@@ -1,7 +1,7 @@
 # Multi-Platform Job Auto-Applier with Lead Capture (Improved Validation)
 
 import streamlit as st
-st.set_page_config(page_title="All-in-One Job Auto-Applier", page_icon="💼")
+st.set_page_config(page_title="Careerupskiller'sAll-in-One Job Auto-Applier", page_icon="💼")
 
 import pandas as pd
 import requests
