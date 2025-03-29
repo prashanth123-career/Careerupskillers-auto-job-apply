@@ -144,6 +144,34 @@ def scrape_linkedin(keyword, location):
         return []
 
 # -------------------- Streamlit App --------------------
+st.markdown("""
+<style>
+    .branding {
+        background: linear-gradient(90deg, #2AB7CA 0%, #1A3550 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 0 0 12px 12px;
+        text-align: center;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+    .branding a {
+        color: white;
+        text-decoration: none;
+        margin: 0 8px;
+    }
+</style>
+<div class="branding">
+    © 2025 CareerUpskillers | 
+    <a href="https://www.careerupskillers.com/about-1">Privacy</a> | 
+    <a href="https://wa.me/917892116728">WhatsApp</a> | 
+    <a href="https://www.youtube.com/@Careerupskillers">YouTube</a> | 
+    <a href="https://www.facebook.com/share/18gUeR73H6/">Facebook</a> | 
+    <a href="https://www.linkedin.com/company/careerupskillers/">LinkedIn</a> | 
+    <a href="https://www.instagram.com/careerupskillers?igsh=YWNmOGMwejBrb24z">Instagram</a>
+</div>
+""", unsafe_allow_html=True)
+
 st.title("💼 All-in-One Job Auto-Applier")
 st.markdown("Apply smartly with AI-powered cover letters and resume autofill.")
 
