@@ -2,10 +2,23 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
-from utils.scrapers import scrape_internshala, scrape_indeed, scrape_naukri, scrape_timesjobs
-from utils.cover_letter import generate_cover_letter
-from utils.resume_parser import parse_resume
 import os
+
+# --- Safe Imports ---
+try:
+    from utils.scrapers import scrape_internshala, scrape_indeed, scrape_naukri, scrape_timesjobs
+except ImportError:
+    st.error("⚠️ Scraper module missing or incorrectly named. Please check `utils/scrapers.py`.")
+
+try:
+    from utils.cover_letter import generate_cover_letter
+except ImportError:
+    st.error("⚠️ Cover letter generator module missing or has import errors.")
+
+try:
+    from utils.resume_parser import parse_resume
+except ImportError:
+    st.error("⚠️ Resume parser module missing or has import errors.")
 
 # -------------------- UI SETUP --------------------
 st.set_page_config(page_title="All-in-One Job Auto-Applier", page_icon="💼")
@@ -56,7 +69,10 @@ if st.button("Search Jobs") and keyword and platforms:
             st.markdown(f"🔗 [View Job]({job['Link']})")
             if use_gpt and resume_text:
                 with st.expander("🧠 View AI-Generated Cover Letter"):
-                    st.write(generate_cover_letter(resume_text, job['Title']))
+                    try:
+                        st.write(generate_cover_letter(resume_text, job['Title']))
+                    except:
+                        st.error("⚠️ Failed to generate cover letter. Model may not have loaded.")
             if mode == "Auto Apply (where possible)":
                 st.button(f"🚀 Auto Apply (Coming Soon)", key=job['Link'])
             else:
