@@ -1,8 +1,7 @@
 streamlit
-beautifulsoup4
-requests
-lxml
 transformers
 torch
+beautifulsoup4
+requests
 python-docx
 PyPDF2
