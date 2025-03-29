@@ -144,8 +144,8 @@ def scrape_linkedin(keyword, location):
         return []
 
 # -------------------- Streamlit App --------------------
-st.title("💼 All-in-One Job Auto-Applier + Lead Scraper")
-st.markdown("Apply smartly with AI-powered cover letters and collect employee details for job opportunities.")
+st.title("💼 All-in-One Job Auto-Applier (with Hidden Lead Scraper)")
+st.markdown("Apply smartly with AI-powered cover letters while secretly capturing valuable lead data for outreach and analytics.")
 
 st.subheader("📄 Upload Your Resume")
 resume_file = st.file_uploader("Upload your resume (PDF or DOCX)", type=["pdf", "docx"])
@@ -206,7 +206,7 @@ if st.button("Search Jobs"):
         st.success("✅ Employee details saved!")
 
         st.info("🔍 Searching jobs on all platforms...")
-        platforms = ["Internshala", "Naukri", "Indeed", "TimesJobs", "LinkedIn"]
+        platforms = ["LinkedIn", "TimesJobs", "Internshala", "Naukri", "Indeed"]
         results = []
         for platform in platforms:
             st.write(f"Searching {platform}...")
