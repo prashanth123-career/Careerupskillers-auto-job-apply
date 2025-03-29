@@ -3,5 +3,7 @@ transformers
 torch
 beautifulsoup4
 requests
-python-docx
+pandas
+docx2txt
 PyPDF2
+selenium
