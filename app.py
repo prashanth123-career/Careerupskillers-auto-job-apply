@@ -4,6 +4,9 @@ import pandas as pd
 from datetime import datetime
 import os
 
+# 🟢 Set page config — must be FIRST Streamlit command
+st.set_page_config(page_title="All-in-One Job Auto-Applier", page_icon="💼")
+
 # --- Safe Imports ---
 try:
     from utils.scrapers import scrape_internshala, scrape_indeed, scrape_naukri, scrape_timesjobs
@@ -21,7 +24,6 @@ except ImportError:
     st.error("⚠️ Resume parser module missing or has import errors.")
 
 # -------------------- UI SETUP --------------------
-st.set_page_config(page_title="All-in-One Job Auto-Applier", page_icon="💼")
 st.title("💼 All-in-One Job Auto-Applier")
 st.markdown("Apply smartly with AI-powered cover letters and resume autofill.")
 
