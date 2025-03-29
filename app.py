@@ -70,7 +70,16 @@ if st.button("Search Jobs") and keyword and platforms:
             st.error(f"❌ Error scraping {platform}: {e}")
 
     # ✅ If jobs found, show them
-    if results:
+    # Add test job if all scrapers return 0
+if len(results) == 0:
+    st.warning("⚠️ No jobs found from platforms. Showing a test job below.")
+    results.append({
+        "Title": "AI Intern - Sales & Marketing",
+        "Company": "CareerUpskillers",
+        "Platform": "Demo",
+        "Link": "https://careerupskillers.com"
+    })
+if results:
         st.success(f"Found {len(results)} jobs.")
         log = []
         for job in results:
