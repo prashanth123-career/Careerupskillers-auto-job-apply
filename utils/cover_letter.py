@@ -1,9 +1,17 @@
-
 from transformers import pipeline
 
-generator = pipeline("text2text-generation", model="google/flan-t5-base")
+# Try to load a lightweight model for cover letter generation
+try:
+    generator = pipeline("text2text-generation", model="google/flan-t5-small")
+except Exception as e:
+    print("⚠️ Model load failed:", e)
+    generator = None
 
+# Function to generate a cover letter using the resume and job title
 def generate_cover_letter(resume_text, job_title):
-    prompt = f"Write a short and professional cover letter for a {job_title} job based on this resume: {resume_text[:800]}"
-    result = generator(prompt, max_length=200, do_sample=False)
+    if generator is None:
+        return "⚠️ Could not load the AI model. Please try again later."
+
+    prompt = f"Write a professional cover letter for the position of '{job_title}' based on the following resume:\n\n{resume_text}"
+    result = generator(prompt, max_length=300, do_sample=True, temperature=0.7)
     return result[0]['generated_text']
