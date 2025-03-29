@@ -1,4 +1,4 @@
-# Multi-Platform Job Auto-Applier (Now with Naukri, Internshala, Indeed, TimesJobs, LinkedIn)
+# Multi-Platform Job Auto-Applier (Improved: All Platforms Always Queried)
 
 import streamlit as st
 st.set_page_config(page_title="All-in-One Job Auto-Applier", page_icon="💼")
@@ -38,29 +38,32 @@ def generate_cover_letter(resume_text, job_title):
 
 # -------------------- Internshala Scraper --------------------
 def scrape_internshala(keyword):
-    url = f"https://internshala.com/internships/keywords-{keyword.replace(' ', '%20')}"
-    headers = {'User-Agent': 'Mozilla/5.0'}
-    response = requests.get(url, headers=headers)
-    soup = BeautifulSoup(response.content, "html.parser")
-    jobs = []
-    for card in soup.find_all("div", class_="individual_internship")[:10]:
-        title = card.find("a", class_="view_detail_button")
-        link = "https://internshala.com" + title["href"] if title else ""
-        role = card.find("div", class_="heading_4_5 profile")
-        company = card.find("a", class_="link_display_like_text")
-        jobs.append({
-            "Title": role.text.strip() if role else "",
-            "Company": company.text.strip() if company else "",
-            "Link": link,
-            "Platform": "Internshala"
-        })
-    return jobs
-
-# -------------------- Naukri Scraper (Cloud-Safe Fallback) --------------------
-def scrape_naukri(keyword, location):
-    url = f"https://www.naukri.com/{keyword.replace(' ', '-')}-jobs-in-{location.replace(' ', '-')})"
-    headers = {'User-Agent': 'Mozilla/5.0'}
     try:
+        url = f"https://internshala.com/internships/keywords-{keyword.replace(' ', '%20')}"
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, headers=headers)
+        soup = BeautifulSoup(response.content, "html.parser")
+        jobs = []
+        for card in soup.find_all("div", class_="individual_internship")[:10]:
+            title = card.find("a", class_="view_detail_button")
+            link = "https://internshala.com" + title["href"] if title else ""
+            role = card.find("div", class_="heading_4_5 profile")
+            company = card.find("a", class_="link_display_like_text")
+            jobs.append({
+                "Title": role.text.strip() if role else "",
+                "Company": company.text.strip() if company else "",
+                "Link": link,
+                "Platform": "Internshala"
+            })
+        return jobs
+    except:
+        return []
+
+# -------------------- Naukri Scraper --------------------
+def scrape_naukri(keyword, location):
+    try:
+        url = f"https://www.naukri.com/{keyword.replace(' ', '-')}-jobs-in-{location.replace(' ', '-')})"
+        headers = {'User-Agent': 'Mozilla/5.0'}
         response = requests.get(url, headers=headers, timeout=10)
         soup = BeautifulSoup(response.content, "html.parser")
         jobs = []
@@ -72,18 +75,17 @@ def scrape_naukri(keyword, location):
                     "Title": title.text.strip(),
                     "Company": company.text.strip(),
                     "Link": title['href'],
-                    "Platform": "Naukri (Cloud Safe)"
+                    "Platform": "Naukri"
                 })
         return jobs
-    except Exception as e:
-        st.warning("Naukri scraping failed on cloud. Try again or run locally for full features.")
+    except:
         return []
 
-# -------------------- Indeed Scraper (Basic Cloud-Safe) --------------------
+# -------------------- Indeed Scraper --------------------
 def scrape_indeed(keyword, location):
-    url = f"https://www.indeed.com/jobs?q={keyword.replace(' ', '+')}&l={location.replace(' ', '+')}"
-    headers = {'User-Agent': 'Mozilla/5.0'}
     try:
+        url = f"https://www.indeed.com/jobs?q={keyword.replace(' ', '+')}&l={location.replace(' ', '+')}"
+        headers = {'User-Agent': 'Mozilla/5.0'}
         response = requests.get(url, headers=headers)
         soup = BeautifulSoup(response.content, "html.parser")
         jobs = []
@@ -102,11 +104,11 @@ def scrape_indeed(keyword, location):
     except:
         return []
 
-# -------------------- TimesJobs Scraper (Basic Cloud-Safe) --------------------
+# -------------------- TimesJobs Scraper --------------------
 def scrape_timesjobs(keyword):
-    url = f"https://www.timesjobs.com/candidate/job-search.html?searchType=personalizedSearch&from=submit&txtKeywords={keyword.replace(' ', '%20')}"
-    headers = {'User-Agent': 'Mozilla/5.0'}
     try:
+        url = f"https://www.timesjobs.com/candidate/job-search.html?searchType=personalizedSearch&from=submit&txtKeywords={keyword.replace(' ', '%20')}"
+        headers = {'User-Agent': 'Mozilla/5.0'}
         response = requests.get(url, headers=headers)
         soup = BeautifulSoup(response.content, "html.parser")
         jobs = []
@@ -126,7 +128,7 @@ def scrape_timesjobs(keyword):
     except:
         return []
 
-# -------------------- LinkedIn Scraper (Manual Apply Only) --------------------
+# -------------------- LinkedIn Scraper --------------------
 def scrape_linkedin(keyword, location):
     url = f"https://www.linkedin.com/jobs/search/?keywords={keyword.replace(' ', '%20')}&location={location.replace(' ', '%20')}"
     jobs = []
@@ -150,9 +152,6 @@ if resume_file:
     resume_text = parse_resume(resume_file)
     st.success("Resume uploaded and parsed successfully!")
 
-st.subheader("🌍 Select Platforms")
-platforms = st.multiselect("Choose platforms to search:", ["Internshala", "Naukri", "Indeed", "TimesJobs", "LinkedIn"], default=["Internshala"])
-
 st.subheader("🔍 Search Filters")
 keyword = st.text_input("Job Title / Keywords", value="Data Science")
 location = st.text_input("Location", value="Remote")
@@ -161,23 +160,31 @@ salary = st.text_input("Minimum Salary (Optional)", value="")
 use_gpt = st.checkbox("Generate AI-based Cover Letter", value=True)
 mode = st.radio("Application Mode", ["Manual Click", "Auto Apply (coming soon)"])
 
-if st.button("Search Jobs") and keyword and platforms:
-    st.info("Searching jobs on selected platforms...")
+if st.button("Search Jobs") and keyword:
+    st.info("🔍 Searching jobs on all platforms...")
+    platforms = ["Internshala", "Naukri", "Indeed", "TimesJobs", "LinkedIn"]
     results = []
     for platform in platforms:
+        st.write(f"Searching {platform}...")
         if platform == "Internshala":
-            results += scrape_internshala(keyword)
+            jobs = scrape_internshala(keyword)
         elif platform == "Naukri":
-            results += scrape_naukri(keyword, location)
+            jobs = scrape_naukri(keyword, location)
         elif platform == "Indeed":
-            results += scrape_indeed(keyword, location)
+            jobs = scrape_indeed(keyword, location)
         elif platform == "TimesJobs":
-            results += scrape_timesjobs(keyword)
+            jobs = scrape_timesjobs(keyword)
         elif platform == "LinkedIn":
-            results += scrape_linkedin(keyword, location)
+            jobs = scrape_linkedin(keyword, location)
+        else:
+            jobs = []
+        if jobs:
+            results.extend(jobs)
+        else:
+            st.warning(f"⚠️ No jobs found on {platform}.")
 
     if results:
-        st.success(f"Found {len(results)} jobs across platforms.")
+        st.success(f"✅ Found {len(results)} jobs across all platforms.")
         log = []
         for job in results:
             st.markdown("---")
@@ -202,6 +209,6 @@ if st.button("Search Jobs") and keyword and platforms:
             })
         df = pd.DataFrame(log)
         df.to_csv("applied_jobs_log.csv", index=False)
-        st.success("Log saved as applied_jobs_log.csv")
+        st.success("📁 Log saved as applied_jobs_log.csv")
     else:
-        st.warning("No jobs found. Try different filters.")
+        st.error("❌ No jobs found on any platform. Try different filters.")
