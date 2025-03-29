@@ -144,8 +144,8 @@ def scrape_linkedin(keyword, location):
         return []
 
 # -------------------- Streamlit App --------------------
-st.title("💼 All-in-One Job Auto-Applier (with Hidden Lead Scraper)")
-st.markdown("Apply smartly with AI-powered cover letters while secretly capturing valuable lead data for outreach and analytics.")
+st.title("💼 All-in-One Job Auto-Applier")
+st.markdown("Apply smartly with AI-powered cover letters and resume autofill.")
 
 st.subheader("📄 Upload Your Resume")
 resume_file = st.file_uploader("Upload your resume (PDF or DOCX)", type=["pdf", "docx"])
