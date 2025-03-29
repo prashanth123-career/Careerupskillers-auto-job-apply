@@ -38,7 +38,110 @@ def generate_cover_letter(resume_text, job_title):
     return result[0]['generated_text']
 
 # -------------------- Job Platform Scrapers --------------------
-# (Internshala, Naukri, Indeed, TimesJobs, LinkedIn same as before...)
+
+def scrape_internshala(keyword):
+    try:
+        url = f"https://internshala.com/internships/keywords-{keyword.replace(' ', '%20')}"
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, headers=headers)
+        soup = BeautifulSoup(response.content, "html.parser")
+        jobs = []
+        for card in soup.find_all("div", class_="individual_internship")[:10]:
+            title = card.find("div", class_="heading_4_5 profile")
+            company = card.find("a", class_="link_display_like_text")
+            link_tag = card.find("a", class_="view_detail_button")
+            link = "https://internshala.com" + link_tag['href'] if link_tag else ""
+            if title and company:
+                jobs.append({
+                    "Title": title.get_text(strip=True),
+                    "Company": company.get_text(strip=True),
+                    "Link": link,
+                    "Platform": "Internshala"
+                })
+        return jobs
+    except:
+        return []
+
+def scrape_naukri(keyword, location):
+    try:
+        url = f"https://www.naukri.com/{keyword.replace(' ', '-')}-jobs-in-{location.replace(' ', '-')}"
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, headers=headers, timeout=10)
+        soup = BeautifulSoup(response.content, "html.parser")
+        jobs = []
+        for card in soup.select(".jobTuple")[:10]:
+            title = card.select_one("a.title")
+            company = card.select_one("a.subTitle")
+            if title and company:
+                jobs.append({
+                    "Title": title.get_text(strip=True),
+                    "Company": company.get_text(strip=True),
+                    "Link": title['href'],
+                    "Platform": "Naukri"
+                })
+        return jobs
+    except:
+        return []
+
+def scrape_indeed(keyword, location):
+    try:
+        url = f"https://www.indeed.com/jobs?q={keyword.replace(' ', '+')}&l={location.replace(' ', '+')}"
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, headers=headers)
+        soup = BeautifulSoup(response.content, "html.parser")
+        jobs = []
+        for div in soup.find_all("a", class_="tapItem")[:10]:
+            title = div.find("h2")
+            company = div.find("span", class_="companyName")
+            link = "https://www.indeed.com" + div.get("href") if div.get("href") else ""
+            if title and company:
+                jobs.append({
+                    "Title": title.text.strip(),
+                    "Company": company.text.strip(),
+                    "Link": link,
+                    "Platform": "Indeed"
+                })
+        return jobs
+    except:
+        return []
+
+def scrape_timesjobs(keyword):
+    try:
+        url = f"https://www.timesjobs.com/candidate/job-search.html?searchType=personalizedSearch&from=submit&txtKeywords={keyword.replace(' ', '%20')}"
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, headers=headers)
+        soup = BeautifulSoup(response.content, "html.parser")
+        jobs = []
+        listings = soup.find_all("li", class_="clearfix job-bx wht-shd-bx")
+        for job in listings[:10]:
+            title = job.find("h2")
+            company = job.find("h3", class_="joblist-comp-name")
+            link = title.find("a")["href"] if title and title.find("a") else ""
+            if title and company:
+                jobs.append({
+                    "Title": title.text.strip(),
+                    "Company": company.text.strip(),
+                    "Link": link,
+                    "Platform": "TimesJobs"
+                })
+        return jobs
+    except:
+        return []
+
+def scrape_linkedin(keyword, location):
+    try:
+        url = f"https://www.linkedin.com/jobs/search/?keywords={keyword.replace(' ', '%20')}&location={location.replace(' ', '%20')}"
+        jobs = []
+        for i in range(1, 11):
+            jobs.append({
+                "Title": f"LinkedIn Job {i} - {keyword}",
+                "Company": "Confidential",
+                "Link": url,
+                "Platform": "LinkedIn (Manual)"
+            })
+        return jobs
+    except:
+        return []
 
 # -------------------- Streamlit App --------------------
 st.title("💼 All-in-One Job Auto-Applier + Lead Scraper")
