@@ -1,6 +1,8 @@
 # Multi-Platform Job Auto-Applier (Now with Naukri Integration)
 
 import streamlit as st
+st.set_page_config(page_title="All-in-One Job Auto-Applier", page_icon="💼")
+
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
@@ -94,7 +96,6 @@ def scrape_naukri(keyword, location):
     return jobs
 
 # -------------------- Streamlit App --------------------
-st.set_page_config(page_title="All-in-One Job Auto-Applier", page_icon="💼")
 st.title("💼 All-in-One Job Auto-Applier")
 st.markdown("Apply smartly with AI-powered cover letters and resume autofill.")
 
