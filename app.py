@@ -202,7 +202,18 @@ if st.button("Search Jobs"):
             "Time": datetime.now()
         }
         lead_df = pd.DataFrame([lead_info])
-        lead_df.to_csv("lead_data.csv", mode='a', header=not os.path.exists("lead_data.csv"), index=False)
+        import json
+        import urllib.parse
+        google_sheets_url = st.secrets.get("GOOGLE_SHEETS_URL")
+        try:
+            if google_sheets_url:
+                requests.post(google_sheets_url, json=lead_info)
+            else:
+                st.warning("Google Sheets URL not found in secrets. Data saved locally.")
+                lead_df.to_csv("lead_data.csv", mode='a', header=not os.path.exists("lead_data.csv"), index=False)
+        except Exception as e:
+            st.warning(f"Google Sheets push failed. Saving locally. Error: {e}")
+            lead_df.to_csv("lead_data.csv", mode='a', header=not os.path.exists("lead_data.csv"), index=False)
         st.success("✅ Employee details saved!")
 
         st.info("🔍 Searching jobs on all platforms...")
