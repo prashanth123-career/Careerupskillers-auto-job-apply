@@ -312,7 +312,7 @@ if st.button("Search Jobs"):
         st.error("❌ Please enter your expected salary.")
     elif not resume_file:
         st.error("❌ Please upload your resume.")
-                    else:
+    else:
                     st.markdown(f"[🖱️ Click to Apply]({job['Link']})")
                                                     log.append({
                     "Title": job['Title'],
