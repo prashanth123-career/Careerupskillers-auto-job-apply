@@ -354,7 +354,7 @@ if st.button("Search Jobs"):
             elif platform == "TimesJobs":
                 jobs = scrape_timesjobs(keyword)
             elif platform == "LinkedIn":
-            jobs = scrape_linkedin(keyword, location)
+                jobs = scrape_linkedin(keyword, location)
         elif platform == "Monster":
             jobs = scrape_monster(keyword, location)
         elif platform == "AngelList":
