@@ -218,11 +218,11 @@ def send_email_alert(to_email, job_count):
         message["From"] = sender_email
         message["To"] = to_email
 
-        text = f"Hi,
+        text = f"""Hi,
 
 We found {job_count} new jobs for your search. Visit the app to apply now!
 
-- CareerUpskillers"
+- CareerUpskillers"""
         part = MIMEText(text, "plain")
         message.attach(part)
 
@@ -354,7 +354,7 @@ if st.button("Search Jobs"):
             elif platform == "TimesJobs":
                 jobs = scrape_timesjobs(keyword)
             elif platform == "LinkedIn":
-                jobs = scrape_linkedin(keyword, location)
+            jobs = scrape_linkedin(keyword, location)
         elif platform == "Monster":
             jobs = scrape_monster(keyword, location)
         elif platform == "AngelList":
