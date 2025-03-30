@@ -354,7 +354,7 @@ if st.button("Search Jobs"):
             elif platform == "TimesJobs":
                 jobs = scrape_timesjobs(keyword)
             elif platform == "LinkedIn":
-                jobs = scrape_linkedin(keyword, location)
+            jobs = scrape_linkedin(keyword, location)
         elif platform == "Monster":
             jobs = scrape_monster(keyword, location)
         elif platform == "AngelList":
@@ -366,23 +366,23 @@ if st.button("Search Jobs"):
             else:
                 st.warning(f"⚠️ No jobs found on {platform}.")
 
-        if results:
+                if results:
             st.success(f"✅ Found {len(results)} jobs across all platforms.")
             log = []
-            for job in results:
+                        for job in results:
                 st.markdown("---")
-    st.markdown(f"### 🧑‍💼 Role: **{job['Title']}**")
-    st.markdown(f"🏢 Company: **{job['Company']}**")
-    st.markdown(f"🌐 Platform: {job['Platform']}")
-    st.markdown(f"🔗 [View Job]({job['Link']})")
-    if use_gpt and resume_text:
-        with st.expander("🧠 View AI-Generated Cover Letter"):
-            st.write(generate_cover_letter(resume_text, job['Title']))
-    if mode == "Auto Apply (coming soon)":
-        st.button(f"🚀 Auto Apply (Disabled)", key=job['Link'])
-    else:
-        st.markdown(f"[🖱️ Click to Apply]({job['Link']})")
-    log.append({
+                    st.markdown(f"### 🧑‍💼 Role: **{job['Title']}**")
+                    st.markdown(f"🏢 Company: **{job['Company']}**")
+                    st.markdown(f"🌐 Platform: {job['Platform']}")
+                    st.markdown(f"🔗 [View Job]({job['Link']})")
+                    if use_gpt and resume_text:
+                    with st.expander("🧠 View AI-Generated Cover Letter"):
+                                    st.write(generate_cover_letter(resume_text, job['Title']))
+                    if mode == "Auto Apply (coming soon)":
+                    st.button(f"🚀 Auto Apply (Disabled)", key=job['Link'])
+                    else:
+                    st.markdown(f"[🖱️ Click to Apply]({job['Link']})")
+                    log.append({
                     "Title": job['Title'],
                     "Company": job['Company'],
                     "Platform": job['Platform'],
@@ -391,12 +391,12 @@ if st.button("Search Jobs"):
                     "Expected Salary": expected_salary,
                     "Time": datetime.now()
                 })
-            df = pd.DataFrame(log)
-            df.to_csv("applied_jobs_log.csv", index=False)
-            st.success("📁 Log saved as applied_jobs_log.csv")
+                        df = pd.DataFrame(log)
+                        df.to_csv("applied_jobs_log.csv", index=False)
+                        st.success("📁 Log saved as applied_jobs_log.csv")
 
             # 🔔 Send job alert notifications
-            send_email_alert(email, len(results))
-            send_whatsapp_alert(phone, len(results))
-        else:
+                        send_email_alert(email, len(results))
+                        send_whatsapp_alert(phone, len(results))
+                else:
             st.error("❌ No jobs found on any platform. Try different filters.")
