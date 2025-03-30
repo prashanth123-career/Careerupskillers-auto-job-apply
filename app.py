@@ -1,5 +1,3 @@
-# Multi-Platform Job Auto-Applier with Lead Capture (Improved Validation)
-
 import streamlit as st
 st.set_page_config(page_title="All-in-One Job Auto-Applier", page_icon="💼")
 
@@ -12,15 +10,18 @@ import docx2txt
 import PyPDF2
 import os
 import re
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # -------------------- Resume Parser --------------------
 def parse_resume(file):
     text = ""
-    ext = file.name.split(".")[-1]
+    ext = file.name.split(".")[-1].lower()
     if ext == "pdf":
         reader = PyPDF2.PdfReader(file)
         for page in reader.pages:
-            text += page.extract_text()
+            text += page.extract_text() or ""
     elif ext == "docx":
         text = docx2txt.process(file)
     return text
@@ -38,12 +39,11 @@ def generate_cover_letter(resume_text, job_title):
     return result[0]['generated_text']
 
 # -------------------- Job Platform Scrapers --------------------
-
 def scrape_monster(keyword, location):
     try:
         url = f"https://www.monsterindia.com/srp/results?query={keyword.replace(' ', '%20')}&locations={location.replace(' ', '%20')}"
         headers = {'User-Agent': 'Mozilla/5.0'}
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         soup = BeautifulSoup(response.content, "html.parser")
         jobs = []
         for div in soup.find_all("div", class_="card-apply-content")[:10]:
@@ -51,12 +51,7 @@ def scrape_monster(keyword, location):
             company = div.find("span", class_="company-name")
             link = title.find("a")['href'] if title and title.find("a") else ""
             if title and company:
-                jobs.append({
-                    "Title": title.text.strip(),
-                    "Company": company.text.strip(),
-                    "Link": link,
-                    "Platform": "Monster"
-                })
+                jobs.append({"Title": title.text.strip(), "Company": company.text.strip(), "Link": link, "Platform": "Monster"})
         return jobs
     except:
         return []
@@ -64,12 +59,10 @@ def scrape_monster(keyword, location):
 def scrape_angellist(keyword, location):
     try:
         jobs = []
-        sample_titles = [
-            "Startup Data Analyst", "AI Research Intern", "Remote ML Developer"
-        ]
+        sample_titles = ["Startup Data Analyst", "AI Research Intern", "Remote ML Developer"]
         companies = ["AngelTech", "GrowStart", "InnovateAI"]
         import urllib.parse
-        for i in range(len(sample_titles)):
+        for i in range(min(len(sample_titles), len(companies))):
             jobs.append({
                 "Title": sample_titles[i],
                 "Company": companies[i],
@@ -84,7 +77,7 @@ def scrape_internshala(keyword):
     try:
         url = f"https://internshala.com/internships/keywords-{keyword.replace(' ', '%20')}"
         headers = {'User-Agent': 'Mozilla/5.0'}
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         soup = BeautifulSoup(response.content, "html.parser")
         jobs = []
         for card in soup.find_all("div", class_="individual_internship")[:10]:
@@ -93,12 +86,7 @@ def scrape_internshala(keyword):
             link_tag = card.find("a", class_="view_detail_button")
             link = "https://internshala.com" + link_tag['href'] if link_tag else ""
             if title and company:
-                jobs.append({
-                    "Title": title.get_text(strip=True),
-                    "Company": company.get_text(strip=True),
-                    "Link": link,
-                    "Platform": "Internshala"
-                })
+                jobs.append({"Title": title.get_text(strip=True), "Company": company.text.strip(), "Link": link, "Platform": "Internshala"})
         return jobs
     except:
         return []
@@ -114,12 +102,7 @@ def scrape_naukri(keyword, location):
             title = card.select_one("a.title")
             company = card.select_one("a.subTitle")
             if title and company:
-                jobs.append({
-                    "Title": title.get_text(strip=True),
-                    "Company": company.get_text(strip=True),
-                    "Link": title['href'],
-                    "Platform": "Naukri"
-                })
+                jobs.append({"Title": title.get_text(strip=True), "Company": company.text.strip(), "Link": title['href'], "Platform": "Naukri"})
         return jobs
     except:
         return []
@@ -128,7 +111,7 @@ def scrape_indeed(keyword, location):
     try:
         url = f"https://www.indeed.com/jobs?q={keyword.replace(' ', '+')}&l={location.replace(' ', '+')}"
         headers = {'User-Agent': 'Mozilla/5.0'}
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         soup = BeautifulSoup(response.content, "html.parser")
         jobs = []
         for div in soup.find_all("a", class_="tapItem")[:10]:
@@ -136,12 +119,7 @@ def scrape_indeed(keyword, location):
             company = div.find("span", class_="companyName")
             link = "https://www.indeed.com" + div.get("href") if div.get("href") else ""
             if title and company:
-                jobs.append({
-                    "Title": title.text.strip(),
-                    "Company": company.text.strip(),
-                    "Link": link,
-                    "Platform": "Indeed"
-                })
+                jobs.append({"Title": title.text.strip(), "Company": company.text.strip(), "Link": link, "Platform": "Indeed"})
         return jobs
     except:
         return []
@@ -150,21 +128,15 @@ def scrape_timesjobs(keyword):
     try:
         url = f"https://www.timesjobs.com/candidate/job-search.html?searchType=personalizedSearch&from=submit&txtKeywords={keyword.replace(' ', '%20')}"
         headers = {'User-Agent': 'Mozilla/5.0'}
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         soup = BeautifulSoup(response.content, "html.parser")
         jobs = []
-        listings = soup.find_all("li", class_="clearfix job-bx wht-shd-bx")
-        for job in listings[:10]:
+        for job in soup.find_all("li", class_="clearfix job-bx wht-shd-bx")[:10]:
             title = job.find("h2")
             company = job.find("h3", class_="joblist-comp-name")
             link = title.find("a")["href"] if title and title.find("a") else ""
             if title and company:
-                jobs.append({
-                    "Title": title.text.strip(),
-                    "Company": company.text.strip(),
-                    "Link": link,
-                    "Platform": "TimesJobs"
-                })
+                jobs.append({"Title": title.text.strip(), "Company": company.text.strip(), "Link": link, "Platform": "TimesJobs"})
         return jobs
     except:
         return []
@@ -172,20 +144,10 @@ def scrape_timesjobs(keyword):
 def scrape_linkedin(keyword, location):
     try:
         jobs = []
-        job_titles = [
-            "Marketing Specialist (Junior / Mid-Level)",
-            "Lead Generation Specialist (Remote)",
-            "AI Business Development & Marketing Specialist",
-            "Lead Generation Specialist",
-            "Market Research Executive",
-            "Telecaller (IT Sales & Marketing)"
-        ]
-        companies = [
-            "InfobelPRO", "Job Helping Hand", "Synaptyx AI",
-            "Supy", "Soul AI", "HashRoot"
-        ]
+        job_titles = ["Marketing Specialist", "Lead Generation Specialist", "AI Business Development"]
+        companies = ["InfobelPRO", "Job Helping Hand", "Synaptyx AI"]
         import urllib.parse
-        for i in range(len(job_titles)):
+        for i in range(min(len(job_titles), len(companies))):
             jobs.append({
                 "Title": job_titles[i],
                 "Company": companies[i],
@@ -195,34 +157,21 @@ def scrape_linkedin(keyword, location):
         return jobs
     except:
         return []
-    except:
-        return []
 
-# -------------------- Streamlit App --------------------
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-
+# -------------------- Notifications --------------------
 def send_email_alert(to_email, job_count):
     try:
-        sender_email = st.secrets.get("EMAIL_SENDER")
-        sender_password = st.secrets.get("EMAIL_PASSWORD")
-        smtp_server = st.secrets.get("SMTP_SERVER")
+        sender_email = st.secrets.get("EMAIL_SENDER", "default@example.com")
+        sender_password = st.secrets.get("EMAIL_PASSWORD", "")
+        smtp_server = st.secrets.get("SMTP_SERVER", "smtp.gmail.com")
         smtp_port = st.secrets.get("SMTP_PORT", 587)
-
-        if not sender_email or not sender_password:
-            return
 
         message = MIMEMultipart("alternative")
         message["Subject"] = "🎯 New Jobs Found for You!"
         message["From"] = sender_email
         message["To"] = to_email
 
-        text = f"""Hi,
-
-We found {job_count} new jobs for your search. Visit the app to apply now!
-
-- CareerUpskillers"""
+        text = f"Hi,\n\nWe found {job_count} new jobs for your search. Visit the app to apply now!\n\n- CareerUpskillers"
         part = MIMEText(text, "plain")
         message.attach(part)
 
@@ -233,29 +182,15 @@ We found {job_count} new jobs for your search. Visit the app to apply now!
     except Exception as e:
         st.warning(f"Failed to send email: {e}")
 
-# WhatsApp Notification Stub (via Twilio or similar)
 def send_whatsapp_alert(phone, job_count):
-    try:
-        # Simulate notification (replace with real API like Twilio later)
-        print(f"Sending WhatsApp alert to {phone}: {job_count} jobs found.")
-    except Exception as e:
-        st.warning(f"WhatsApp alert failed: {e}")
+    # Placeholder for WhatsApp integration (e.g., Twilio)
+    st.info(f"WhatsApp alert to {phone}: {job_count} jobs found (integration pending).")
+
+# -------------------- Streamlit App --------------------
 st.markdown("""
 <style>
-    .branding {
-        background: linear-gradient(90deg, #2AB7CA 0%, #1A3550 100%);
-        color: white;
-        padding: 15px;
-        border-radius: 0 0 12px 12px;
-        text-align: center;
-        font-size: 14px;
-        margin-bottom: 10px;
-    }
-    .branding a {
-        color: white;
-        text-decoration: none;
-        margin: 0 8px;
-    }
+    .branding {background: linear-gradient(90deg, #2AB7CA 0%, #1A3550 100%); color: white; padding: 15px; border-radius: 0 0 12px 12px; text-align: center; font-size: 14px; margin-bottom: 10px;}
+    .branding a {color: white; text-decoration: none; margin: 0 8px;}
 </style>
 <div class="branding">
     © 2025 CareerUpskillers | 
@@ -294,10 +229,10 @@ location = st.text_input("Search Location", value="Remote")
 use_gpt = st.checkbox("Generate AI-based Cover Letter", value=True)
 mode = st.radio("Application Mode", ["Manual Click", "Auto Apply (coming soon)"])
 
-email_valid = re.match(r"[^@\s]+@[^@\s]+\.[^@\s]+", email)
-phone_valid = re.match(r"^\+?[0-9\-\s]{8,15}$", phone)
-
 if st.button("Search Jobs"):
+    email_valid = re.match(r"[^@\s]+@[^@\s]+\.[^@\s]+", email)
+    phone_valid = re.match(r"^\+?[0-9\-\s]{8,15}$", phone)
+
     if not name.strip():
         st.error("❌ Please enter your full name.")
     elif not email_valid:
@@ -313,6 +248,25 @@ if st.button("Search Jobs"):
     elif not resume_file:
         st.error("❌ Please upload your resume.")
     else:
+        with st.spinner("Searching for jobs..."):
+            results = []
+            results.extend(scrape_monster(keyword, location))
+            results.extend(scrape_angellist(keyword, location))
+            results.extend(scrape_internshala(keyword))
+            results.extend(scrape_naukri(keyword, location))
+            results.extend(scrape_indeed(keyword, location))
+            results.extend(scrape_timesjobs(keyword))
+            results.extend(scrape_linkedin(keyword, location))
+
+        if results:
+            st.subheader("📋 Job Results")
+            log = []
+            for i, job in enumerate(results):
+                st.write(f"**{i+1}. {job['Title']}** at {job['Company']} ({job['Platform']})")
+                if use_gpt:
+                    cover_letter = generate_cover_letter(resume_text, job['Title'])
+                    with st.expander("View AI-Generated Cover Letter"):
+                        st.text(cover_letter)
                 st.markdown(f"[🖱️ Click to Apply]({job['Link']})")
                 log.append({
                     "Title": job['Title'],
@@ -325,11 +279,10 @@ if st.button("Search Jobs"):
                 })
 
             df = pd.DataFrame(log)
-                                                                            df.to_csv("applied_jobs_log.csv", index=False)
-                                                                            st.success("📁 Log saved as applied_jobs_log.csv")
+            df.to_csv("applied_jobs_log.csv", index=False)
+            st.success("📁 Log saved as applied_jobs_log.csv")
 
-            # 🔔 Send job alert notifications
-                                                                            send_email_alert(email, len(results))
-                                                                            send_whatsapp_alert(phone, len(results))
-                                                else:
+            send_email_alert(email, len(results))
+            send_whatsapp_alert(phone, len(results))
+        else:
             st.error("❌ No jobs found on any platform. Try different filters.")
