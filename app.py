@@ -285,8 +285,8 @@ if st.button("Search Jobs"):
             log = []
             for job in results:
                 st.markdown("---")
-                st.markdown(f"### 🧑‍💼 Role: **{job['Title']}**")
-    st.markdown(f"🏢 Company: **{job['Company']}**")
+                                st.markdown(f"### 🧑‍💼 Role: **{job['Title']}**")
+                st.markdown(f"🏢 Company: **{job['Company']}**")
                 st.markdown(f"🌐 Platform: {job['Platform']}")
                 st.markdown(f"🔗 [View Job]({job['Link']})")
                 if use_gpt and resume_text:
