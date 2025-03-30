@@ -313,8 +313,8 @@ if st.button("Search Jobs"):
     elif not resume_file:
         st.error("❌ Please upload your resume.")
     else:
-                    st.markdown(f"[🖱️ Click to Apply]({job['Link']})")
-                                                    log.append({
+                st.markdown(f"[🖱️ Click to Apply]({job['Link']})")
+                log.append({
                     "Title": job['Title'],
                     "Company": job['Company'],
                     "Platform": job['Platform'],
@@ -323,12 +323,12 @@ if st.button("Search Jobs"):
                     "Expected Salary": expected_salary,
                     "Time": datetime.now()
                 })
-                                                df = pd.DataFrame(log)
-                                                df.to_csv("applied_jobs_log.csv", index=False)
-                                                st.success("📁 Log saved as applied_jobs_log.csv")
+                                                                df = pd.DataFrame(log)
+                                                                df.to_csv("applied_jobs_log.csv", index=False)
+                                                                st.success("📁 Log saved as applied_jobs_log.csv")
 
             # 🔔 Send job alert notifications
-                                                send_email_alert(email, len(results))
-                                                send_whatsapp_alert(phone, len(results))
-                                else:
+                                                                send_email_alert(email, len(results))
+                                                                send_whatsapp_alert(phone, len(results))
+                                        else:
             st.error("❌ No jobs found on any platform. Try different filters.")
