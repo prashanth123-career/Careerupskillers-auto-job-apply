@@ -312,77 +312,9 @@ if st.button("Search Jobs"):
         st.error("❌ Please enter your expected salary.")
     elif not resume_file:
         st.error("❌ Please upload your resume.")
-    else:
-        lead_info = {
-            "Name": name,
-            "Email": email,
-            "Phone": phone,
-            "Current Location": current_location,
-            "Interested Location": interested_location,
-            "Experience": experience,
-            "Current Salary": current_salary,
-            "Expected Salary": expected_salary,
-            "Resume Uploaded": bool(resume_file),
-            "Time": datetime.now()
-        }
-        lead_df = pd.DataFrame([lead_info])
-        import json
-        import urllib.parse
-        google_sheets_url = st.secrets.get("GOOGLE_SHEETS_URL")
-        try:
-            if google_sheets_url:
-                requests.post(google_sheets_url, json=lead_info)
-            else:
-                st.warning("Google Sheets URL not found in secrets. Data saved locally.")
-                lead_df.to_csv("lead_data.csv", mode='a', header=not os.path.exists("lead_data.csv"), index=False)
-        except Exception as e:
-            st.warning(f"Google Sheets push failed. Saving locally. Error: {e}")
-            lead_df.to_csv("lead_data.csv", mode='a', header=not os.path.exists("lead_data.csv"), index=False)
-        st.success("✅ Employee details saved!")
-
-        st.info("🔍 Searching jobs on all platforms...")
-        platforms = ["LinkedIn", "TimesJobs", "Internshala", "Naukri", "Indeed", "Monster", "AngelList"]
-        results = []
-        for platform in platforms:
-            st.write(f"Searching {platform}...")
-            if platform == "Internshala":
-                jobs = scrape_internshala(keyword)
-            elif platform == "Naukri":
-                jobs = scrape_naukri(keyword, location)
-            elif platform == "Indeed":
-                jobs = scrape_indeed(keyword, location)
-            elif platform == "TimesJobs":
-                jobs = scrape_timesjobs(keyword)
-            elif platform == "LinkedIn":
-                jobs = scrape_linkedin(keyword, location)
-        elif platform == "Monster":
-                jobs = scrape_monster(keyword, location)
-        elif platform == "AngelList":
-                jobs = scrape_angellist(keyword, location)
-            else:
-                jobs = []  # fallback if no matching platform
-            if jobs:
-                results.extend(jobs)
-            else:
-                st.warning(f"⚠️ No jobs found on {platform}.")
-
-                if results:
-            st.success(f"✅ Found {len(results)} jobs across all platforms.")
-            log = []
-                        for job in results:
-                st.markdown("---")
-                    st.markdown(f"### 🧑‍💼 Role: **{job['Title']}**")
-                    st.markdown(f"🏢 Company: **{job['Company']}**")
-                    st.markdown(f"🌐 Platform: {job['Platform']}")
-                    st.markdown(f"🔗 [View Job]({job['Link']})")
-                    if use_gpt and resume_text:
-                    with st.expander("🧠 View AI-Generated Cover Letter"):
-                                    st.write(generate_cover_letter(resume_text, job['Title']))
-                    if mode == "Auto Apply (coming soon)":
-                    st.button(f"🚀 Auto Apply (Disabled)", key=job['Link'])
                     else:
                     st.markdown(f"[🖱️ Click to Apply]({job['Link']})")
-                    log.append({
+                                    log.append({
                     "Title": job['Title'],
                     "Company": job['Company'],
                     "Platform": job['Platform'],
@@ -391,12 +323,12 @@ if st.button("Search Jobs"):
                     "Expected Salary": expected_salary,
                     "Time": datetime.now()
                 })
-                        df = pd.DataFrame(log)
-                        df.to_csv("applied_jobs_log.csv", index=False)
-                        st.success("📁 Log saved as applied_jobs_log.csv")
+                                    df = pd.DataFrame(log)
+                                    df.to_csv("applied_jobs_log.csv", index=False)
+                                    st.success("📁 Log saved as applied_jobs_log.csv")
 
             # 🔔 Send job alert notifications
-                        send_email_alert(email, len(results))
-                        send_whatsapp_alert(phone, len(results))
-                else:
+                                    send_email_alert(email, len(results))
+                                    send_whatsapp_alert(phone, len(results))
+                        else:
             st.error("❌ No jobs found on any platform. Try different filters.")
