@@ -199,6 +199,47 @@ def scrape_linkedin(keyword, location):
         return []
 
 # -------------------- Streamlit App --------------------
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+def send_email_alert(to_email, job_count):
+    try:
+        sender_email = st.secrets.get("EMAIL_SENDER")
+        sender_password = st.secrets.get("EMAIL_PASSWORD")
+        smtp_server = st.secrets.get("SMTP_SERVER")
+        smtp_port = st.secrets.get("SMTP_PORT", 587)
+
+        if not sender_email or not sender_password:
+            return
+
+        message = MIMEMultipart("alternative")
+        message["Subject"] = "🎯 New Jobs Found for You!"
+        message["From"] = sender_email
+        message["To"] = to_email
+
+        text = f"Hi,
+
+We found {job_count} new jobs for your search. Visit the app to apply now!
+
+- CareerUpskillers"
+        part = MIMEText(text, "plain")
+        message.attach(part)
+
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, to_email, message.as_string())
+    except Exception as e:
+        st.warning(f"Failed to send email: {e}")
+
+# WhatsApp Notification Stub (via Twilio or similar)
+def send_whatsapp_alert(phone, job_count):
+    try:
+        # Simulate notification (replace with real API like Twilio later)
+        print(f"Sending WhatsApp alert to {phone}: {job_count} jobs found.")
+    except Exception as e:
+        st.warning(f"WhatsApp alert failed: {e}")
 st.markdown("""
 <style>
     .branding {
@@ -313,7 +354,7 @@ if st.button("Search Jobs"):
             elif platform == "TimesJobs":
                 jobs = scrape_timesjobs(keyword)
             elif platform == "LinkedIn":
-            jobs = scrape_linkedin(keyword, location)
+                jobs = scrape_linkedin(keyword, location)
         elif platform == "Monster":
             jobs = scrape_monster(keyword, location)
         elif platform == "AngelList":
@@ -329,7 +370,7 @@ if st.button("Search Jobs"):
             st.success(f"✅ Found {len(results)} jobs across all platforms.")
             log = []
             for job in results:
-    st.markdown("---")
+                st.markdown("---")
     st.markdown(f"### 🧑‍💼 Role: **{job['Title']}**")
     st.markdown(f"🏢 Company: **{job['Company']}**")
     st.markdown(f"🌐 Platform: {job['Platform']}")
@@ -353,5 +394,9 @@ if st.button("Search Jobs"):
             df = pd.DataFrame(log)
             df.to_csv("applied_jobs_log.csv", index=False)
             st.success("📁 Log saved as applied_jobs_log.csv")
+
+            # 🔔 Send job alert notifications
+            send_email_alert(email, len(results))
+            send_whatsapp_alert(phone, len(results))
         else:
             st.error("❌ No jobs found on any platform. Try different filters.")
