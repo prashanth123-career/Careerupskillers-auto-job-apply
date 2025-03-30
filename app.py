@@ -1,7 +1,7 @@
 # Multi-Platform Job Auto-Applier with Lead Capture (Improved Validation)
 
 import streamlit as st
-st.set_page_config(page_title="Careerupskiller'sAll-in-One Job Auto-Applier", page_icon="💼")
+st.set_page_config(page_title="All-in-One Job Auto-Applier", page_icon="💼")
 
 import pandas as pd
 import requests
@@ -130,16 +130,30 @@ def scrape_timesjobs(keyword):
 
 def scrape_linkedin(keyword, location):
     try:
-        url = f"https://www.linkedin.com/jobs/search/?keywords={keyword.replace(' ', '%20')}&location={location.replace(' ', '%20')}"
+        # Placeholder for future dynamic scraping logic
         jobs = []
-        for i in range(1, 11):
+        job_titles = [
+            "Marketing Specialist (Junior / Mid-Level)",
+            "Lead Generation Specialist (Remote)",
+            "AI Business Development & Marketing Specialist",
+            "Lead Generation Specialist",
+            "Market Research Executive",
+            "Telecaller (IT Sales & Marketing)"
+        ]
+        companies = [
+            "InfobelPRO", "Job Helping Hand", "Synaptyx AI",
+            "Supy", "Soul AI", "HashRoot"
+        ]
+        for i in range(len(job_titles)):
             jobs.append({
-                "Title": f"LinkedIn Job {i} - {keyword}",
-                "Company": "Confidential",
-                "Link": url,
+                "Title": job_titles[i],
+                "Company": companies[i],
+                "Link": f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote_plus(keyword)}&location={urllib.parse.quote_plus(location)}",
                 "Platform": "LinkedIn (Manual)"
             })
         return jobs
+    except:
+        return []
     except:
         return []
 
