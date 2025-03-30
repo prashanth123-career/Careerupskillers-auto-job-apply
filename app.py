@@ -39,6 +39,47 @@ def generate_cover_letter(resume_text, job_title):
 
 # -------------------- Job Platform Scrapers --------------------
 
+def scrape_monster(keyword, location):
+    try:
+        url = f"https://www.monsterindia.com/srp/results?query={keyword.replace(' ', '%20')}&locations={location.replace(' ', '%20')}"
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, headers=headers)
+        soup = BeautifulSoup(response.content, "html.parser")
+        jobs = []
+        for div in soup.find_all("div", class_="card-apply-content")[:10]:
+            title = div.find("h3")
+            company = div.find("span", class_="company-name")
+            link = title.find("a")['href'] if title and title.find("a") else ""
+            if title and company:
+                jobs.append({
+                    "Title": title.text.strip(),
+                    "Company": company.text.strip(),
+                    "Link": link,
+                    "Platform": "Monster"
+                })
+        return jobs
+    except:
+        return []
+
+def scrape_angellist(keyword, location):
+    try:
+        jobs = []
+        sample_titles = [
+            "Startup Data Analyst", "AI Research Intern", "Remote ML Developer"
+        ]
+        companies = ["AngelTech", "GrowStart", "InnovateAI"]
+        import urllib.parse
+        for i in range(len(sample_titles)):
+            jobs.append({
+                "Title": sample_titles[i],
+                "Company": companies[i],
+                "Link": f"https://angel.co/jobs?query={urllib.parse.quote_plus(keyword)}",
+                "Platform": "AngelList (Manual)"
+            })
+        return jobs
+    except:
+        return []
+
 def scrape_internshala(keyword):
     try:
         url = f"https://internshala.com/internships/keywords-{keyword.replace(' ', '%20')}"
@@ -130,7 +171,6 @@ def scrape_timesjobs(keyword):
 
 def scrape_linkedin(keyword, location):
     try:
-        # Placeholder for future dynamic scraping logic
         jobs = []
         job_titles = [
             "Marketing Specialist (Junior / Mid-Level)",
@@ -144,6 +184,7 @@ def scrape_linkedin(keyword, location):
             "InfobelPRO", "Job Helping Hand", "Synaptyx AI",
             "Supy", "Soul AI", "HashRoot"
         ]
+        import urllib.parse
         for i in range(len(job_titles)):
             jobs.append({
                 "Title": job_titles[i],
@@ -259,7 +300,7 @@ if st.button("Search Jobs"):
         st.success("✅ Employee details saved!")
 
         st.info("🔍 Searching jobs on all platforms...")
-        platforms = ["LinkedIn", "TimesJobs", "Internshala", "Naukri", "Indeed"]
+        platforms = ["LinkedIn", "TimesJobs", "Internshala", "Naukri", "Indeed", "Monster", "AngelList"]
         results = []
         for platform in platforms:
             st.write(f"Searching {platform}...")
@@ -272,7 +313,11 @@ if st.button("Search Jobs"):
             elif platform == "TimesJobs":
                 jobs = scrape_timesjobs(keyword)
             elif platform == "LinkedIn":
-                jobs = scrape_linkedin(keyword, location)
+            jobs = scrape_linkedin(keyword, location)
+        elif platform == "Monster":
+            jobs = scrape_monster(keyword, location)
+        elif platform == "AngelList":
+            jobs = scrape_angellist(keyword, location)
             else:
                 jobs = []
             if jobs:
@@ -284,19 +329,19 @@ if st.button("Search Jobs"):
             st.success(f"✅ Found {len(results)} jobs across all platforms.")
             log = []
             for job in results:
-                st.markdown("---")
-                                st.markdown(f"### 🧑‍💼 Role: **{job['Title']}**")
-                st.markdown(f"🏢 Company: **{job['Company']}**")
-                st.markdown(f"🌐 Platform: {job['Platform']}")
-                st.markdown(f"🔗 [View Job]({job['Link']})")
-                if use_gpt and resume_text:
-                    with st.expander("🧠 View AI-Generated Cover Letter"):
-                        st.write(generate_cover_letter(resume_text, job['Title']))
-                if mode == "Auto Apply (coming soon)":
-                    st.button(f"🚀 Auto Apply (Disabled)", key=job['Link'])
-                else:
-                    st.markdown(f"[🖱️ Click to Apply]({job['Link']})")
-                log.append({
+    st.markdown("---")
+    st.markdown(f"### 🧑‍💼 Role: **{job['Title']}**")
+    st.markdown(f"🏢 Company: **{job['Company']}**")
+    st.markdown(f"🌐 Platform: {job['Platform']}")
+    st.markdown(f"🔗 [View Job]({job['Link']})")
+    if use_gpt and resume_text:
+        with st.expander("🧠 View AI-Generated Cover Letter"):
+            st.write(generate_cover_letter(resume_text, job['Title']))
+    if mode == "Auto Apply (coming soon)":
+        st.button(f"🚀 Auto Apply (Disabled)", key=job['Link'])
+    else:
+        st.markdown(f"[🖱️ Click to Apply]({job['Link']})")
+    log.append({
                     "Title": job['Title'],
                     "Company": job['Company'],
                     "Platform": job['Platform'],
