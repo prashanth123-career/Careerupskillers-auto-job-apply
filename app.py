@@ -354,13 +354,13 @@ if st.button("Search Jobs"):
             elif platform == "TimesJobs":
                 jobs = scrape_timesjobs(keyword)
             elif platform == "LinkedIn":
-            jobs = scrape_linkedin(keyword, location)
+                jobs = scrape_linkedin(keyword, location)
         elif platform == "Monster":
-            jobs = scrape_monster(keyword, location)
+                jobs = scrape_monster(keyword, location)
         elif platform == "AngelList":
-            jobs = scrape_angellist(keyword, location)
+                jobs = scrape_angellist(keyword, location)
             else:
-                jobs = []
+                jobs = []  # fallback if no matching platform
             if jobs:
                 results.extend(jobs)
             else:
