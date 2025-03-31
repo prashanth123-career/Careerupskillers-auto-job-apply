@@ -7,10 +7,6 @@ st.set_page_config(page_title="Auto Job Apply", page_icon="💼")
 st.title("💼 Auto Job Apply App")
 st.write("Log in to start applying for jobs automatically!")
 
-# Ignore torch warnings if you have PyTorch (from your previous logs)
-import streamlit.watcher
-streamlit.watcher.local_sources_watcher._ignored_modules.add("torch")
-
 # Initialize session state for authentication
 if "auth" not in st.session_state:
     st.session_state.auth = False
@@ -22,17 +18,20 @@ if "user" not in st.session_state:
 # Function to show the login page
 def show_login():
     # Get OAuth details from Streamlit secrets
-    CLIENT_ID = st.secrets["CLIENT_ID"]
-    CLIENT_SECRET = st.secrets["CLIENT_SECRET"]
-    AUTHORIZE_URL = st.secrets["OAUTH_AUTHORIZE_URL"]
-    TOKEN_URL = st.secrets["OAUTH_TOKEN_URL"]
-    REFRESH_TOKEN_URL = st.secrets["OAUTH_REFRESH_TOKEN_URL"]
+    try:
+        CLIENT_ID = st.secrets["CLIENT_ID"]
+        CLIENT_SECRET = st.secrets["CLIENT_SECRET"]
+        AUTHORIZE_URL = st.secrets["OAUTH_AUTHORIZE_URL"]
+        TOKEN_URL = st.secrets["OAUTH_TOKEN_URL"]
+        REFRESH_TOKEN_URL = st.secrets["OAUTH_REFRESH_TOKEN_URL"]
+    except KeyError as e:
+        st.error(f"Missing secret: {e}. Please check your Streamlit secrets configuration.")
+        return
 
-    # For Google OAuth, the user info endpoint is this (we'll use it later)
+    # For Google OAuth, the user info endpoint is this
     USER_INFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo"
 
     # Set the redirect URI based on whether we're on Streamlit Cloud or local
-    # On Streamlit Cloud, use your app's URL; locally, use localhost
     REDIRECT_URI = "https://careerupskillers-auto-job-apply-jwvlomnmt8edxweekkezzv.streamlit.app"
     if "localhost" in st.secrets.get("BASE_URL", ""):  # Check if running locally
         REDIRECT_URI = "http://localhost:8501"
@@ -70,7 +69,7 @@ def show_login():
             st.session_state.user = userinfo
             st.rerun()  # Refresh the app to show the dashboard
         else:
-            st.error("Failed to fetch user info. Please try again.")
+            st.error(f"Failed to fetch user info. Status code: {response.status_code}. Please try again.")
 
 # Function to show the footer (from your logs)
 def footer():
