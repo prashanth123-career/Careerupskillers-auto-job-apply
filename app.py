@@ -20,6 +20,10 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 import time
 import urllib.parse
+import chromedriver_autoinstaller
+
+# Install chromedriver automatically
+chromedriver_autoinstaller.install()
 
 # -------------------- Resume Parser --------------------
 def parse_resume(file):
@@ -68,8 +72,8 @@ def scrape_linkedin(keyword, location):
             except:
                 continue
         driver.quit()
-    except:
-        return []
+    except Exception as e:
+        st.warning(f"LinkedIn scraping error: {e}")
     return jobs
 
 # -------------------- AngelList Scraper --------------------
@@ -98,7 +102,8 @@ def scrape_naukri(keyword, location):
             if title and company:
                 jobs.append({"Title": title.get_text(strip=True), "Company": company.get_text(strip=True), "Link": title['href'], "Platform": "Naukri"})
         return jobs
-    except:
+    except Exception as e:
+        st.warning(f"Naukri scraping error: {e}")
         return []
 
 # -------------------- Indeed Scraper --------------------
@@ -116,7 +121,8 @@ def scrape_indeed(keyword, location):
             if title and company:
                 jobs.append({"Title": title.text.strip(), "Company": company.text.strip(), "Link": link, "Platform": "Indeed"})
         return jobs
-    except:
+    except Exception as e:
+        st.warning(f"Indeed scraping error: {e}")
         return []
 
 # -------------------- Remotive Scraper --------------------
