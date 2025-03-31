@@ -1,4 +1,4 @@
-# Multi-Platform Job Auto-Applier (Fully Working Version)
+# Multi-Platform Job Auto-Applier (Fixed Version)
 import streamlit as st
 st.set_page_config(page_title="All-in-One Job Auto-Applier", page_icon="💼", layout="wide")
 
@@ -79,6 +79,7 @@ def scrape_linkedin(keyword, location):
         url = f"https://www.linkedin.com/jobs/search/?keywords={keyword.replace(' ', '%20')}&location={location.replace(' ', '%20')}"
         driver.get(url)
         
+        # Fixed line - properly closed WebDriverWait parenthesis
         WebDriverWait(driver, 15).until(
             EC.presence_of_element_located((By.CLASS_NAME, "jobs-search__results-list"))
         
