@@ -19,6 +19,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 import time
+import urllib.parse
 
 # -------------------- Resume Parser --------------------
 def parse_resume(file):
@@ -54,7 +55,7 @@ def scrape_linkedin(keyword, location):
         options.add_argument('--disable-gpu')
         options.add_argument('--no-sandbox')
         driver = webdriver.Chrome(options=options)
-        search_url = f"https://www.linkedin.com/jobs/search/?keywords={keyword}&location={location}"
+        search_url = f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote_plus(keyword)}&location={urllib.parse.quote_plus(location)}"
         driver.get(search_url)
         time.sleep(5)
         job_cards = driver.find_elements(By.CLASS_NAME, "base-card")[:5]
@@ -63,7 +64,7 @@ def scrape_linkedin(keyword, location):
                 title = card.find_element(By.CLASS_NAME, "base-search-card__title").text
                 company = card.find_element(By.CLASS_NAME, "base-search-card__subtitle").text
                 link = card.find_element(By.TAG_NAME, "a").get_attribute("href")
-                jobs.append({"Title": title, "Company": company, "Link": link, "Platform": "LinkedIn"})
+                jobs.append({"Title": title.strip(), "Company": company.strip(), "Link": link, "Platform": "LinkedIn"})
             except:
                 continue
         driver.quit()
@@ -73,15 +74,15 @@ def scrape_linkedin(keyword, location):
 
 # -------------------- AngelList Scraper --------------------
 def scrape_angellist(keyword):
-    return [{"Title": f"{keyword} Intern at AngelList #{i+1}", "Company": "StartupX", "Link": f"https://angel.co/jobs?query={keyword}", "Platform": "AngelList"} for i in range(2)]
+    return [{"Title": f"{keyword} Intern at AngelList #{i+1}", "Company": "StartupX", "Link": f"https://angel.co/jobs?query={urllib.parse.quote_plus(keyword)}", "Platform": "AngelList"} for i in range(2)]
 
 # -------------------- Monster Scraper --------------------
 def scrape_monster(keyword, location):
-    return [{"Title": f"{keyword} Role at Monster #{i+1}", "Company": "MonsterX", "Link": f"https://www.monsterindia.com/srp/results?query={keyword}&locations={location}", "Platform": "Monster"} for i in range(2)]
+    return [{"Title": f"{keyword} Role at Monster #{i+1}", "Company": "MonsterX", "Link": f"https://www.monsterindia.com/srp/results?query={urllib.parse.quote_plus(keyword)}&locations={urllib.parse.quote_plus(location)}", "Platform": "Monster"} for i in range(2)]
 
 # -------------------- Glassdoor Scraper --------------------
 def scrape_glassdoor(keyword, location):
-    return [{"Title": f"{keyword} Job on Glassdoor #{i+1}", "Company": "Glassdoor Inc", "Link": f"https://www.glassdoor.com/Job/jobs.htm?sc.keyword={keyword}", "Platform": "Glassdoor"} for i in range(2)]
+    return [{"Title": f"{keyword} Job on Glassdoor #{i+1}", "Company": "Glassdoor Inc", "Link": f"https://www.glassdoor.com/Job/jobs.htm?sc.keyword={urllib.parse.quote_plus(keyword)}", "Platform": "Glassdoor"} for i in range(2)]
 
 # -------------------- Naukri Scraper --------------------
 def scrape_naukri(keyword, location):
@@ -103,7 +104,7 @@ def scrape_naukri(keyword, location):
 # -------------------- Indeed Scraper --------------------
 def scrape_indeed(keyword, location):
     try:
-        url = f"https://www.indeed.com/jobs?q={keyword.replace(' ', '+')}&l={location.replace(' ', '+')}"
+        url = f"https://www.indeed.com/jobs?q={urllib.parse.quote_plus(keyword)}&l={urllib.parse.quote_plus(location)}"
         headers = {'User-Agent': 'Mozilla/5.0'}
         response = requests.get(url, headers=headers, timeout=10)
         soup = BeautifulSoup(response.content, "html.parser")
@@ -120,6 +121,6 @@ def scrape_indeed(keyword, location):
 
 # -------------------- Remotive Scraper --------------------
 def scrape_remotive(keyword):
-    return [{"Title": f"{keyword} Job #{i+1}", "Company": "Remotive Co.", "Link": f"https://remotive.io/remote-jobs/search/{keyword}", "Platform": "Remotive"} for i in range(2)]
+    return [{"Title": f"{keyword} Job #{i+1}", "Company": "Remotive Co.", "Link": f"https://remotive.io/remote-jobs/search/{urllib.parse.quote_plus(keyword)}", "Platform": "Remotive"} for i in range(2)]
 
 # -------------------- App UI and Logic Below (Unchanged) --------------------
