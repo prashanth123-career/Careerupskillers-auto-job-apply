@@ -1,4 +1,4 @@
-# Multi-Platform Job Auto-Applier (Final Clean Version)
+# Multi-Platform Job Auto-Applier (with Auto-Apply & More Platforms)
 
 import streamlit as st
 st.set_page_config(page_title="All-in-One Job Auto-Applier", page_icon="💼", layout="wide")
@@ -15,8 +15,6 @@ import re
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from googletrans import Translator
-import plotly.express as px
 
 # -------------------- Resume Parser --------------------
 def parse_resume(file):
@@ -43,7 +41,7 @@ def generate_cover_letter(resume_text, job_title):
     result = generator(prompt, max_length=300, do_sample=False)
     return result[0]['generated_text']
 
-# -------------------- Job Scraper (Sample: LinkedIn, Naukri) --------------------
+# -------------------- Job Scrapers --------------------
 def scrape_linkedin(keyword, location):
     jobs = []
     job_titles = ["AI Analyst", "Machine Learning Intern", "Remote Data Scientist"]
@@ -78,6 +76,82 @@ def scrape_naukri(keyword, location):
     except:
         return []
 
+def scrape_indeed(keyword, location):
+    try:
+        url = f"https://www.indeed.com/jobs?q={keyword.replace(' ', '+')}&l={location.replace(' ', '+')}"
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, headers=headers)
+        soup = BeautifulSoup(response.content, "html.parser")
+        jobs = []
+        for div in soup.find_all("a", class_="tapItem")[:5]:
+            title = div.find("h2")
+            company = div.find("span", class_="companyName")
+            link = "https://www.indeed.com" + div.get("href") if div.get("href") else ""
+            if title and company:
+                jobs.append({
+                    "Title": title.text.strip(),
+                    "Company": company.text.strip(),
+                    "Link": link,
+                    "Platform": "Indeed"
+                })
+        return jobs
+    except:
+        return []
+
+def scrape_remotive(keyword):
+    try:
+        url = f"https://remotive.io/remote-jobs/search?search={keyword.replace(' ', '%20')}"
+        response = requests.get(url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        jobs = []
+        for job_card in soup.find_all("div", class_="job-tile")[:5]:
+            title_tag = job_card.find("h2")
+            company_tag = job_card.find("span", class_="company")
+            link_tag = job_card.find("a", class_="job-tile-title")
+            if title_tag and company_tag and link_tag:
+                jobs.append({
+                    "Title": title_tag.text.strip(),
+                    "Company": company_tag.text.strip(),
+                    "Link": "https://remotive.io" + link_tag['href'],
+                    "Platform": "Remotive"
+                })
+        return jobs
+    except:
+        return []
+
+def scrape_angellist(keyword):
+    jobs = []
+    for i in range(3):
+        jobs.append({
+            "Title": f"{keyword} Intern at AngelList #{i+1}",
+            "Company": "StartupX",
+            "Link": f"https://angel.co/jobs?query={keyword}",
+            "Platform": "AngelList"
+        })
+    return jobs
+
+def scrape_monster(keyword, location):
+    jobs = []
+    for i in range(3):
+        jobs.append({
+            "Title": f"{keyword} Role #{i+1}",
+            "Company": "Monster Inc",
+            "Link": f"https://www.monsterindia.com/srp/results?query={keyword}&locations={location}",
+            "Platform": "Monster"
+        })
+    return jobs
+
+def scrape_glassdoor(keyword, location):
+    jobs = []
+    for i in range(3):
+        jobs.append({
+            "Title": f"{keyword} Position #{i+1}",
+            "Company": "Glassdoor AI",
+            "Link": f"https://www.glassdoor.com/Job/jobs.htm?sc.keyword={keyword}&locT=C&locId={location}",
+            "Platform": "Glassdoor"
+        })
+    return jobs
+
 # -------------------- Email Notification --------------------
 def send_email_alert(to_email, job_count):
     try:
@@ -103,7 +177,7 @@ def send_email_alert(to_email, job_count):
         st.warning(f"Failed to send email: {e}")
 
 # -------------------- App UI --------------------
-st.title("💼 All-in-One careerupskillers Job Auto-Applier")
+st.title("💼 All-in-One CareerUpskillers Job Auto-Applier")
 st.markdown("Apply smartly with AI-powered cover letters and resume autofill.")
 
 st.subheader("📄 Upload Your Resume")
@@ -120,12 +194,21 @@ phone = st.text_input("Phone Number")
 location = st.text_input("Job Location", value="Remote")
 keyword = st.text_input("Job Title / Keywords", value="AI Intern")
 use_gpt = st.checkbox("Generate AI-based Cover Letter", value=True)
+auto_apply = st.checkbox("Auto Apply (Beta)", value=False)
 
 if st.button("🔍 Search Jobs"):
     if not (name and email and phone and resume_file):
         st.warning("Please fill all fields and upload your resume.")
     else:
-        results = scrape_linkedin(keyword, location) + scrape_naukri(keyword, location)
+        results = []
+        results += scrape_linkedin(keyword, location)
+        results += scrape_naukri(keyword, location)
+        results += scrape_indeed(keyword, location)
+        results += scrape_remotive(keyword)
+        results += scrape_angellist(keyword)
+        results += scrape_monster(keyword, location)
+        results += scrape_glassdoor(keyword, location)
+
         if results:
             st.success(f"✅ Found {len(results)} jobs!")
             for i, job in enumerate(results):
@@ -142,12 +225,14 @@ if st.button("🔍 Search Jobs"):
                     if use_gpt and resume_text:
                         with st.expander("🧠 View AI-Generated Cover Letter"):
                             st.text(generate_cover_letter(resume_text, job['Title']))
+
+                    if auto_apply:
+                        st.success("✅ Auto-applied (Simulated)")
+
+            if email:
+                send_email_alert(email, len(results))
         else:
             st.warning("No jobs found.")
-
-        # Optional Email Notification
-        if email:
-            send_email_alert(email, len(results))
 
 # -------------------- Footer --------------------
 st.markdown("""
