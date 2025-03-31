@@ -101,12 +101,18 @@ def extract_education(text):
 # -------------------- AI Models --------------------
 @st.cache_resource
 def load_models():
-    generator = pipeline("text2text-generation", model="google/flan-t5-base")
-    classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
-    qa_model = pipeline("question-answering", model="deepset/roberta-base-squad2")
-    return generator, classifier, qa_model
+    try:
+        generator = pipeline("text2text-generation", model="google/flan-t5-base")
+        classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
+        qa_model = pipeline("question-answering", model="deepset/roberta-base-squad2")
+        return generator, classifier, qa_model
+    except Exception as e:
+        st.error(f"Failed to load models: {e}")
+        return None, None, None
 
 generator, classifier, qa_model = load_models()
+if generator is None:
+    st.error("AI models failed to load. Some features may not work.")
 
 # -------------------- Cover Letter Generator --------------------
 def generate_cover_letter(resume_text, job_title, job_description=""):
@@ -300,34 +306,41 @@ def show_login():
         st.session_state.token = result.get('token')
         st.session_state.auth = True
         userinfo = oauth2.get_user_info(result.get('token'))
+        st.write("User Info:", userinfo)  # Debug output
         st.session_state.user = userinfo
+        st.write("Login successful, redirecting...")
         st.rerun()
+    else:
+        st.write("Please log in to continue.")
 
 def dashboard_header():
-    st.markdown(f"""
-    <style>
-        .header {{
-            background: linear-gradient(90deg, #2AB7CA 0%, #1A3550 100%);
-            color: white;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }}
-        .welcome {{
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }}
-        .last-login {{
-            font-size: 12px;
-            color: #e0e0e0;
-        }}
-    </style>
-    <div class="header">
-        <div class="welcome">👋 Welcome, {st.session_state.user.get('name', 'User')}</div>
-        <div class="last-login">Last login: {datetime.now().strftime("%Y-%m-%d %H:%M")}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    try:
+        st.markdown(f"""
+        <style>
+            .header {{
+                background: linear-gradient(90deg, #2AB7CA 0%, #1A3550 100%);
+                color: white;
+                padding: 15px;
+                border-radius: 12px;
+                margin-bottom: 20px;
+            }}
+            .welcome {{
+                font-size: 24px;
+                font-weight: bold;
+                margin-bottom: 5px;
+            }}
+            .last-login {{
+                font-size: 12px;
+                color: #e0e0e0;
+            }}
+        </style>
+        <div class="header">
+            <div class="welcome">👋 Welcome, {st.session_state.user.get('name', 'User')}</div>
+            <div class="last-login">Last login: {datetime.now().strftime("%Y-%m-%d %H:%M")}</div>
+        </div>
+        """, unsafe_allow_html=True)
+    except Exception as e:
+        st.error(f"Error in dashboard_header: {e}")
 
 def job_search_section():
     with st.expander("🔍 Advanced Job Search", expanded=True):
@@ -553,6 +566,7 @@ def main():
         show_login()
         return
     
+    st.write("Debug: Authenticated, rendering dashboard...")  # Debug output
     dashboard_header()
     load_applications()
     
