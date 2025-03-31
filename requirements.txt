@@ -4,5 +4,4 @@ beautifulsoup4==4.12.3
 transformers==4.38.2
 PyPDF2==3.0.1
 docx2txt==0.8
-chromedriver-autoinstaller==0.6.3
 webdriver-manager==4.0.2
