@@ -33,7 +33,7 @@ def parse_resume(file):
 # -------------------- Load AI Generator --------------------
 @st.cache_resource
 def load_generator():
-    return pipeline("text2text-generation", model="google/flan-t5-base")
+    return pipeline("text2text-generation", model="t5-small")
 
 generator = load_generator()
 
@@ -59,7 +59,7 @@ def scrape_linkedin(keyword, location):
 
 def scrape_naukri(keyword, location):
     try:
-        url = f"https://www.naukri.com/{keyword.replace(' ', '-')}-jobs-in-{location.replace(' ', '-')}"
+        url = f"https://www.naukri.com/{keyword.replace(' ', '-')}-jobs-in-{location.replace(' ', '-')}">
         headers = {'User-Agent': 'Mozilla/5.0'}
         response = requests.get(url, headers=headers)
         soup = BeautifulSoup(response.content, "html.parser")
@@ -91,7 +91,7 @@ def send_email_alert(to_email, job_count):
         message["From"] = sender_email
         message["To"] = to_email
 
-        text = f"""Hi,\n\nWe found {job_count} new jobs for your search.\nVisit the app to apply now!\n\n- CareerUpskillers"""
+        text = f"Hi,\n\nWe found {job_count} new jobs for your search.\nVisit the app to apply now!\n\n- CareerUpskillers"
         part = MIMEText(text, "plain")
         message.attach(part)
 
