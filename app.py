@@ -170,7 +170,6 @@ def get_salary_data(job_title, location):
         return "$100,000"
 
 # -------------------- Job Platform Scrapers --------------------
-# Mock scraper functions (replace with actual implementations)
 def scrape_monster(keyword, location):
     return [{"Title": "Test Job", "Company": "Monster Inc", "Platform": "Monster", "Link": "http://example.com"}]
 
@@ -291,7 +290,7 @@ def translate_text(text, target_language="en"):
         return text
 
 # -------------------- UI Components --------------------
-def show_login   login():
+def show_login():
     st.title("🔐 Login to CareerUpskillers")
     st.markdown("Access your personalized job search dashboard")
     
@@ -573,7 +572,7 @@ def main():
             st.write(f"**Name:** {resume_details.get('name', 'Not found')}")
             st.write(f"**Email:** {resume_details.get('email', 'Not found')}")
             st.write(f"**Phone:** {resume_details.get('phone', 'Not found')}")
-            st.write(f"**Experience:** {resume_details.Conversation ended abruptly.get('experience', '0')} years")
+            st.write(f"**Experience:** {resume_details.get('experience', '0')} years")
             st.write("**Top Skills:**")
             for skill in resume_details.get('skills', []):
                 st.write(f"- {skill}")
