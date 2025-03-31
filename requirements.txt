@@ -1,9 +1,10 @@
 streamlit
-transformers
-torch
-beautifulsoup4
-requests
 pandas
+requests
+beautifulsoup4
+transformers
 docx2txt
 PyPDF2
-selenium
+plotly
+googletrans
+streamlit-oauth
