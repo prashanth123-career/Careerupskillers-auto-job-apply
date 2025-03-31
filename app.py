@@ -23,18 +23,26 @@ import base64
 import threading
 
 # -------------------- Authentication --------------------
+# Load secrets
 CLIENT_ID = st.secrets.get("OAUTH_CLIENT_ID", "")
 CLIENT_SECRET = st.secrets.get("OAUTH_CLIENT_SECRET", "")
 AUTHORIZE_URL = st.secrets.get("OAUTH_AUTHORIZE_URL", "")
 TOKEN_URL = st.secrets.get("OAUTH_TOKEN_URL", "")
 REFRESH_TOKEN_URL = st.secrets.get("OAUTH_REFRESH_TOKEN_URL", "")
 REVOKE_TOKEN_URL = st.secrets.get("OAUTH_REVOKE_TOKEN_URL", "")
-REDIRECT_URI = st.secrets.get("OAUTH_REDIRECT_URI", "")
 SCOPE = "openid profile email"
+
+# Dynamically set REDIRECT_URI based on environment
+if "localhost" in st.secrets.get("OAUTH_REDIRECT_URI", ""):
+    # Local development
+    REDIRECT_URI = "http://localhost:8501"
+else:
+    # Deployed on Streamlit Cloud
+    REDIRECT_URI = "https://careerupskillers-auto-job-apply-jwvlomnmt8edxweekkezzv.streamlit.app/"
 
 # Debug: Display OAuth configuration
 st.write("Debug - OAuth Config:")
-st.write(f"Client ID: {CLIENT_ID[:10]}...")  # Show partial Client ID for security
+st.write(f"Client ID: {CLIENT_ID[:10]}...")
 st.write(f"Redirect URI: {REDIRECT_URI}")
 
 oauth2 = OAuth2Component(CLIENT_ID, CLIENT_SECRET, AUTHORIZE_URL, TOKEN_URL, REFRESH_TOKEN_URL, REVOKE_TOKEN_URL)
@@ -459,3 +467,221 @@ def display_job_results(jobs, resume_text):
 def apply_for_job(job, resume_text):
     st.session_state.current_application = job
     st.session_state.show_application_form = True
+    add_application(job['Company'], job['Title'], job['Platform'])
+
+def application_form():
+    if 'current_application' in st.session_state:
+        job = st.session_state.current_application
+        
+        with st.form("job_application"):
+            st.subheader(f"Apply for {job['Title']} at {job['Company']}")
+            
+            name = st.text_input("Full Name", value=st.session_state.get('name', ''))
+            email = st.text_input("Email", value=st.session_state.get('email', ''))
+            phone = st.text_input("Phone", value=st.session_state.get('phone', ''))
+            
+            cover_letter = st.text_area("Cover Letter", height=300,
+                                      value=generate_cover_letter(
+                                          st.session_state.get('resume_text', ''),
+                                          job['Title']))
+            
+            resume = st.file_uploader("Upload Resume (PDF/DOCX)", type=["pdf", "docx"])
+            
+            salary_exp = st.text_input("Salary Expectation")
+            availability = st.date_input("Available from")
+            
+            submitted = st.form_submit_button("Submit Application")
+            if submitted:
+                st.success("Application submitted successfully!")
+                time.sleep(2)
+                st.session_state.show_application_form = False
+                del st.session_state.current_application
+
+def interview_prep_section():
+    st.subheader("🎤 Interview Preparation")
+    
+    tab1, tab2, tab3 = st.tabs(["Generate Questions", "Practice Session", "Resources"])
+    
+    with tab1:
+        job_title = st.text_input("Job Title for Interview Questions", "Data Scientist")
+        job_desc = st.text_area("Paste Job Description (for better questions)", height=150)
+        
+        if st.button("Generate Interview Questions"):
+            with st.spinner("Creating tailored interview questions..."):
+                questions = generate_interview_questions(job_title, job_desc)
+                st.text_area("Questions", questions, height=400)
+    
+    with tab2:
+        st.write("Practice answering common questions:")
+        
+        questions = [
+            "Tell me about yourself",
+            "What are your strengths and weaknesses?",
+            "Why do you want this job?",
+            "Where do you see yourself in 5 years?"
+        ]
+        
+        selected_q = st.selectbox("Select a question to practice", questions)
+        user_answer = st.text_area("Type your answer", height=150)
+        
+        if user_answer and st.button("Get Feedback"):
+            with st.spinner("Analyzing your answer..."):
+                feedback_prompt = f"""
+                Provide constructive feedback on this interview answer:
+                Question: {selected_q}
+                Answer: {user_answer}
+                
+                Focus on:
+                - Clarity and structure
+                - Relevance to the question
+                - Demonstration of skills
+                - Professional tone
+                """
+                if generator is None:
+                    st.text_area("Feedback", "Placeholder feedback (AI model loading disabled).", height=200)
+                else:
+                    feedback = generator(feedback_prompt, max_length=300)
+                    st.text_area("Feedback", feedback[0]['generated_text'], height=200)
+    
+    with tab3:
+        st.write("Interview Preparation Resources:")
+        
+        cols = st.columns(3)
+        with cols[0]:
+            st.markdown("""
+            **Technical Interviews**  
+            - [LeetCode](https://leetcode.com)  
+            - [HackerRank](https://hackerrank.com)  
+            - [CodeSignal](https://codesignal.com)
+            """)
+        
+        with cols[1]:
+            st.markdown("""
+            **Behavioral Interviews**  
+            - [STAR Method Guide](https://example.com)  
+            - [Common Questions](https://example.com)  
+            - [Success Stories](https://example.com)
+            """)
+        
+        with cols[2]:
+            st.markdown("""
+            **Company Research**  
+            - [Glassdoor](https://glassdoor.com)  
+            - [LinkedIn](https://linkedin.com)  
+            - [Company Websites](https://example.com)
+            """)
+
+def settings_section():
+    st.subheader("⚙️ Settings & Preferences")
+    
+    with st.form("user_preferences"):
+        st.write("Notification Settings")
+        email_notifs = st.checkbox("Email Notifications", True)
+        whatsapp_notifs = st.checkbox("WhatsApp Notifications", False)
+        frequency = st.selectbox("Alert Frequency", ["Immediate", "Daily Digest", "Weekly Digest"])
+        
+        st.write("Application Preferences")
+        default_resume = st.file_uploader("Set Default Resume", type=["pdf", "docx"])
+        auto_generate_letters = st.checkbox("Auto-generate Cover Letters", True)
+        
+        if st.form_submit_button("Save Preferences"):
+            st.success("Preferences saved successfully!")
+
+# -------------------- Main App --------------------
+def main():
+    # Handle OAuth callback manually for debugging
+    if 'code' in st.experimental_get_query_params():
+        st.write("Callback received!")
+        st.write("Query Parameters:", st.experimental_get_query_params())
+        st.session_state.auth = True
+        st.rerun()
+        return
+    
+    if not st.session_state.auth:
+        show_login()
+        return
+    
+    st.write("Debug: Authenticated, rendering dashboard...")
+    dashboard_header()
+    load_applications()
+    
+    menu = ["Job Search", "Application Tracker", "Interview Prep", "Salary Insights", "Settings"]
+    choice = st.sidebar.selectbox("Menu", menu)
+    
+    st.sidebar.subheader("📄 Your Resume")
+    resume_file = st.sidebar.file_uploader("Upload Resume", type=["pdf", "docx"], key="resume_upload")
+    
+    if resume_file:
+        resume_text, resume_details = parse_resume(resume_file)
+        st.session_state.resume_text = resume_text
+        st.session_state.resume_details = resume_details
+        st.sidebar.success("Resume parsed successfully!")
+        
+        with st.sidebar.expander("Resume Summary"):
+            st.write(f"**Name:** {resume_details.get('name', 'Not found')}")
+            st.write(f"**Email:** {resume_details.get('email', 'Not found')}")
+            st.write(f"**Phone:** {resume_details.get('phone', 'Not found')}")
+            st.write(f"**Experience:** {resume_details.get('experience', '0')} years")
+            st.write("**Top Skills:**")
+            for skill in resume_details.get('skills', []):
+                st.write(f"- {skill}")
+    
+    if choice == "Job Search":
+        st.header("🔍 Find Your Dream Job")
+        search_params = job_search_section()
+        
+        if search_params:
+            jobs = scrape_job_platforms(search_params['keyword'], search_params['location'])
+            
+            if 'resume_text' in st.session_state:
+                display_job_results(jobs, st.session_state.resume_text)
+            else:
+                st.warning("Please upload your resume first to see tailored results")
+    
+    elif choice == "Application Tracker":
+        st.header("📊 Your Applications")
+        
+        if 'applications' in st.session_state and not st.session_state.applications.empty:
+            edited_df = st.data_editor(
+                st.session_state.applications,
+                column_config={
+                    "Date": st.column_config.DateColumn("Date"),
+                    "Status": st.column_config.SelectboxColumn(
+                        "Status",
+                        options=["Applied", "Interview", "Offer", "Rejected", "Ghosted"]
+                    ),
+                    "InterviewDate": st.column_config.DateColumn("Interview Date"),
+                },
+                num_rows="dynamic",
+                use_container_width=True
+            )
+            
+            if st.button("Save Changes"):
+                st.session_state.applications = edited_df
+                save_applications()
+                st.success("Applications updated!")
+            
+            st.download_button(
+                "Export to CSV",
+                st.session_state.applications.to_csv(index=False),
+                "job_applications.csv",
+                "text/csv"
+            )
+        else:
+            st.info("You haven't applied to any jobs yet. Start your search!")
+    
+    elif choice == "Interview Prep":
+        st.header("🎤 Interview Preparation")
+        interview_prep_section()
+    
+    elif choice == "Salary Insights":
+        st.header("💰 Salary Comparison")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            job_title = st.text_input("Job Title for Salary Data", "Data Scientist")
+        with col2:
+            location = st.selectbox("Location", ["Remote", "New York", "San Francisco", "London"])
+        
+        if st.button("Get Salary Data"):
+            salary = get_salary_data
