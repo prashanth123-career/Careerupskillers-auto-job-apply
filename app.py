@@ -15,6 +15,22 @@ import re
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+
+# -------------------- Selenium Setup --------------------
+@st.cache_resource
+def get_driver():
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    return webdriver.Chrome(options=chrome_options)
 
 # -------------------- Resume Parser --------------------
 def parse_resume(file):
@@ -43,17 +59,47 @@ def generate_cover_letter(resume_text, job_title):
 
 # -------------------- Job Scrapers --------------------
 def scrape_linkedin(keyword, location):
-    jobs = []
-    job_titles = ["AI Analyst", "Machine Learning Intern", "Remote Data Scientist"]
-    companies = ["LinkedIn Inc", "Techverse AI", "NeuroSpace"]
-    for i in range(len(job_titles)):
-        jobs.append({
-            "Title": job_titles[i],
-            "Company": companies[i],
-            "Link": f"https://www.linkedin.com/jobs/search/?keywords={keyword}&location={location}",
-            "Platform": "LinkedIn"
-        })
-    return jobs
+    try:
+        driver = get_driver()
+        url = f"https://www.linkedin.com/jobs/search/?keywords={keyword.replace(' ', '%20')}&location={location.replace(' ', '%20')}"
+        driver.get(url)
+        
+        # Wait for jobs to load
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "jobs-search__results-list"))
+        )
+        
+        # Scroll to load more jobs
+        for _ in range(2):
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(2)
+        
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+        jobs = []
+        
+        for job in soup.find_all("li", class_="jobs-search-results__list-item")[:10]:
+            title = job.find("a", class_="job-card-list__title")
+            company = job.find("span", class_="job-card-container__primary-description")
+            link = job.find("a", class_="job-card-list__title")
+            
+            if title and company and link:
+                jobs.append({
+                    "Title": title.text.strip(),
+                    "Company": company.text.strip(),
+                    "Link": link["href"].split("?")[0],  # Clean URL
+                    "Platform": "LinkedIn"
+                })
+        
+        return jobs
+    
+    except Exception as e:
+        st.warning(f"LinkedIn scraping error: {str(e)}")
+        return []
+    finally:
+        try:
+            driver.quit()
+        except:
+            pass
 
 def scrape_naukri(keyword, location):
     try:
@@ -200,14 +246,15 @@ if st.button("🔍 Search Jobs"):
     if not (name and email and phone and resume_file):
         st.warning("Please fill all fields and upload your resume.")
     else:
-        results = []
-        results += scrape_linkedin(keyword, location)
-        results += scrape_naukri(keyword, location)
-        results += scrape_indeed(keyword, location)
-        results += scrape_remotive(keyword)
-        results += scrape_angellist(keyword)
-        results += scrape_monster(keyword, location)
-        results += scrape_glassdoor(keyword, location)
+        with st.spinner("Searching for jobs across platforms..."):
+            results = []
+            results += scrape_linkedin(keyword, location)
+            results += scrape_naukri(keyword, location)
+            results += scrape_indeed(keyword, location)
+            results += scrape_remotive(keyword)
+            results += scrape_angellist(keyword)
+            results += scrape_monster(keyword, location)
+            results += scrape_glassdoor(keyword, location)
 
         if results:
             st.success(f"✅ Found {len(results)} jobs!")
