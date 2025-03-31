@@ -67,7 +67,7 @@ def scrape_linkedin(keyword, location):
             driver.get(url)
             
             # Wait for jobs to load with longer timeout
-            WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.CLASS_NAME, "jobs-search__results-list"))
+            WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.CLASS_NAME,"jobs-search__results-list"))
             
             # Scroll to load more jobs
             for _ in range(2):
