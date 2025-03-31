@@ -20,6 +20,7 @@ import plotly.express as px
 import pytz
 from googletrans import Translator
 import base64
+import threading
 
 # -------------------- Authentication --------------------
 CLIENT_ID = st.secrets.get("OAUTH_CLIENT_ID", "")
@@ -51,7 +52,6 @@ def parse_resume(file):
     elif ext == "docx":
         text = docx2txt.process(file)
     
-    # Extract key details
     details = {
         "name": extract_name(text),
         "email": extract_email(text),
@@ -63,9 +63,8 @@ def parse_resume(file):
     return text, details
 
 def extract_name(text):
-    # Simple name extraction (can be enhanced with NLP)
     lines = text.split('\n')
-    for line in lines[:5]:  # Name usually appears in first few lines
+    for line in lines[:5]:
         if re.search(r'[A-Z][a-z]+ [A-Z][a-z]+', line.strip()):
             return line.strip()
     return ""
@@ -79,22 +78,19 @@ def extract_phone(text):
     return phone.group(0) if phone else ""
 
 def extract_skills(text):
-    # Common skills list (can be expanded)
     skills_list = ["python", "java", "sql", "machine learning", "data analysis", 
                   "project management", "communication", "teamwork", "leadership"]
     found_skills = []
     for skill in skills_list:
         if re.search(r'\b' + re.escape(skill) + r'\b', text.lower()):
             found_skills.append(skill.title())
-    return found_skills[:10]  # Return top 10 skills
+    return found_skills[:10]
 
 def extract_experience(text):
-    # Simple experience extraction
     exp = re.search(r'(\d+)\s*(years?|yrs?)', text.lower())
     return exp.group(1) if exp else "0"
 
 def extract_education(text):
-    # Simple education extraction
     degrees = ["bachelor", "master", "phd", "mba", "bsc", "msc", "btech", "mtech"]
     for line in text.split('\n'):
         for degree in degrees:
@@ -160,7 +156,6 @@ def generate_interview_questions(job_title, job_description):
 
 # -------------------- Salary Comparison --------------------
 def get_salary_data(job_title, location):
-    # Mock data - in a real app, you'd use an API like Glassdoor or Payscale
     salaries = {
         "Data Scientist": {"Remote": "$120,000", "New York": "$140,000", "San Francisco": "$150,000"},
         "Software Engineer": {"Remote": "$110,000", "New York": "$130,000", "San Francisco": "$140,000"},
@@ -172,15 +167,34 @@ def get_salary_data(job_title, location):
     elif job_title in salaries:
         return salaries[job_title]["Remote"]
     else:
-        return "$100,000"  # Default
+        return "$100,000"
 
 # -------------------- Job Platform Scrapers --------------------
+# Mock scraper functions (replace with actual implementations)
+def scrape_monster(keyword, location):
+    return [{"Title": "Test Job", "Company": "Monster Inc", "Platform": "Monster", "Link": "http://example.com"}]
+
+def scrape_angellist(keyword, location):
+    return []
+
+def scrape_internshala(keyword):
+    return []
+
+def scrape_naukri(keyword, location):
+    return []
+
+def scrape_indeed(keyword, location):
+    return []
+
+def scrape_timesjobs(keyword):
+    return []
+
+def scrape_linkedin(keyword, location):
+    return []
+
 def scrape_job_platforms(keyword, location):
     with st.spinner("Searching across multiple platforms..."):
         results = []
-        
-        # Run scrapers in parallel using threading for better performance
-        import threading
         
         def run_scraper(scraper_func, *args):
             try:
@@ -208,8 +222,6 @@ def scrape_job_platforms(keyword, location):
             t.join()
         
         return results
-
-# [Keep all your existing scraper functions as they are]
 
 # -------------------- Application Tracker --------------------
 def init_application_tracker():
@@ -276,10 +288,10 @@ def translate_text(text, target_language="en"):
         translation = translator.translate(text, dest=target_language)
         return translation.text
     except:
-        return text  # Return original if translation fails
+        return text
 
 # -------------------- UI Components --------------------
-def show_login():
+def show_login   login():
     st.title("🔐 Login to CareerUpskillers")
     st.markdown("Access your personalized job search dashboard")
     
@@ -324,7 +336,6 @@ def job_search_section():
         with col1:
             keyword = st.text_input("Job Title / Keywords", value="Data Science")
             location = st.text_input("Search Location", value="Remote")
-            
         with col2:
             salary_range = st.slider("Minimum Salary Expectation ($)", 30000, 200000, 80000, 5000)
             experience_level = st.selectbox("Experience Level", 
@@ -384,19 +395,16 @@ def display_job_results(jobs, resume_text):
         if 'applications' in st.session_state and not st.session_state.applications.empty:
             st.write("Your Application History")
             
-            # Convert 'Date' to datetime and sort
             df = st.session_state.applications.copy()
             df['Date'] = pd.to_datetime(df['Date'])
             df = df.sort_values('Date', ascending=False)
             
-            # Status distribution
             status_counts = df['Status'].value_counts().reset_index()
             status_counts.columns = ['Status', 'Count']
             fig1 = px.pie(status_counts, values='Count', names='Status', 
                          title='Application Status Distribution')
             st.plotly_chart(fig1, use_container_width=True)
             
-            # Timeline
             df['Month'] = df['Date'].dt.strftime('%Y-%m')
             timeline = df.groupby(['Month', 'Status']).size().unstack().fillna(0)
             fig2 = px.bar(timeline, barmode='stack', 
@@ -432,21 +440,17 @@ def application_form():
         with st.form("job_application"):
             st.subheader(f"Apply for {job['Title']} at {job['Company']}")
             
-            # Auto-filled from profile
             name = st.text_input("Full Name", value=st.session_state.get('name', ''))
             email = st.text_input("Email", value=st.session_state.get('email', ''))
             phone = st.text_input("Phone", value=st.session_state.get('phone', ''))
             
-            # Cover letter
             cover_letter = st.text_area("Cover Letter", height=300,
                                       value=generate_cover_letter(
                                           st.session_state.get('resume_text', ''),
                                           job['Title']))
             
-            # Resume upload
             resume = st.file_uploader("Upload Resume (PDF/DOCX)", type=["pdf", "docx"])
             
-            # Additional questions
             salary_exp = st.text_input("Salary Expectation")
             availability = st.date_input("Available from")
             
@@ -546,20 +550,16 @@ def settings_section():
 
 # -------------------- Main App --------------------
 def main():
-    # Check authentication
     if not st.session_state.auth:
         show_login()
         return
     
-    # Load user data
     dashboard_header()
     load_applications()
     
-    # Navigation
     menu = ["Job Search", "Application Tracker", "Interview Prep", "Salary Insights", "Settings"]
     choice = st.sidebar.selectbox("Menu", menu)
     
-    # Resume upload in sidebar
     st.sidebar.subheader("📄 Your Resume")
     resume_file = st.sidebar.file_uploader("Upload Resume", type=["pdf", "docx"], key="resume_upload")
     
@@ -569,17 +569,15 @@ def main():
         st.session_state.resume_details = resume_details
         st.sidebar.success("Resume parsed successfully!")
         
-        # Show extracted details
         with st.sidebar.expander("Resume Summary"):
             st.write(f"**Name:** {resume_details.get('name', 'Not found')}")
             st.write(f"**Email:** {resume_details.get('email', 'Not found')}")
             st.write(f"**Phone:** {resume_details.get('phone', 'Not found')}")
-            st.write(f"**Experience:** {resume_details.get('experience', '0')} years")
+            st.write(f"**Experience:** {resume_details.Conversation ended abruptly.get('experience', '0')} years")
             st.write("**Top Skills:**")
             for skill in resume_details.get('skills', []):
                 st.write(f"- {skill}")
     
-    # Main content area
     if choice == "Job Search":
         st.header("🔍 Find Your Dream Job")
         search_params = job_search_section()
@@ -615,7 +613,6 @@ def main():
                 save_applications()
                 st.success("Applications updated!")
             
-            # Export options
             st.download_button(
                 "Export to CSV",
                 st.session_state.applications.to_csv(index=False),
@@ -642,7 +639,6 @@ def main():
             salary = get_salary_data(job_title, location)
             st.metric(f"Average Salary for {job_title}", salary)
             
-            # Show comparison chart
             salary_data = {
                 "Position": ["Data Scientist", "Software Engineer", "Product Manager"],
                 "Remote": [120000, 110000, 95000],
@@ -662,7 +658,6 @@ def main():
         st.header("⚙️ Settings & Preferences")
         settings_section()
     
-    # Show application form if triggered
     if 'show_application_form' in st.session_state and st.session_state.show_application_form:
         application_form()
 
