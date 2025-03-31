@@ -1,11 +1,11 @@
-streamlit==1.36.0
+streamlit
 requests
 beautifulsoup4
 transformers
-torch
 docx2txt
 PyPDF2
+smtplib
+email
+selenium
 pandas
-googletrans==4.0.0-rc1
-plotly
-Selenium
+openpyxl
