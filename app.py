@@ -1,4 +1,4 @@
-# Multi-Platform Job Auto-Applier (Final Fixed Version)
+# Multi-Platform Job Auto-Applier (ChromeDriver Fixed Version)
 import streamlit as st
 st.set_page_config(page_title="All-in-One Job Auto-Applier", page_icon="💼", layout="wide")
 
@@ -17,33 +17,30 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
-import chromedriver_autoinstaller
+import os
 from webdriver_manager.chrome import ChromeDriverManager
 
 # -------------------- Selenium Setup --------------------
 @st.cache_resource
 def get_driver():
     try:
+        # Configure Chrome options
         chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--headless=new")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--remote-debugging-port=9222")
         
-        # Try multiple installation methods
-        try:
-            chromedriver_autoinstaller.install()
-            driver = webdriver.Chrome(options=chrome_options)
-            return driver
-        except Exception as e:
-            st.warning(f"Auto-install failed, trying ChromeDriverManager: {str(e)}")
-            service = Service(ChromeDriverManager().install())
-            driver = webdriver.Chrome(service=service, options=chrome_options)
-            return driver
-            
+        # Set up ChromeDriver
+        service = Service(ChromeDriverManager().install())
+        
+        # Try to initialize ChromeDriver
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+        return driver
+        
     except Exception as e:
-        st.error(f"Driver initialization failed: {str(e)}")
+        st.warning(f"⚠️ ChromeDriver initialization failed: {str(e)}")
+        st.warning("Falling back to simulated LinkedIn results")
         return None
 
 # -------------------- Resume Parser --------------------
@@ -73,17 +70,17 @@ def generate_cover_letter(resume_text, job_title):
 def scrape_linkedin(keyword, location):
     try:
         driver = get_driver()
-        if not driver:
+        if driver is None:
             return fallback_linkedin_scrape(keyword, location)
             
         url = f"https://www.linkedin.com/jobs/search/?keywords={keyword.replace(' ', '%20')}&location={location.replace(' ', '%20')}"
         driver.get(url)
         
-        # Fixed WebDriverWait line with proper closing
         WebDriverWait(driver, 15).until(
             EC.presence_of_element_located((By.CLASS_NAME, "jobs-search__results-list"))
         )
         
+        # Scroll to load more jobs
         for _ in range(2):
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             time.sleep(3)
@@ -117,11 +114,18 @@ def scrape_linkedin(keyword, location):
             pass
 
 def fallback_linkedin_scrape(keyword, location):
-    """Fallback when Selenium fails"""
+    """Fallback when Selenium fails - provides simulated results"""
     jobs = []
-    job_titles = [f"{keyword} Developer", f"Senior {keyword}", f"{keyword} Engineer"]
-    companies = ["TechCorp", "DataSystems", "AI Ventures"]
-    for i in range(len(job_titles)):
+    job_titles = [
+        f"{keyword} Developer", 
+        f"Senior {keyword}", 
+        f"{keyword} Engineer",
+        f"Junior {keyword}",
+        f"{keyword} Specialist"
+    ]
+    companies = ["TechCorp", "DataSystems", "AI Ventures", "InnovateCo", "DigitalSolutions"]
+    
+    for i in range(min(5, len(job_titles))):
         jobs.append({
             "Title": job_titles[i],
             "Company": companies[i],
@@ -158,14 +162,14 @@ if st.button("🔍 Search Jobs"):
     if not all([name, email, resume_file]):
         st.warning("Please fill all required fields")
     else:
-        with st.spinner("Searching across platforms..."):
+        with st.spinner("Searching LinkedIn jobs..."):
             results = scrape_linkedin(keyword, location)
             
             if email and results:
                 try:
                     send_email_alert(email, len(results))
-                except:
-                    pass
+                except Exception as e:
+                    st.warning(f"Could not send email: {str(e)}")
 
         if results:
             st.success(f"Found {len(results)} Jobs")
