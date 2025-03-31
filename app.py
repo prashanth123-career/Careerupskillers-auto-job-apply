@@ -290,7 +290,7 @@ def show_login():
         st.session_state.auth = True
         userinfo = oauth2.get_user_info(result.get('token'))
         st.session_state.user = userinfo
-        st.rerun()
+        st.rerun('ddd')
 
 def dashboard_header():
     st.markdown(f"""
