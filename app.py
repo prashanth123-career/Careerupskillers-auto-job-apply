@@ -1,6 +1,5 @@
 import streamlit as st
 st.set_page_config(page_title="All-in-One Job Auto-Applier", page_icon="💼")
-
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
