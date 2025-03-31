@@ -1,12 +1,10 @@
-requirements
 streamlit==1.36.0
-pandas
 requests
 beautifulsoup4
-transformers==4.38.2
+transformers
+torch
 docx2txt
 PyPDF2
-plotly
-pytz
+pandas
 googletrans==4.0.0-rc1
-streamlit_oauth
+plotly
