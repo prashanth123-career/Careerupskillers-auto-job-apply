@@ -1,9 +1,3 @@
-streamlit
-transformers
-torch
-beautifulsoup4
-requests
-pandas
-docx2txt
-PyPDF2
-selenium
+streamlit==1.36.0
+streamlit-oauth==0.2.0
+requests==2.32.3
