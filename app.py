@@ -1,3 +1,4 @@
+
 # Multi-Platform Job Auto-Applier (with Auto-Apply & More Platforms + Selenium LinkedIn Fix)
 
 import streamlit as st
@@ -122,5 +123,3 @@ def scrape_indeed(keyword, location):
 # -------------------- Remotive Scraper --------------------
 def scrape_remotive(keyword):
     return [{"Title": f"{keyword} Job #{i+1}", "Company": "Remotive Co.", "Link": f"https://remotive.io/remote-jobs/search/{urllib.parse.quote_plus(keyword)}", "Platform": "Remotive"} for i in range(2)]
-
-# -------------------- App UI and Logic Below (Unchanged) --------------------
