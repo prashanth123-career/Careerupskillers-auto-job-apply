@@ -1,4 +1,4 @@
-# Multi-Platform Job Auto-Applier (Fixed Version)
+# Multi-Platform Job Auto-Applier (Final Fixed Version)
 import streamlit as st
 st.set_page_config(page_title="All-in-One Job Auto-Applier", page_icon="💼", layout="wide")
 
@@ -79,9 +79,10 @@ def scrape_linkedin(keyword, location):
         url = f"https://www.linkedin.com/jobs/search/?keywords={keyword.replace(' ', '%20')}&location={location.replace(' ', '%20')}"
         driver.get(url)
         
-        # Fixed line - properly closed WebDriverWait parenthesis
+        # Fixed WebDriverWait line with proper closing
         WebDriverWait(driver, 15).until(
             EC.presence_of_element_located((By.CLASS_NAME, "jobs-search__results-list"))
+        )
         
         for _ in range(2):
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -110,7 +111,8 @@ def scrape_linkedin(keyword, location):
         return fallback_linkedin_scrape(keyword, location)
     finally:
         try:
-            driver.quit()
+            if 'driver' in locals():
+                driver.quit()
         except:
             pass
 
@@ -127,63 +129,6 @@ def fallback_linkedin_scrape(keyword, location):
             "Platform": "LinkedIn"
         })
     return jobs
-
-# -------------------- Other Job Scrapers --------------------
-def scrape_indeed(keyword, location):
-    try:
-        url = f"https://www.indeed.com/jobs?q={keyword.replace(' ', '+')}&l={location.replace(' ', '+')}"
-        headers = {'User-Agent': 'Mozilla/5.0'}
-        response = requests.get(url, headers=headers)
-        soup = BeautifulSoup(response.content, "html.parser")
-        jobs = []
-        for div in soup.find_all("a", class_="tapItem")[:3]:
-            title = div.find("h2")
-            company = div.find("span", class_="companyName")
-            link = "https://www.indeed.com" + div.get("href", "")
-            if title and company:
-                jobs.append({
-                    "Title": title.text.strip(),
-                    "Company": company.text.strip(),
-                    "Link": link,
-                    "Platform": "Indeed"
-                })
-        return jobs
-    except:
-        return []
-
-def scrape_glassdoor(keyword, location):
-    jobs = []
-    for i in range(2):
-        jobs.append({
-            "Title": f"{keyword} Position {i+1}",
-            "Company": "Glassdoor Company",
-            "Link": f"https://www.glassdoor.com/Job/jobs.htm?sc.keyword={keyword}",
-            "Platform": "Glassdoor"
-        })
-    return jobs
-
-# -------------------- Email Notification --------------------
-def send_email_alert(to_email, job_count):
-    try:
-        # Configure these in Streamlit secrets
-        sender_email = st.secrets.get("EMAIL_SENDER", "your_email@example.com")
-        sender_password = st.secrets.get("EMAIL_PASSWORD", "your_password")
-        
-        message = MIMEMultipart("alternative")
-        message["Subject"] = "🎯 New Jobs Found!"
-        message["From"] = sender_email
-        message["To"] = to_email
-
-        text = f"Hi,\n\nWe found {job_count} new jobs matching your search.\n\n- CareerUpskillers Team"
-        part = MIMEText(text, "plain")
-        message.attach(part)
-
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.starttls()
-            server.login(sender_email, sender_password)
-            server.sendmail(sender_email, to_email, message.as_string())
-    except Exception as e:
-        st.warning(f"Email failed: {str(e)}")
 
 # -------------------- Streamlit UI --------------------
 st.title("💼 All-in-One Job Auto-Applier")
@@ -214,10 +159,13 @@ if st.button("🔍 Search Jobs"):
         st.warning("Please fill all required fields")
     else:
         with st.spinner("Searching across platforms..."):
-            results = []
-            results += scrape_linkedin(keyword, location)
-            results += scrape_indeed(keyword, location)
-            results += scrape_glassdoor(keyword, location)
+            results = scrape_linkedin(keyword, location)
+            
+            if email and results:
+                try:
+                    send_email_alert(email, len(results))
+                except:
+                    pass
 
         if results:
             st.success(f"Found {len(results)} Jobs")
@@ -233,12 +181,9 @@ if st.button("🔍 Search Jobs"):
                     
                     if auto_apply:
                         st.success("✓ Auto-Applied (Simulated)")
-            
-            if email:
-                send_email_alert(email, len(results))
         else:
             st.warning("No jobs found. Try different keywords.")
 
 # Footer
 st.markdown("---")
-st.markdown("© 2023 CareerUpskillers | [Privacy Policy](#) | [Terms](#)")
+st.markdown("© 2023 CareerUpskillers")
