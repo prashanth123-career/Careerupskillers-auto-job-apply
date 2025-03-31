@@ -5,9 +5,6 @@ sentencepiece==0.1.99
 chromedriver-autoinstaller==0.6.3
 selenium==4.17.2
 PyPDF2==3.0.1
-docx2txt==1.0
+docx2txt==0.8
 beautifulsoup4==4.12.3
 requests==2.31.0
-urllib3==1.26.18
-lxml==4.9.3
-pandas==2.2.1
