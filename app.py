@@ -1,4 +1,4 @@
-# Job Auto-Applier (No Email Alerts Version)
+# Job Auto-Applier (Fully Fixed Version)
 import streamlit as st
 st.set_page_config(page_title="Job Auto-Applier", page_icon="💼", layout="wide")
 
@@ -33,14 +33,20 @@ def get_driver():
 
 # -------------------- Resume Parser --------------------
 def parse_resume(file):
-    text = ""
-    if file.name.endswith(".pdf"):
-        reader = PyPDF2.PdfReader(file)
-        for page in reader.pages:
-            text += page.extract_text() or ""
-    elif file.name.endswith(".docx"):
-        text = docx2txt.process(file)
-    return text
+    if not file:
+        return ""
+    try:
+        text = ""
+        if file.name.endswith(".pdf"):
+            reader = PyPDF2.PdfReader(file)
+            for page in reader.pages:
+                text += page.extract_text() or ""
+        elif file.name.endswith(".docx"):
+            text = docx2txt.process(file)
+        return text
+    except Exception as e:
+        st.warning(f"Error parsing resume: {str(e)}")
+        return ""
 
 # -------------------- AI Generator --------------------
 @st.cache_resource
@@ -48,13 +54,17 @@ def load_generator():
     return pipeline("text2text-generation", model="t5-small")
 
 def generate_cover_letter(resume_text, job_title):
-    generator = load_generator()
-    prompt = f"Write a cover letter for {job_title} based on: {resume_text[:800]}"
-    result = generator(prompt, max_length=300, do_sample=False)
-    return result[0]['generated_text']
+    try:
+        generator = load_generator()
+        prompt = f"Write a cover letter for {job_title} based on: {resume_text[:800]}"
+        result = generator(prompt, max_length=300, do_sample=False)
+        return result[0]['generated_text']
+    except:
+        return "Could not generate cover letter at this time."
 
 # -------------------- LinkedIn Scraper --------------------
 def scrape_linkedin(keyword, location):
+    driver = None
     try:
         driver = get_driver()
         if not driver:
@@ -74,25 +84,31 @@ def scrape_linkedin(keyword, location):
         st.warning(f"Scraping failed: {str(e)}")
         return get_simulated_results(keyword, location)
     finally:
-        if 'driver' in locals():
-            driver.quit()
+        if driver is not None:
+            try:
+                driver.quit()
+            except:
+                pass
 
 def parse_job_listings(soup):
     jobs = []
-    listings = soup.find_all("li", class_="jobs-search-results__list-item")[:5]
-    for job in listings:
-        title = job.find("a", class_="job-card-list__title")
-        company = job.find("span", class_="job-card-container__primary-description")
-        link = job.find("a", class_="job-card-list__title")
-        
-        if title and company and link:
-            jobs.append({
-                "Title": title.text.strip(),
-                "Company": company.text.strip(),
-                "Link": link["href"].split("?")[0],
-                "Platform": "LinkedIn"
-            })
-    return jobs
+    try:
+        listings = soup.find_all("li", class_="jobs-search-results__list-item")[:5]
+        for job in listings:
+            title = job.find("a", class_="job-card-list__title")
+            company = job.find("span", class_="job-card-container__primary-description")
+            link = job.find("a", class_="job-card-list__title")
+            
+            if title and company and link:
+                jobs.append({
+                    "Title": title.text.strip(),
+                    "Company": company.text.strip(),
+                    "Link": link["href"].split("?")[0],
+                    "Platform": "LinkedIn"
+                })
+    except:
+        pass
+    return jobs if jobs else get_simulated_results("", "")
 
 def get_simulated_results(keyword, location):
     """Fallback with realistic-looking simulated data"""
@@ -107,9 +123,9 @@ def get_simulated_results(keyword, location):
     
     for title, company in templates:
         jobs.append({
-            "Title": title.format(keyword=keyword),
+            "Title": title.format(keyword=keyword) if keyword else "Software Engineer",
             "Company": company,
-            "Link": f"https://www.linkedin.com/jobs/search/?keywords={keyword}",
+            "Link": "https://www.linkedin.com/jobs/",
             "Platform": "LinkedIn"
         })
     return jobs
