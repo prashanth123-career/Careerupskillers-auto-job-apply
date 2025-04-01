@@ -24,7 +24,9 @@ def get_driver():
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    service = Service(ChromeDriverManager().install())
+
+    # Fix for Streamlit Cloud: Explicit ChromeDriver version
+    service = Service(ChromeDriverManager(version="114.0.5735.90").install())
     return webdriver.Chrome(service=service, options=chrome_options)
 
 # -------------------- Resume Parser --------------------
@@ -91,7 +93,6 @@ def scrape_linkedin(keyword, location, time_filter, experience):
         time_posted = job.find("time", class_="job-search-card__listdate")
         if title_tag:
             job_title = title_tag.text.strip()
-            # Skip intern roles for experienced candidates
             if experience >= 2 and "intern" in job_title.lower():
                 continue
             jobs.append({
