@@ -1,42 +1,13 @@
 import streamlit as st
-import openai
-import PyPDF2
-import docx2txt
 import urllib.parse
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
 
-st.set_page_config(page_title="Smart Job Finder", page_icon="💼", layout="centered")
+st.set_page_config(page_title="All-in-One Job Finder", page_icon="💼", layout="centered")
 
-# ✅ Set OpenAI key safely
-openai.api_key = st.secrets["OPENAI_API_KEY"]
-
-# ✅ Resume Parser
-def parse_resume(file):
-    if file.name.endswith(".pdf"):
-        reader = PyPDF2.PdfReader(file)
-        return "\n".join([page.extract_text() for page in reader.pages if page.extract_text()])
-    elif file.name.endswith(".docx"):
-        return docx2txt.process(file)
-    return ""
-
-# ✅ Cover Letter with OpenAI (v1+ compatible)
-def generate_cover_letter(role, experience, skills):
-    prompt = f"""
-Write a short and professional cover letter for the role of {role}.
-The candidate has {experience} years of experience and skills: {skills}.
-Tone: Confident and formal.
-"""
-    # Updated to modern OpenAI API syntax
-    client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.5,
-        max_tokens=300
-    )
-    return response.choices[0].message.content.strip()
-
-# ✅ LinkedIn Search Link
-def linkedin_url(keyword, location, time_range):
+# ---- LinkedIn URL Builder ----
+def linkedin_url(keyword, location, time_filter):
     time_map = {
         "Past 24 hours": "r86400",
         "Past week": "r604800",
@@ -46,33 +17,124 @@ def linkedin_url(keyword, location, time_range):
     params = {
         "keywords": keyword,
         "location": location,
-        "f_TPR": time_map.get(time_range, "")
+        "f_TPR": time_map.get(time_filter, "")
     }
-    return f"https://www.linkedin.com/jobs/search/?{urllib.parse.urlencode({k:v for k,v in params.items() if v})}"
+    return f"https://www.linkedin.com/jobs/search/?{urllib.parse.urlencode({k: v for k, v in params.items() if v})}"
 
-# ✅ Streamlit UI
-st.title("💼 Smart Job Finder + AI Cover Letter")
+# ---- Job Scrapers ----
+def scrape_timesjobs(keyword, location):
+    try:
+        url = f"https://www.timesjobs.com/candidate/job-search.html?searchType=personalizedSearch&txtKeywords={urllib.parse.quote_plus(keyword)}&txtLocation={urllib.parse.quote_plus(location)}"
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, headers=headers, timeout=10)
+        soup = BeautifulSoup(response.content, "html.parser")
+        jobs = []
+        for job in soup.find_all("li", class_="clearfix job-bx wht-shd-bx")[:10]:
+            title = job.find("h2").text.strip()
+            company = job.find("h3", class_="joblist-comp-name").text.strip()
+            link = job.find("h2").a['href']
+            jobs.append({"Title": title, "Company": company, "Link": link, "Platform": "TimesJobs"})
+        return jobs
+    except:
+        return []
+
+def scrape_monster(keyword, location):
+    try:
+        url = f"https://www.monsterindia.com/srp/results?query={urllib.parse.quote_plus(keyword)}&locations={urllib.parse.quote_plus(location)}"
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, headers=headers, timeout=10)
+        soup = BeautifulSoup(response.content, "html.parser")
+        jobs = []
+        for div in soup.find_all("div", class_="card-apply-content")[:10]:
+            title = div.find("h3")
+            company = div.find("span", class_="company-name")
+            link = title.find("a")['href'] if title and title.find("a") else ""
+            if title and company:
+                jobs.append({
+                    "Title": title.text.strip(),
+                    "Company": company.text.strip(),
+                    "Link": link,
+                    "Platform": "Monster"
+                })
+        return jobs
+    except:
+        return []
+
+def scrape_naukri(keyword, location):
+    try:
+        url = f"https://www.naukri.com/{urllib.parse.quote_plus(keyword)}-jobs-in-{urllib.parse.quote_plus(location)}"
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, headers=headers, timeout=10)
+        soup = BeautifulSoup(response.content, "html.parser")
+        jobs = []
+        for card in soup.select(".jobTuple")[:10]:
+            title = card.select_one("a.title")
+            company = card.select_one("a.subTitle")
+            if title and company:
+                jobs.append({
+                    "Title": title.get_text(strip=True),
+                    "Company": company.text.strip(),
+                    "Link": title['href'],
+                    "Platform": "Naukri"
+                })
+        return jobs
+    except:
+        return []
+
+def scrape_indeed(keyword, location):
+    try:
+        url = f"https://www.indeed.com/jobs?q={urllib.parse.quote_plus(keyword)}&l={urllib.parse.quote_plus(location)}"
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, headers=headers, timeout=10)
+        soup = BeautifulSoup(response.content, "html.parser")
+        jobs = []
+        for div in soup.find_all("a", class_="tapItem")[:10]:
+            title = div.find("h2")
+            company = div.find("span", class_="companyName")
+            link = "https://www.indeed.com" + div.get("href") if div.get("href") else ""
+            if title and company:
+                jobs.append({
+                    "Title": title.text.strip(),
+                    "Company": company.text.strip(),
+                    "Link": link,
+                    "Platform": "Indeed"
+                })
+        return jobs
+    except:
+        return []
+
+# ---- Streamlit UI ----
+st.title("💼 All-in-One Job Finder")
+st.markdown("Search jobs across LinkedIn, Naukri, Monster, TimesJobs, and Indeed.")
 
 with st.form("job_form"):
-    role = st.text_input("Job Role", "Data Scientist")
-    experience = st.number_input("Experience (years)", min_value=0.0, max_value=30.0, value=2.5, step=0.1)
-    skills = st.text_input("Key Skills", "Python, Machine Learning, SQL")
-    location = st.text_input("Preferred Job Location", "Remote")
-    time_range = st.selectbox("Show jobs from", ["Past 24 hours", "Past week", "Past month", "Any time"])
-    resume = st.file_uploader("Upload Your Resume", type=["pdf", "docx"])
-    generate = st.checkbox("Generate AI Cover Letter", value=True)
-    submit = st.form_submit_button("🔍 Search Jobs")
+    keyword = st.text_input("Job Title / Keyword", value="Data Scientist")
+    location = st.text_input("Preferred Location", value="Remote")
+    time_filter = st.selectbox("LinkedIn Filter (time posted)", ["Past 24 hours", "Past week", "Past month", "Any time"])
+    submitted = st.form_submit_button("🔍 Search Jobs")
 
-if submit:
-    if not role or not skills or not resume:
-        st.error("Please fill all fields and upload a resume.")
+if submitted:
+    with st.spinner("Searching all platforms..."):
+        job_list = []
+
+        # 1. LinkedIn link (not scraped)
+        link = linkedin_url(keyword, location, time_filter)
+        st.subheader("🔗 LinkedIn Search")
+        st.markdown(f"[Click here to view LinkedIn Jobs]({link})")
+
+        # 2. Scraped Platforms
+        job_list += scrape_naukri(keyword, location)
+        job_list += scrape_monster(keyword, location)
+        job_list += scrape_timesjobs(keyword, location)
+        job_list += scrape_indeed(keyword, location)
+
+    if job_list:
+        st.subheader("📋 Jobs from Other Platforms")
+        for i, job in enumerate(job_list):
+            st.markdown(f"**{i+1}. {job['Title']}**  \n🧑‍💼 {job['Company']}  \n🌐 *{job['Platform']}*  \n🔗 [Apply Now]({job['Link']})")
+            st.markdown("---")
+
+        df = pd.DataFrame(job_list)
+        st.download_button("📥 Download Jobs as CSV", df.to_csv(index=False), file_name="job_list.csv", mime="text/csv")
     else:
-        resume_text = parse_resume(resume)
-        search_link = linkedin_url(role, location, time_range)
-        st.success("✅ Search Ready")
-        st.markdown(f"🔗 [Click here to view LinkedIn Jobs]({search_link})")
-
-        if generate:
-            with st.spinner("✍️ Generating Cover Letter..."):
-                cover = generate_cover_letter(role, experience, skills)
-                st.text_area("📩 Your AI-Generated Cover Letter", value=cover, height=300)
+        st.warning("No jobs found on Naukri, Monster, TimesJobs, or Indeed.")
