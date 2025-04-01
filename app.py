@@ -1,12 +1,10 @@
-# Smart LinkedIn Job Finder with Resume & GPT
+# Smart Cover Letter + Job Search App (Manual Input + LinkedIn Integration)
 import streamlit as st
 import re
 import time
 import urllib.parse
-from bs4 import BeautifulSoup
 from transformers import pipeline
-import docx2txt
-import PyPDF2
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -15,45 +13,17 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# -------------------- Page Setup --------------------
-st.set_page_config(page_title="Smart Job Finder", page_icon="💼", layout="wide")
-st.title("💼 Smart Job Finder Based on Your Resume")
-st.markdown("Upload your resume and let AI match you with relevant LinkedIn jobs.")
+# -------------------- Setup --------------------
+st.set_page_config(page_title="Smart Job & Cover Letter App", page_icon="✉️", layout="wide")
+st.title("✉️ AI Cover Letter & Job Finder")
+st.markdown("Fill in your career details manually. Let AI generate a cover letter & find jobs for you!")
 
-# -------------------- Load Free GPT Model --------------------
+# -------------------- GPT Model --------------------
 @st.cache_resource
 def load_gpt():
     return pipeline("text2text-generation", model="google/flan-t5-base")
 
-# -------------------- Resume Reader --------------------
-def parse_resume(file):
-    try:
-        if file.name.endswith(".pdf"):
-            reader = PyPDF2.PdfReader(file)
-            return " ".join([page.extract_text() or "" for page in reader.pages])
-        elif file.name.endswith(".docx"):
-            return docx2txt.process(file)
-    except:
-        return ""
-    return ""
-
-# -------------------- Extract Details from Resume --------------------
-def extract_resume_details(text, model):
-    prompt = f"""From the resume below, extract:
-1. Job Title or Designation
-2. Key Skills
-3. Short Job Description (max 30 words)
-
-Resume:
-{text[:1500]}
-"""
-    try:
-        output = model(prompt, max_length=200, do_sample=False)
-        return output[0]['generated_text']
-    except:
-        return "Could not extract details from resume."
-
-# -------------------- LinkedIn Scraping --------------------
+# -------------------- LinkedIn Job Scraper --------------------
 @st.cache_resource
 def get_driver():
     options = Options()
@@ -118,49 +88,70 @@ def parse_job_listings(soup, keyword, time_filter, location):
             })
     return jobs
 
-# -------------------- Streamlit UI --------------------
-with st.form("job_form"):
-    st.subheader("📄 Upload Your Resume")
-    resume_file = st.file_uploader("Choose your resume file", type=["pdf", "docx"])
+# -------------------- Competitor Companies --------------------
+def suggest_competitors(company):
+    competitors = {
+        "TCS": ["Infosys", "Wipro", "Cognizant"],
+        "Wipro": ["TCS", "HCL", "Capgemini"],
+        "Google": ["Microsoft", "Amazon", "Meta"],
+        "Amazon": ["Flipkart", "eBay", "Walmart"],
+        "Accenture": ["IBM", "Capgemini", "Deloitte"]
+    }
+    return competitors.get(company.strip(), ["Infosys", "TCS", "HCL"])
 
+# -------------------- Streamlit Form --------------------
+with st.form("manual_input"):
+    st.subheader("📌 Enter Your Career Details")
+    
     col1, col2 = st.columns(2)
     with col1:
-        location = st.text_input("🌍 Preferred Job Location", "Remote")
+        designation = st.text_input("Your Designation / Role", "Data Analyst")
+        experience = st.number_input("Years of Experience", 0, 50, 2)
     with col2:
-        time_filter = st.selectbox("🕒 Show Jobs Posted In", ["Past 24 hours", "Past week", "Past month", "Any time"], index=1)
+        company = st.text_input("Previous Company", "TCS")
+        location = st.text_input("Preferred Job Location", "Remote")
 
-    submitted = st.form_submit_button("🔍 Find Jobs")
+    skills = st.text_area("Your Technical Skills (comma-separated)", "Python, SQL, Power BI, Excel")
 
-# -------------------- After Submission --------------------
+    time_filter = st.selectbox("🕒 Show Jobs Posted In", ["Past 24 hours", "Past week", "Past month", "Any time"], index=1)
+
+    submitted = st.form_submit_button("✨ Generate Cover Letter & Find Jobs")
+
+# -------------------- Result --------------------
 if submitted:
-    if not resume_file:
-        st.warning("Please upload a resume file.")
+    if not designation or not skills:
+        st.warning("Please fill in your designation and skills.")
     else:
-        with st.spinner("Reading your resume and preparing search..."):
+        with st.spinner("Generating cover letter using AI..."):
             model = load_gpt()
-            resume_text = parse_resume(resume_file)
-            extracted = extract_resume_details(resume_text, model)
+            prompt = f"""Write a professional and concise cover letter for a {designation} role.
+The candidate has {experience} years of experience at {company}, and has skills: {skills}.
+"""
+            try:
+                output = model(prompt, max_length=400, do_sample=False)
+                cover_letter = output[0]['generated_text']
+            except:
+                cover_letter = "Could not generate cover letter."
 
-            st.success("📌 Resume Analyzed")
-            st.markdown("#### 📊 Extracted Details from Resume")
-            st.code(extracted)
+        st.success("✅ Cover Letter Generated")
+        with st.expander("✉️ AI Cover Letter"):
+            st.markdown(cover_letter)
 
-            # Extract keywords from resume details
-            keyword_match = re.findall(r'(?:Designation|Job Title):?\s*(.*)', extracted)
-            search_keyword = keyword_match[0] if keyword_match else "Data Analyst"
+        # Competitor companies
+        competitors = suggest_competitors(company)
+        with st.expander("🏢 Competitor Companies to Watch"):
+            st.markdown(", ".join(competitors))
 
-            st.info(f"🔄 Fetching jobs based on: **{search_keyword.strip()}**")
-
-        with st.spinner("Searching LinkedIn jobs..."):
-            jobs = scrape_linkedin_jobs(search_keyword.strip(), location, time_filter)
+        with st.spinner("🔍 Searching LinkedIn for job listings..."):
+            jobs = scrape_linkedin_jobs(designation, location, time_filter)
 
         if jobs:
-            st.success(f"✅ Found {len(jobs)} job listings")
+            st.success(f"🔗 Found {len(jobs)} job listings on LinkedIn")
             for i, job in enumerate(jobs):
                 with st.expander(f"{i+1}. {job['Job Title']} at {job['Company']} ({job['Posted']})"):
-                    st.markdown(f"[🔗 View & Apply on LinkedIn]({job['Apply Link']})")
+                    st.markdown(f"[Apply on LinkedIn]({job['Apply Link']})")
         else:
-            st.warning("No relevant jobs found. Try a different keyword or time filter.")
+            st.warning("No jobs found. Try different designation or time filter.")
 
 st.markdown("---")
-st.caption("Powered by CareerUpskillers • AI Resume + LinkedIn Scraper")
+st.caption("Built by CareerUpskillers • AI Tools for Job Seekers")
