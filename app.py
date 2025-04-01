@@ -1,8 +1,6 @@
-# Job Auto-Applier with Time Filters
+# Smart Resume-Based Job Finder
 import streamlit as st
-import urllib.parse
-from datetime import datetime, timedelta
-from bs4 import BeautifulSoup
+import re
 from transformers import pipeline
 import docx2txt
 import PyPDF2
@@ -12,11 +10,39 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import time
 from webdriver_manager.chrome import ChromeDriverManager
+import time
+import urllib.parse
 
 # -------------------- Setup --------------------
-st.set_page_config(page_title="Job Auto-Applier", page_icon="💼", layout="wide")
+st.set_page_config(page_title="Resume Job Matcher", page_icon="🔍", layout="wide")
+
+# -------------------- Resume Analyzer --------------------
+def extract_skills(resume_text):
+    """Extract skills from resume text"""
+    skills = []
+    # Common tech skills pattern
+    tech_skills = re.findall(r'\b(?:Python|Java|SQL|JavaScript|React|AWS|Machine Learning|Data Analysis)\b', resume_text, re.IGNORECASE)
+    # Extract job titles mentioned
+    titles = re.findall(r'\b(?:Engineer|Developer|Analyst|Specialist|Manager|Designer)\b', resume_text, re.IGNORECASE)
+    return list(set(tech_skills + titles))
+
+def suggest_job_titles(skills):
+    """Generate relevant job titles based on skills"""
+    mapping = {
+        'Python': ['Python Developer', 'Data Engineer'],
+        'Java': ['Java Developer', 'Backend Engineer'],
+        'SQL': ['Data Analyst', 'Database Administrator'],
+        'JavaScript': ['Frontend Developer', 'Full Stack Engineer'],
+        'React': ['React Developer', 'UI Engineer'],
+        'AWS': ['Cloud Engineer', 'DevOps Specialist'],
+        'Machine Learning': ['ML Engineer', 'Data Scientist'],
+        'Data Analysis': ['Business Analyst', 'Data Analyst']
+    }
+    titles = []
+    for skill in skills:
+        titles.extend(mapping.get(skill, []))
+    return list(set(titles))[:5]  # Return top 5 unique titles
 
 # -------------------- Selenium Setup --------------------
 @st.cache_resource
@@ -26,195 +52,91 @@ def get_driver():
         chrome_options.add_argument("--headless=new")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
-        
         service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-        return driver
-    except Exception as e:
-        st.warning("⚠️ ChromeDriver failed - using simulated results")
+        return webdriver.Chrome(service=service, options=chrome_options)
+    except:
         return None
 
-# -------------------- Resume Parser --------------------
-def parse_resume(file):
-    if not file:
-        return ""
-    try:
-        text = ""
-        if file.name.endswith(".pdf"):
-            reader = PyPDF2.PdfReader(file)
-            for page in reader.pages:
-                text += page.extract_text() or ""
-        elif file.name.endswith(".docx"):
-            text = docx2txt.process(file)
-        return text
-    except Exception as e:
-        st.warning(f"Error parsing resume: {str(e)}")
-        return ""
-
-# -------------------- AI Generator --------------------
-@st.cache_resource
-def load_generator():
-    return pipeline("text2text-generation", model="t5-small")
-
-def generate_cover_letter(resume_text, job_title):
-    try:
-        generator = load_generator()
-        prompt = f"Write a professional cover letter for {job_title} position based on these skills: {resume_text[:800]}"
-        result = generator(prompt, max_length=400, do_sample=False)
-        return result[0]['generated_text']
-    except:
-        return "Could not generate cover letter at this time."
-
-# -------------------- Job Scraper with Time Filters --------------------
-def get_linkedin_search_url(keyword, location, time_filter):
-    """Generate LinkedIn search URL with time filter"""
-    base_url = "https://www.linkedin.com/jobs/search/"
-    
-    # Convert time filter to LinkedIn's parameter
-    time_mapping = {
-        "Past 24 hours": "r86400",
-        "Past week": "r604800",
-        "Past month": "r2592000",
-        "Any time": ""
-    }
-    time_param = time_mapping.get(time_filter, "")
-    
+# -------------------- Job Scraper --------------------
+def get_search_url(job_title, location):
+    """Generate LinkedIn search URL"""
     params = {
-        "keywords": keyword,
-        "location": location if location.lower() != "remote" else "",
-        "f_TPR": time_param
+        "keywords": job_title,
+        "location": location if location.lower() != "remote" else ""
     }
-    
-    query_string = urllib.parse.urlencode(
-        {k: v for k, v in params.items() if v},
-        quote_via=urllib.parse.quote
-    )
-    return f"{base_url}?{query_string}"
+    query = urllib.parse.urlencode({k: v for k, v in params.items() if v})
+    return f"https://www.linkedin.com/jobs/search/?{query}"
 
-def scrape_linkedin(keyword, location, time_filter):
-    driver = None
+def scrape_jobs(job_title, location):
+    driver = get_driver()
+    if not driver:
+        return []  # Return empty if no driver
+    
     try:
-        driver = get_driver()
-        if not driver:
-            return get_simulated_results(keyword, location, time_filter)
-            
-        url = get_linkedin_search_url(keyword, location, time_filter)
+        url = get_search_url(job_title, location)
         driver.get(url)
+        time.sleep(3)  # Let page load
         
-        # Wait for filters to be applied
-        time.sleep(3)
+        # Extract job count
+        try:
+            count_element = driver.find_element(By.CLASS_NAME, "results-context-header__job-count")
+            job_count = count_element.text
+        except:
+            job_count = "multiple"
         
-        WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "jobs-search__results-list"))
-        )
-        
-        # Scroll to load more jobs
-        for _ in range(2):
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(2)
-        
-        soup = BeautifulSoup(driver.page_source, "html.parser")
-        return parse_job_listings(soup, keyword, time_filter)
-        
-    except Exception as e:
-        st.warning(f"Scraping failed: {str(e)}")
-        return get_simulated_results(keyword, location, time_filter)
+        return {
+            "title": job_title,
+            "count": job_count,
+            "url": url
+        }
     finally:
-        if driver is not None:
-            try:
-                driver.quit()
-            except:
-                pass
+        if driver:
+            driver.quit()
 
-def parse_job_listings(soup, keyword, time_filter):
-    jobs = []
-    try:
-        listings = soup.find_all("li", class_="jobs-search__results-list-item")[:5]
-        for job in listings:
-            title = job.find("a", class_="job-card-list__title")
-            time_posted = job.find("time", class_="job-search-card__listdate")
-            
-            if title:
-                job_title = title.text.strip()
-                if keyword.lower() in job_title.lower():
-                    jobs.append({
-                        "Title": job_title,
-                        "Time Posted": time_posted.text.strip() if time_posted else time_filter,
-                        "Link": get_linkedin_search_url(keyword, "", time_filter),
-                        "Platform": "LinkedIn"
-                    })
-    except:
-        pass
-    return jobs if jobs else get_simulated_results(keyword, "", time_filter)
-
-def get_simulated_results(keyword, location, time_filter):
-    """Fallback with time-aware simulated data"""
-    job_titles = [
-        f"Senior {keyword} Engineer",
-        f"{keyword} Developer",
-        f"Junior {keyword} Analyst",
-        f"Remote {keyword} Specialist",
-        f"{keyword} Consultant"
-    ]
-    
-    search_url = get_linkedin_search_url(keyword, location, time_filter)
-    
-    return [{
-        "Title": title,
-        "Time Posted": time_filter,
-        "Link": search_url,
-        "Platform": "LinkedIn"
-    } for title in job_titles]
-
-# -------------------- Streamlit UI with Time Filters --------------------
+# -------------------- Streamlit UI --------------------
 def main():
-    st.title("💼 Smart Job Finder with Time Filters")
-    st.markdown("Find recent job postings and generate customized cover letters")
+    st.title("🔍 Smart Resume Job Matcher")
+    st.markdown("Upload your resume to find matching job opportunities")
     
-    # User Input Section
-    with st.form("job_search"):
-        col1, col2 = st.columns(2)
-        with col1:
-            name = st.text_input("Your Name")
-            keyword = st.text_input("Job Title/Keywords", "Data Analyst")
-        with col2:
-            resume_file = st.file_uploader("Upload Resume (PDF/DOCX)", type=["pdf", "docx"])
-            location = st.text_input("Location", "Remote")
-        
-        # Time filter dropdown
-        time_filter = st.selectbox(
-            "Show jobs from",
-            ["Past 24 hours", "Past week", "Past month", "Any time"],
-            index=0
-        )
-        
-        generate_cl = st.checkbox("Generate Cover Letters", True)
-        submitted = st.form_submit_button("🔍 Find Jobs")
+    resume_file = st.file_uploader("Upload Resume (PDF/DOCX)", type=["pdf", "docx"])
+    location = st.text_input("Preferred Location", "Remote")
     
-    if submitted:
-        if not name or not resume_file:
-            st.warning("Please enter your name and upload a resume")
-        else:
-            with st.spinner(f"Searching {time_filter.lower()} jobs..."):
-                resume_text = parse_resume(resume_file)
-                jobs = scrape_linkedin(keyword, location, time_filter)
-                
-                if jobs:
-                    st.success(f"Found {len(jobs)} {time_filter.lower()} positions")
-                    for i, job in enumerate(jobs):
-                        with st.expander(f"{i+1}. {job['Title']} ({job['Time Posted']})"):
-                            st.markdown(f"[🔍 Search similar {time_filter.lower()} positions on LinkedIn]({job['Link']})")
-                            
-                            if generate_cl and resume_text:
-                                st.divider()
-                                st.subheader("AI-Generated Cover Letter")
-                                st.write(generate_cover_letter(resume_text, job['Title']))
-                else:
-                    st.warning(f"No {time_filter.lower()} jobs found. Try different keywords or time range.")
-
-    # Footer
-    st.markdown("---")
-    st.caption("© 2023 CareerConnect | Find fresh opportunities")
+    if st.button("Find Matching Jobs") and resume_file:
+        with st.spinner("Analyzing your resume..."):
+            # Parse resume
+            text = ""
+            if resume_file.name.endswith(".pdf"):
+                reader = PyPDF2.PdfReader(resume_file)
+                text = " ".join([page.extract_text() or "" for page in reader.pages])
+            else:
+                text = docx2txt.process(resume_file)
+            
+            # Extract skills and suggest jobs
+            skills = extract_skills(text)
+            suggested_jobs = suggest_job_titles(skills)
+            
+            if not suggested_jobs:
+                st.warning("Couldn't identify relevant skills in your resume")
+                return
+            
+            st.success(f"Based on your resume, we recommend searching for these positions:")
+            
+            # Display job matches
+            for job in suggested_jobs:
+                with st.expander(f"🧑‍💻 {job}"):
+                    result = scrape_jobs(job, location)
+                    if result:
+                        st.markdown(f"**{result['count']} jobs found**")
+                        st.markdown(f"[🔍 Search {job} positions on LinkedIn]({result['url']})")
+                    else:
+                        st.markdown(f"[🔍 Search {job} positions on LinkedIn]({get_search_url(job, location)})")
+            
+            # Show extracted skills
+            st.divider()
+            st.subheader("Skills Identified in Your Resume")
+            cols = st.columns(4)
+            for i, skill in enumerate(skills):
+                cols[i%4].success(f"• {skill}")
 
 if __name__ == "__main__":
     main()
