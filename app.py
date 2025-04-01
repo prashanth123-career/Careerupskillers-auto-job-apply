@@ -1,116 +1,126 @@
-# Enhanced Resume Analyzer with Free AI
+# LinkedIn Job Scraper with Time Filter
 import streamlit as st
-import re
-from transformers import pipeline
-import docx2txt
-import PyPDF2
 import urllib.parse
+from bs4 import BeautifulSoup
+import time
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 
-# -------------------- Setup --------------------
-st.set_page_config(page_title="AI Resume Analyzer", page_icon="🤖", layout="wide")
+# --------------- Streamlit Setup ----------------
+st.set_page_config(page_title="LinkedIn Job Scraper", page_icon="💼", layout="wide")
+st.title("💼 LinkedIn Job Scraper with Time Filters")
+st.markdown("Search and apply to latest jobs from LinkedIn based on your preferences.")
 
-# Load free AI models
+# --------------- Get Chrome Driver ---------------
 @st.cache_resource
-def load_models():
-    skill_extractor = pipeline("text2text-generation", model="facebook/bart-base")
-    job_matcher = pipeline("text-classification", model="distilbert-base-uncased") 
-    return skill_extractor, job_matcher
+def get_driver():
+    chrome_options = Options()
+    chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+    return driver
 
-# -------------------- Resume Analysis --------------------
-def extract_skills_ai(text, skill_extractor):
-    """Use AI to extract skills from text"""
-    prompt = f"Extract technical skills and job roles from this resume text: {text[:2000]}"
+# --------------- LinkedIn URL Builder ---------------
+def get_linkedin_search_url(keyword, location, time_filter):
+    base_url = "https://www.linkedin.com/jobs/search/"
+    time_mapping = {
+        "Past 24 hours": "r86400",
+        "Past week": "r604800",
+        "Past month": "r2592000",
+        "Any time": ""
+    }
+    time_param = time_mapping.get(time_filter, "")
+    params = {
+        "keywords": keyword,
+        "location": location if location.lower() != "remote" else "",
+        "f_TPR": time_param
+    }
+    query_string = urllib.parse.urlencode({k: v for k, v in params.items() if v})
+    return f"{base_url}?{query_string}"
+
+# --------------- Job Scraper ----------------------
+def scrape_linkedin_jobs(keyword, location, time_filter):
+    driver = get_driver()
     try:
-        result = skill_extractor(prompt, max_length=300, do_sample=False)
-        return parse_ai_output(result[0]['generated_text'])
-    except:
+        url = get_linkedin_search_url(keyword, location, time_filter)
+        driver.get(url)
+        time.sleep(3)
+
+        WebDriverWait(driver, 15).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "jobs-search__results-list"))
+        )
+
+        # Scroll to load more jobs
+        for _ in range(2):
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(2)
+
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+        return parse_listings(soup, keyword, time_filter, location)
+    except Exception as e:
+        st.warning(f"Scraping failed: {e}")
         return []
+    finally:
+        try:
+            driver.quit()
+        except:
+            pass
 
-def parse_ai_output(text):
-    """Parse AI output into skills list"""
-    skills = re.findall(r'\b(?:Python|Java|SQL|JavaScript|React|AWS|Azure|Machine Learning|Data Analysis|Data Science|Web Development|Cloud Computing)\b', text, re.IGNORECASE)
-    roles = re.findall(r'\b(?:Engineer|Developer|Analyst|Specialist|Manager|Designer|Scientist|Architect)\b', text, re.IGNORECASE)
-    return list(set(skills + roles))
+def parse_listings(soup, keyword, time_filter, location):
+    jobs = []
+    listings = soup.find_all("li", class_="jobs-search__results-list-item")[:10]
+    for job in listings:
+        title = job.find("a", class_="job-card-list__title")
+        company = job.find("h4", class_="job-card-container__company-name")
+        time_posted = job.find("time", class_="job-search-card__listdate")
 
-def suggest_jobs_ai(skills, job_matcher):
-    """Use AI to suggest matching jobs"""
-    if not skills:
-        return []
-    
-    prompt = f"Suggest 5 job titles that match these skills: {', '.join(skills)}"
-    try:
-        result = job_matcher(prompt, candidate_labels=[
-            "Software Engineer", "Data Analyst", "Web Developer", 
-            "Cloud Architect", "ML Engineer", "Product Manager",
-            "DevOps Engineer", "UX Designer", "Data Scientist"
-        ])
-        return [pred['label'] for pred in sorted(result, key=lambda x: x['score'], reverse=True)[:5]]
-    except:
-        return []
+        if title:
+            job_title = title.text.strip()
+            company_name = company.text.strip() if company else "N/A"
+            jobs.append({
+                "Job Title": job_title,
+                "Company": company_name,
+                "Time Posted": time_posted.text.strip() if time_posted else time_filter,
+                "Apply Link": get_linkedin_search_url(keyword, location, time_filter)
+            })
+    return jobs
 
-# -------------------- Streamlit UI --------------------
-def main():
-    st.title("🤖 AI-Powered Resume Analyzer")
-    st.markdown("Upload your resume to discover your best job matches")
-    
-    skill_extractor, job_matcher = load_models()
-    
-    resume_file = st.file_uploader("Upload Resume (PDF/DOCX)", type=["pdf", "docx"])
-    
-    if resume_file and st.button("Analyze My Resume"):
-        with st.spinner("AI is analyzing your resume..."):
-            # Parse resume text
-            text = ""
-            if resume_file.name.endswith(".pdf"):
-                reader = PyPDF2.PdfReader(resume_file)
-                text = " ".join([page.extract_text() or "" for page in reader.pages])
-            else:
-                text = docx2txt.process(resume_file)
-            
-            # Extract skills using AI
-            skills = extract_skills_ai(text, skill_extractor)
-            
-            if not skills:
-                st.error("Our AI couldn't identify specific skills. Try a more detailed resume.")
-                st.info("Common missing elements: Programming languages, tools, job titles")
-                return
-            
-            # Get job suggestions
-            suggested_jobs = suggest_jobs_ai(skills, job_matcher)
-            
-            # Display results
-            st.success("🎯 Here's what we found in your resume:")
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.subheader("Your Top Skills")
-                for skill in skills[:10]:
-                    st.markdown(f"- {skill}")
-                if len(skills) > 10:
-                    st.caption(f"+ {len(skills)-10} more skills")
-            
-            with col2:
-                st.subheader("Recommended Jobs")
-                for job in suggested_jobs:
-                    search_url = f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(job)}"
-                    st.markdown(f"- [{job}]({search_url})")
-            
-            # Show resume insights
-            st.divider()
-            st.subheader("AI Analysis Summary")
-            st.markdown("""
-            Based on your resume, you appear to have experience with:
-            - **{primary_skill}** and related technologies
-            - Roles like **{sample_role}**
-            - Approximately **{years} years** of experience
-            """.format(
-                primary_skill=skills[0] if skills else "technical fields",
-                sample_role=suggested_jobs[0] if suggested_jobs else "technical roles",
-                years=min(5, len(re.findall(r'\b(20\d{2})\b', text)))
-            )
-            
-            st.info("💡 Tip: Add more specific skills and technologies to improve matches")
+# --------------- Streamlit UI ----------------------
+with st.form("job_search_form"):
+    col1, col2 = st.columns(2)
+    with col1:
+        keyword = st.text_input("🔍 Job Keyword", "Data Analyst")
+    with col2:
+        location = st.text_input("📍 Location", "Remote")
 
-if __name__ == "__main__":
-    main()
+    time_filter = st.selectbox(
+        "🕒 Filter by Time Posted",
+        ["Past 24 hours", "Past week", "Past month", "Any time"]
+    )
+
+    submitted = st.form_submit_button("🔎 Search Jobs")
+
+# --------------- Display Results ----------------------
+if submitted:
+    with st.spinner("Fetching jobs from LinkedIn..."):
+        jobs = scrape_linkedin_jobs(keyword, location, time_filter)
+
+        if jobs:
+            st.success(f"✅ Found {len(jobs)} job listings")
+            for i, job in enumerate(jobs):
+                with st.expander(f"{i+1}. {job['Job Title']} at {job['Company']}"):
+                    st.markdown(f"**Posted:** {job['Time Posted']}")
+                    st.markdown(f"[🔗 View Job on LinkedIn]({job['Apply Link']})")
+        else:
+            st.warning("❌ No jobs found. Try changing your filters.")
+
+# --------------- Footer ----------------------
+st.markdown("---")
+st.caption("Made with 💻 by CareerUpskillers – Automate your job hunt easily.")
