@@ -37,16 +37,41 @@ def linkedin_url(keyword, location, time_filter, experience, remote_option, easy
 
     return f"https://www.linkedin.com/jobs/search/?{urllib.parse.urlencode({k: v for k, v in params.items() if v})}"
 
+# ---------------- Indeed Smart Filtered Link ----------------
+def indeed_url(keyword, location, country, salary=None):
+    domain_map = {
+        "USA": "www.indeed.com",
+        "UK": "uk.indeed.com",
+        "Canada": "ca.indeed.com",
+        "Australia": "au.indeed.com",
+        "India": "www.indeed.co.in"
+    }
+    
+    base_url = f"https://{domain_map.get(country, 'www.indeed.com')}/jobs"
+    params = {
+        "q": keyword,
+        "l": location
+    }
+    
+    # Only add salary parameter for supported countries
+    if salary and country != "India":
+        params["salary"] = salary
+    
+    return f"{base_url}?{urllib.parse.urlencode(params)}"
+
 # ---------------- Global Portals Generator ----------------
-def generate_job_links(keyword, location, country):
+def generate_job_links(keyword, location, country, salary=None):
     query = urllib.parse.quote_plus(keyword)
     loc = urllib.parse.quote_plus(location)
 
     portals = []
-
+    
+    # Generate Indeed URL with salary filter (except for India)
+    indeed_link = indeed_url(keyword, location, country, salary)
+    
     if country == "USA":
         portals = [
-            ("Indeed", f"https://www.indeed.com/jobs?q={query}&l={loc}"),
+            ("Indeed", indeed_link),
             ("Glassdoor", f"https://www.glassdoor.com/Job/jobs.htm?sc.keyword={query}&locKeyword={loc}"),
             ("Monster", f"https://www.monster.com/jobs/search/?q={query}&where={loc}"),
             ("ZipRecruiter", f"https://www.ziprecruiter.com/jobs-search?search={query}&location={loc}"),
@@ -57,7 +82,7 @@ def generate_job_links(keyword, location, country):
 
     elif country == "UK":
         portals = [
-            ("Indeed UK", f"https://uk.indeed.com/jobs?q={query}&l={loc}"),
+            ("Indeed UK", indeed_link),
             ("Reed", f"https://www.reed.co.uk/jobs/{query}-jobs-in-{location.replace(' ', '-') }"),
             ("Monster UK", f"https://www.monster.co.uk/jobs/search/?q={query}&where={loc}"),
             ("TotalJobs", f"https://www.totaljobs.com/jobs/{query}/in-{location.replace(' ', '-')}"),
@@ -69,7 +94,7 @@ def generate_job_links(keyword, location, country):
     elif country == "India":
         portals = [
             ("Naukri", f"https://www.naukri.com/{keyword.replace(' ', '-')}-jobs-in-{location.replace(' ', '-')}"),
-            ("Indeed India", f"https://www.indeed.co.in/jobs?q={query}&l={loc}"),
+            ("Indeed India", indeed_link),
             ("Monster India", f"https://www.monsterindia.com/srp/results?query={query}&locations={loc}"),
             ("TimesJobs", f"https://www.timesjobs.com/candidate/job-search.html?txtKeywords={query}&txtLocation={loc}"),
             ("Shine", f"https://www.shine.com/job-search/{keyword.replace(' ', '-')}-jobs-in-{location.replace(' ', '-')}"),
@@ -79,7 +104,7 @@ def generate_job_links(keyword, location, country):
     elif country == "Australia":
         portals = [
             ("Seek", f"https://www.seek.com.au/{keyword.replace(' ', '-')}-jobs/in-{location.replace(' ', '-')}"),
-            ("Indeed AU", f"https://au.indeed.com/jobs?q={query}&l={loc}"),
+            ("Indeed AU", indeed_link),
             ("JobActive", f"https://www.workforceaustralia.gov.au/jobs?keyword={query}&location={loc}"),
             ("CareerOne", f"https://www.careerone.com.au/jobs?q={query}&where={loc}"),
             ("Adzuna AU", f"https://www.adzuna.com.au/search?q={query}&location={loc}"),
@@ -88,7 +113,7 @@ def generate_job_links(keyword, location, country):
 
     elif country == "Canada":
         portals = [
-            ("Indeed CA", f"https://ca.indeed.com/jobs?q={query}&l={loc}"),
+            ("Indeed CA", indeed_link),
             ("Job Bank", f"https://www.jobbank.gc.ca/jobsearch/jobsearch?searchstring={query}&locationstring={loc}"),
             ("Monster Canada", f"https://www.monster.ca/jobs/search/?q={query}&where={loc}"),
             ("Workopolis", f"https://www.workopolis.com/jobsearch/find-jobs?ak={query}&l={loc}"),
@@ -99,7 +124,7 @@ def generate_job_links(keyword, location, country):
 
     else:  # Others
         portals = [
-            ("Indeed", f"https://www.indeed.com/jobs?q={query}&l={loc}"),
+            ("Indeed", indeed_link),
             ("Google Jobs", f"https://www.google.com/search?q={query}+jobs+in+{loc}")
         ]
 
@@ -113,6 +138,13 @@ with st.form("job_form"):
     keyword = st.text_input("Job Title / Keywords", "Data Scientist")
     location = st.text_input("Preferred Location", "Remote")
     country = st.selectbox("🌐 Country", ["USA", "UK", "India", "Australia", "Canada", "Others"])
+    
+    # Salary filter only shown for supported countries
+    if country != "India":
+        salary = st.number_input("💰 Minimum Salary (per year)", min_value=0, value=0, step=10000)
+    else:
+        salary = None
+    
     time_filter = st.selectbox("📅 LinkedIn Date Posted", ["Past 24 hours", "Past week", "Past month", "Any time"])
     experience = st.selectbox("📈 Experience Level", ["Any", "Internship", "Entry level", "Associate", "Mid-Senior level", "Director"])
     remote_option = st.selectbox("🏢 Work Type", ["Any", "Remote", "On-site", "Hybrid"])
@@ -125,7 +157,7 @@ if submitted:
     st.markdown(f"✅ [Open LinkedIn Search]({linkedin_link})")
 
     st.subheader(f"🌐 Job Portals in {country}")
-    for name, url in generate_job_links(keyword, location, country):
+    for name, url in generate_job_links(keyword, location, country, salary if salary else None):
         st.markdown(f"- 🔗 [{name}]({url})")
 
     st.success("🎯 All job search links generated successfully!")
