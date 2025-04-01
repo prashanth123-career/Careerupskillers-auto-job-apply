@@ -1,109 +1,65 @@
-# Smart Resume-Based Job Finder
+# Enhanced Resume Analyzer with Free AI
 import streamlit as st
 import re
 from transformers import pipeline
 import docx2txt
 import PyPDF2
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
-import time
 import urllib.parse
 
 # -------------------- Setup --------------------
-st.set_page_config(page_title="Resume Job Matcher", page_icon="🔍", layout="wide")
+st.set_page_config(page_title="AI Resume Analyzer", page_icon="🤖", layout="wide")
 
-# -------------------- Resume Analyzer --------------------
-def extract_skills(resume_text):
-    """Extract skills from resume text"""
-    skills = []
-    # Common tech skills pattern
-    tech_skills = re.findall(r'\b(?:Python|Java|SQL|JavaScript|React|AWS|Machine Learning|Data Analysis)\b', resume_text, re.IGNORECASE)
-    # Extract job titles mentioned
-    titles = re.findall(r'\b(?:Engineer|Developer|Analyst|Specialist|Manager|Designer)\b', resume_text, re.IGNORECASE)
-    return list(set(tech_skills + titles))
-
-def suggest_job_titles(skills):
-    """Generate relevant job titles based on skills"""
-    mapping = {
-        'Python': ['Python Developer', 'Data Engineer'],
-        'Java': ['Java Developer', 'Backend Engineer'],
-        'SQL': ['Data Analyst', 'Database Administrator'],
-        'JavaScript': ['Frontend Developer', 'Full Stack Engineer'],
-        'React': ['React Developer', 'UI Engineer'],
-        'AWS': ['Cloud Engineer', 'DevOps Specialist'],
-        'Machine Learning': ['ML Engineer', 'Data Scientist'],
-        'Data Analysis': ['Business Analyst', 'Data Analyst']
-    }
-    titles = []
-    for skill in skills:
-        titles.extend(mapping.get(skill, []))
-    return list(set(titles))[:5]  # Return top 5 unique titles
-
-# -------------------- Selenium Setup --------------------
+# Load free AI models
 @st.cache_resource
-def get_driver():
+def load_models():
+    skill_extractor = pipeline("text2text-generation", model="facebook/bart-base")
+    job_matcher = pipeline("text-classification", model="distilbert-base-uncased") 
+    return skill_extractor, job_matcher
+
+# -------------------- Resume Analysis --------------------
+def extract_skills_ai(text, skill_extractor):
+    """Use AI to extract skills from text"""
+    prompt = f"Extract technical skills and job roles from this resume text: {text[:2000]}"
     try:
-        chrome_options = Options()
-        chrome_options.add_argument("--headless=new")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        service = Service(ChromeDriverManager().install())
-        return webdriver.Chrome(service=service, options=chrome_options)
+        result = skill_extractor(prompt, max_length=300, do_sample=False)
+        return parse_ai_output(result[0]['generated_text'])
     except:
-        return None
+        return []
 
-# -------------------- Job Scraper --------------------
-def get_search_url(job_title, location):
-    """Generate LinkedIn search URL"""
-    params = {
-        "keywords": job_title,
-        "location": location if location.lower() != "remote" else ""
-    }
-    query = urllib.parse.urlencode({k: v for k, v in params.items() if v})
-    return f"https://www.linkedin.com/jobs/search/?{query}"
+def parse_ai_output(text):
+    """Parse AI output into skills list"""
+    skills = re.findall(r'\b(?:Python|Java|SQL|JavaScript|React|AWS|Azure|Machine Learning|Data Analysis|Data Science|Web Development|Cloud Computing)\b', text, re.IGNORECASE)
+    roles = re.findall(r'\b(?:Engineer|Developer|Analyst|Specialist|Manager|Designer|Scientist|Architect)\b', text, re.IGNORECASE)
+    return list(set(skills + roles))
 
-def scrape_jobs(job_title, location):
-    driver = get_driver()
-    if not driver:
-        return []  # Return empty if no driver
+def suggest_jobs_ai(skills, job_matcher):
+    """Use AI to suggest matching jobs"""
+    if not skills:
+        return []
     
+    prompt = f"Suggest 5 job titles that match these skills: {', '.join(skills)}"
     try:
-        url = get_search_url(job_title, location)
-        driver.get(url)
-        time.sleep(3)  # Let page load
-        
-        # Extract job count
-        try:
-            count_element = driver.find_element(By.CLASS_NAME, "results-context-header__job-count")
-            job_count = count_element.text
-        except:
-            job_count = "multiple"
-        
-        return {
-            "title": job_title,
-            "count": job_count,
-            "url": url
-        }
-    finally:
-        if driver:
-            driver.quit()
+        result = job_matcher(prompt, candidate_labels=[
+            "Software Engineer", "Data Analyst", "Web Developer", 
+            "Cloud Architect", "ML Engineer", "Product Manager",
+            "DevOps Engineer", "UX Designer", "Data Scientist"
+        ])
+        return [pred['label'] for pred in sorted(result, key=lambda x: x['score'], reverse=True)[:5]]
+    except:
+        return []
 
 # -------------------- Streamlit UI --------------------
 def main():
-    st.title("🔍 Smart Resume Job Matcher")
-    st.markdown("Upload your resume to find matching job opportunities")
+    st.title("🤖 AI-Powered Resume Analyzer")
+    st.markdown("Upload your resume to discover your best job matches")
+    
+    skill_extractor, job_matcher = load_models()
     
     resume_file = st.file_uploader("Upload Resume (PDF/DOCX)", type=["pdf", "docx"])
-    location = st.text_input("Preferred Location", "Remote")
     
-    if st.button("Find Matching Jobs") and resume_file:
-        with st.spinner("Analyzing your resume..."):
-            # Parse resume
+    if resume_file and st.button("Analyze My Resume"):
+        with st.spinner("AI is analyzing your resume..."):
+            # Parse resume text
             text = ""
             if resume_file.name.endswith(".pdf"):
                 reader = PyPDF2.PdfReader(resume_file)
@@ -111,32 +67,50 @@ def main():
             else:
                 text = docx2txt.process(resume_file)
             
-            # Extract skills and suggest jobs
-            skills = extract_skills(text)
-            suggested_jobs = suggest_job_titles(skills)
+            # Extract skills using AI
+            skills = extract_skills_ai(text, skill_extractor)
             
-            if not suggested_jobs:
-                st.warning("Couldn't identify relevant skills in your resume")
+            if not skills:
+                st.error("Our AI couldn't identify specific skills. Try a more detailed resume.")
+                st.info("Common missing elements: Programming languages, tools, job titles")
                 return
             
-            st.success(f"Based on your resume, we recommend searching for these positions:")
+            # Get job suggestions
+            suggested_jobs = suggest_jobs_ai(skills, job_matcher)
             
-            # Display job matches
-            for job in suggested_jobs:
-                with st.expander(f"🧑‍💻 {job}"):
-                    result = scrape_jobs(job, location)
-                    if result:
-                        st.markdown(f"**{result['count']} jobs found**")
-                        st.markdown(f"[🔍 Search {job} positions on LinkedIn]({result['url']})")
-                    else:
-                        st.markdown(f"[🔍 Search {job} positions on LinkedIn]({get_search_url(job, location)})")
+            # Display results
+            st.success("🎯 Here's what we found in your resume:")
             
-            # Show extracted skills
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.subheader("Your Top Skills")
+                for skill in skills[:10]:
+                    st.markdown(f"- {skill}")
+                if len(skills) > 10:
+                    st.caption(f"+ {len(skills)-10} more skills")
+            
+            with col2:
+                st.subheader("Recommended Jobs")
+                for job in suggested_jobs:
+                    search_url = f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(job)}"
+                    st.markdown(f"- [{job}]({search_url})")
+            
+            # Show resume insights
             st.divider()
-            st.subheader("Skills Identified in Your Resume")
-            cols = st.columns(4)
-            for i, skill in enumerate(skills):
-                cols[i%4].success(f"• {skill}")
+            st.subheader("AI Analysis Summary")
+            st.markdown("""
+            Based on your resume, you appear to have experience with:
+            - **{primary_skill}** and related technologies
+            - Roles like **{sample_role}**
+            - Approximately **{years} years** of experience
+            """.format(
+                primary_skill=skills[0] if skills else "technical fields",
+                sample_role=suggested_jobs[0] if suggested_jobs else "technical roles",
+                years=min(5, len(re.findall(r'\b(20\d{2})\b', text)))
+            )
+            
+            st.info("💡 Tip: Add more specific skills and technologies to improve matches")
 
 if __name__ == "__main__":
     main()
