@@ -7,3 +7,5 @@ pandas
 docx2txt
 PyPDF2
 selenium
+webdriver-manager==4.0.2
+
