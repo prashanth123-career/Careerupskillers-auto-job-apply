@@ -161,3 +161,13 @@ if submitted:
         st.markdown(f"- 🔗 [{name}]({url})")
 
     st.success("🎯 All job search links generated successfully!")
+    
+    # Career Counseling CTA
+    st.markdown("---")
+    st.markdown("""
+    ### Need help deciding your career path?
+    Get free personalized career counseling from our AI Career Advisor!
+    
+    [👉 Get Free Career Counseling Now](https://careerupskillers-ai-advisor-d8vugggkkncjpxirbrcbx6.streamlit.app/)
+    """)
+    st.markdown("---")
