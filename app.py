@@ -25,7 +25,9 @@ Write a short and professional cover letter for the role of {role}.
 The candidate has {experience} years of experience and skills: {skills}.
 Tone: Confident and formal.
 """
-    response = openai.ChatCompletion.create(
+    # Updated to modern OpenAI API syntax
+    client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+    response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.5,
