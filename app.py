@@ -115,7 +115,7 @@ else:
             country = st.selectbox("Country", ["USA", "UK", "India", "UAE", "Germany", "Canada", "Australia"])
         with col2:
             time_filter = st.selectbox("Date Posted", ["Past month", "Past week", "Past 24 hours", "Any time"])
-            experience = st.selectbox("Experience", ["Any", "Entry level", "Mid-Senior level", "Director"])
+            experience = st.selectbox("Experience Level", ["Any", "Entry level", "Mid-Senior level", "Director"])
             language = st.selectbox("Language", list(LANGUAGES.keys()))
 
         if st.form_submit_button("🔍 Find Jobs"):
