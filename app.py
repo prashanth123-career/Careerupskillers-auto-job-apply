@@ -4,6 +4,9 @@ import streamlit as st
 import urllib.parse
 from datetime import datetime
 
+# ✅ Must be first Streamlit command
+st.set_page_config(page_title="🌍 Global AI Job Finder", page_icon="🌎", layout="centered")
+
 # Hide Streamlit header and footer
 hide_st_style = """
     <style>
