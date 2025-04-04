@@ -1,127 +1,142 @@
-# ✅ app.py (fully merged single script with job finder, interview prep, and courses)
-
 import streamlit as st
 import urllib.parse
 from datetime import datetime
 
-# Hide Streamlit header and footer
-st.markdown("""
-    <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    </style>
-""", unsafe_allow_html=True)
+# --- App Configuration ---
+st.set_page_config(
+    page_title="🌍 AI Career Suite", 
+    page_icon="🚀", 
+    layout="wide"
+)
 
-st.set_page_config(page_title="🌍 Global AI Career Hub", page_icon="🚀", layout="wide")
-
-# ---------------- Sidebar Navigation ----------------
-st.sidebar.title("🌍 CareerUpskillers")
-page = st.sidebar.radio("Choose Section", ["AI Job Finder", "Interview Preparation", "Free Courses"])
-
-# ---------------- Constants ----------------
-LANGUAGES = {
-    "English": "en", "Arabic": "ar", "Hindi": "hi", "German": "de",
-    "French": "fr", "Spanish": "es", "Chinese": "zh"
-}
-
-JOB_RESOURCES = {
-    "Data Scientist": {
-        "interview": {
-            "free": [
-                ("📹 Data Science Interview Guide (YouTube)", "https://youtu.be/r4ofQ8X0Xq0"),
-                ("📚 StrataScratch (450+ Problems)", "https://www.stratascratch.com"),
-                ("💻 LeetCode Data Science Questions", "https://leetcode.com/explore/learn/card/data-structure/")
-            ],
-            "paid": [
-                ("🎓 Data Science Interview Prep (Udemy)", "https://www.udemy.com/course/data-science-interview-prep/"),
-                ("📊 Interview Cake (Full Course)", "https://www.interviewcake.com/data-science-interview-questions")
-            ]
+# --- Constants ---
+PLATFORMS = {
+    "Interview Preparation": {
+        "YouTube": {
+            "url": "https://www.youtube.com/results",
+            "params": {
+                "search_query": "{query} interview preparation",
+                "sp": "CAI%253D"  # Sort by relevance
+            }
         },
-        "courses": {
-            "free": [
-                ("📚 Google Data Analytics (Coursera)", "https://www.coursera.org/professional-certificates/google-data-analytics"),
-                ("📈 Kaggle Learn (Interactive)", "https://www.kaggle.com/learn/overview"),
-                ("🐍 Python for Data Science (freeCodeCamp)", "https://www.freecodecamp.org/news/python-for-data-science-course/")
-            ]
+        "LeetCode": {
+            "url": "https://leetcode.com/problemset/all/",
+            "params": {
+                "search": "{query}",
+                "topicSlugs": "array"  # Default technical topic
+            }
+        },
+        "Glassdoor": {
+            "url": "https://www.glassdoor.com/Interview/index.htm",
+            "params": {
+                "keyword": "{query}"
+            }
         }
     },
-    "AI Engineer": {
-        "interview": {
-            "free": [
-                ("📹 AI System Design (YouTube)", "https://youtu.be/qiWhe4jzx0c"),
-                ("💻 AI Interview Questions (GitHub)", "https://github.com/Developer-Y/ai-interview-questions"),
-                ("📚 ML Cheatsheets", "https://github.com/afshinea/stanford-cs-229-machine-learning")
-            ],
-            "paid": [
-                ("🎓 Grokking AI Interviews (Educative)", "https://www.educative.io/courses/grokking-ai-software-engineer-interview"),
-                ("🤖 Interview Kickstart AI Course", "https://www.interviewkickstart.com/courses/ai-ml-course")
-            ]
+    "Free Courses": {
+        "Coursera": {
+            "url": "https://www.coursera.org/search",
+            "params": {
+                "query": "{query}",
+                "productDifficultyLevel": "beginner",
+                "productType": "courses"
+            }
         },
-        "courses": {
-            "free": [
-                ("🧠 Fast.ai (Practical DL)", "https://course.fast.ai"),
-                ("🤖 Andrew Ng's ML (Coursera)", "https://www.coursera.org/learn/machine-learning"),
-                ("🦾 Hugging Face Course", "https://huggingface.co/course")
-            ]
+        "edX": {
+            "url": "https://www.edx.org/search",
+            "params": {
+                "q": "{query}",
+                "subject": "Computer Science"
+            }
+        },
+        "freeCodeCamp": {
+            "url": "https://www.freecodecamp.org/news/search/",
+            "params": {
+                "query": "{query}"
+            }
         }
     }
 }
 
-# ---------------- Helper Functions ----------------
-def show_interview_resources(job):
-    st.subheader(f"🎤 {job} Interview Preparation")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("### 🎁 Free Resources")
-        if job in JOB_RESOURCES:
-            for name, url in JOB_RESOURCES[job]["interview"]["free"]:
-                st.markdown(f"🔗 [{name}]({url})")
-    with col2:
-        st.markdown("### 💎 Premium Resources")
-        if job in JOB_RESOURCES:
-            for name, url in JOB_RESOURCES[job]["interview"]["paid"]:
-                st.markdown(f"🔗 [{name}]({url})")
+# --- URL Builder Functions ---
+def build_search_url(base_url, params, query):
+    """Constructs a search URL with parameters"""
+    formatted_params = {}
+    for key, value in params.items():
+        formatted_params[key] = value.format(query=urllib.parse.quote(query))
+    return f"{base_url}?{urllib.parse.urlencode(formatted_params)}"
 
-def show_course_resources(job):
-    st.subheader(f"🎓 Free Courses for {job}")
-    if job in JOB_RESOURCES:
-        for name, url in JOB_RESOURCES[job]["courses"]["free"]:
-            st.markdown(f"🔗 [{name}]({url})")
-    st.markdown("### 🔍 More:")
-    st.markdown(f"🔗 [YouTube {job} Tutorials](https://www.youtube.com/results?search_query={urllib.parse.quote(job)}+tutorial)")
-    st.markdown(f"🔗 [Coursera {job}](https://www.coursera.org/search?query={urllib.parse.quote(job)})")
+def linkedin_jobs_url(keyword, location, filters):
+    """LinkedIn job search with UI parameters"""
+    params = {
+        "keywords": keyword,
+        "location": location,
+        "f_TPR": filters.get("time", ""),
+        "f_E": filters.get("experience", ""),
+        "f_WT": filters.get("work_type", "")
+    }
+    return f"https://www.linkedin.com/jobs/search/?{urllib.parse.urlencode({k: v for k, v in params.items() if v})}"
 
-# ---------------- Routes ----------------
-if page == "Interview Preparation":
-    st.title("🎤 AI Interview Preparation")
-    job = st.selectbox("Choose Job Role", list(JOB_RESOURCES.keys()))
-    show_interview_resources(job)
-
-elif page == "Free Courses":
-    st.title("🎓 Free AI/ML Courses")
-    job = st.selectbox("Choose a Learning Path", list(JOB_RESOURCES.keys()))
-    show_course_resources(job)
-
-else:
-    st.title("🌍 Global AI Job Finder")
-    st.markdown("🔎 Enter your job preferences to discover global job opportunities.")
-
+# --- UI Components ---
+def show_job_search():
+    st.title("🔍 AI Job Search")
+    
     with st.form("job_form"):
         col1, col2 = st.columns(2)
         with col1:
-            keyword = st.text_input("Job Title", "Data Scientist")
+            role = st.text_input("Job Role", "Data Scientist")
             location = st.text_input("Location", "Remote")
-            country = st.selectbox("Country", ["USA", "UK", "India", "UAE", "Germany", "Canada", "Australia"])
+            country = st.selectbox("Country", ["USA", "India", "UK", "UAE"])
+        
         with col2:
-            time_filter = st.selectbox("Date Posted", ["Past month", "Past week", "Past 24 hours", "Any time"])
-            experience = st.selectbox("Experience", ["Any", "Entry level", "Mid-Senior level", "Director"])
-            language = st.selectbox("Language", list(LANGUAGES.keys()))
+            time_filter = st.selectbox("Posted", ["Past week", "Past month", "Any time"])
+            exp_level = st.selectbox("Experience", ["Entry", "Mid", "Senior"])
+        
+        if st.form_submit_button("Search Jobs"):
+            filters = {
+                "time": {"Past week": "r604800", "Past month": "r2592000"}.get(time_filter, ""),
+                "experience": {"Entry": "2", "Mid": "4", "Senior": "5"}.get(exp_level, ""),
+                "work_type": "2"  # Remote
+            }
+            
+            st.success("Generated Search Links:")
+            st.markdown(f"""
+            - 🔗 [LinkedIn Jobs]({linkedin_jobs_url(role, location, filters)})
+            - 🔗 [Indeed Jobs](https://www.indeed.com/jobs?q={urllib.parse.quote(role)}&l={urllib.parse.quote(location)})
+            - 🔗 [Google Jobs](https://www.google.com/search?q={urllib.parse.quote(role)}+jobs+in+{urllib.parse.quote(location)}&ibp=htl;jobs)
+            """)
 
-        if st.form_submit_button("🔍 Find Jobs"):
-            lang_code = LANGUAGES[language]
-            st.subheader("🔗 Smart Job Links")
-            search_url = f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote_plus(keyword)}&location={urllib.parse.quote_plus(location)}&hl={lang_code}"
-            st.markdown(f"✅ [LinkedIn Job Search]({search_url})")
-            google_url = f"https://www.google.com/search?q={urllib.parse.quote_plus(keyword)}+jobs+in+{urllib.parse.quote_plus(location)}&ibp=htl;jobs"
-            st.markdown(f"✅ [Google Job Listings]({google_url})")
+def show_resource_search(resource_type):
+    st.title(f"🎓 {resource_type} Search")
+    
+    with st.form(f"{resource_type.lower()}_form"):
+        topic = st.text_input("What do you want to learn?", "Machine Learning" if resource_type == "Free Courses" else "Data Structures")
+        
+        if st.form_submit_button(f"Find {resource_type}"):
+            st.success(f"Best {resource_type} Resources:")
+            
+            for platform, config in PLATFORMS[resource_type].items():
+                url = build_search_url(config["url"], config["params"], topic)
+                st.markdown(f"- 🔗 [{platform}]({url})")
+            
+            if resource_type == "Interview Preparation":
+                st.markdown(f"""
+                Additional Resources:
+                - 📚 [Recommended Books](https://www.amazon.com/s?k={urllib.parse.quote(topic)}+interview+prep)
+                - 💻 [Practice Tests](https://www.testdome.com/tests?skill={urllib.parse.quote(topic.lower())})
+                """)
+
+# --- Main App ---
+def main():
+    st.sidebar.title("🌍 Navigation")
+    tab = st.sidebar.radio("Go to", ["Job Search", "Interview Preparation", "Free Courses"])
+    
+    if tab == "Job Search":
+        show_job_search()
+    elif tab == "Interview Preparation":
+        show_resource_search("Interview Preparation")
+    else:
+        show_resource_search("Free Courses")
+
+if __name__ == "__main__":
+    main()
