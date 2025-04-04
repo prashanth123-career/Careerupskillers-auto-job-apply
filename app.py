@@ -1,9 +1,15 @@
 import streamlit as st
 import urllib.parse
 
-st.set_page_config(page_title="🌍 Global AI Job Finder", page_icon="🌎", layout="centered")
+# --- App Configuration ---
+st.set_page_config(
+    page_title="🌍 Global AI Career Hub", 
+    page_icon="🚀", 
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-# Language options (ISO 639-1 codes)
+# --- Constants ---
 LANGUAGES = {
     "English": "en",
     "Arabic": "ar",
@@ -14,7 +20,50 @@ LANGUAGES = {
     "Chinese": "zh"
 }
 
-# ---------------- LinkedIn Smart Filtered Link ----------------
+JOB_RESOURCES = {
+    "Data Scientist": {
+        "interview": {
+            "free": [
+                ("📹 Data Science Interview Guide (YouTube)", "https://youtu.be/r4ofQ8X0Xq0"),
+                ("📚 StrataScratch (450+ Problems)", "https://www.stratascratch.com"),
+                ("💻 LeetCode Data Science Questions", "https://leetcode.com/explore/learn/card/data-structure/")
+            ],
+            "paid": [
+                ("🎓 Data Science Interview Prep (Udemy)", "https://www.udemy.com/course/data-science-interview-prep/"),
+                ("📊 Interview Cake (Full Course)", "https://www.interviewcake.com/data-science-interview-questions")
+            ]
+        },
+        "courses": {
+            "free": [
+                ("📚 Google Data Analytics (Coursera)", "https://www.coursera.org/professional-certificates/google-data-analytics"),
+                ("📈 Kaggle Learn (Interactive)", "https://www.kaggle.com/learn/overview"),
+                ("🐍 Python for Data Science (freeCodeCamp)", "https://www.freecodecamp.org/news/python-for-data-science-course/")
+            ]
+        }
+    },
+    "AI Engineer": {
+        "interview": {
+            "free": [
+                ("📹 AI System Design (YouTube)", "https://youtu.be/qiWhe4jzx0c"),
+                ("💻 AI Interview Questions (GitHub)", "https://github.com/Developer-Y/ai-interview-questions"),
+                ("📚 ML Cheatsheets", "https://github.com/afshinea/stanford-cs-229-machine-learning")
+            ],
+            "paid": [
+                ("🎓 Grokking AI Interviews (Educative)", "https://www.educative.io/courses/grokking-ai-software-engineer-interview"),
+                ("🤖 Interview Kickstart AI Course", "https://www.interviewkickstart.com/courses/ai-ml-course")
+            ]
+        },
+        "courses": {
+            "free": [
+                ("🧠 Fast.ai (Practical DL)", "https://course.fast.ai"),
+                ("🤖 Andrew Ng's ML (Coursera)", "https://www.coursera.org/learn/machine-learning"),
+                ("🦾 Hugging Face Course", "https://huggingface.co/course")
+            ]
+        }
+    }
+}
+
+# --- Helper Functions ---
 def linkedin_url(keyword, location, time_filter, experience, remote_option, easy_apply, language="en"):
     time_map = {
         "Past 24 hours": "r86400",
@@ -44,12 +93,10 @@ def linkedin_url(keyword, location, time_filter, experience, remote_option, easy
         "f_E": exp_map.get(experience, ""),
         "f_WT": remote_map.get(remote_option, ""),
         "f_AL": "true" if easy_apply else "",
-        "hl": language  # Language parameter
+        "hl": language
     }
-
     return f"https://www.linkedin.com/jobs/search/?{urllib.parse.urlencode({k: v for k, v in params.items() if v})}"
 
-# ---------------- Indeed Smart Filtered Link ----------------
 def indeed_url(keyword, location, country, salary=None, language="en"):
     domain_map = {
         "USA": "www.indeed.com",
@@ -61,20 +108,16 @@ def indeed_url(keyword, location, country, salary=None, language="en"):
         "Germany": "de.indeed.com",
         "New Zealand": "nz.indeed.com"
     }
-    
     base_url = f"https://{domain_map.get(country, 'www.indeed.com')}/jobs"
     params = {
         "q": keyword,
         "l": location,
-        "hl": language  # Language parameter
+        "hl": language
     }
-    
     if salary and country not in ["India", "UAE"]:
         params["salary"] = salary
-    
     return f"{base_url}?{urllib.parse.urlencode(params)}"
 
-# ---------------- Google Jobs Link ----------------
 def google_jobs_url(keyword, location, country, language="en"):
     country_domain = {
         "USA": "com",
@@ -89,93 +132,103 @@ def google_jobs_url(keyword, location, country, language="en"):
     domain = country_domain.get(country, "com")
     return f"https://www.google.{domain}/search?q={urllib.parse.quote(keyword)}+jobs+in+{urllib.parse.quote(location)}&ibp=htl;jobs&hl={language}"
 
-# ---------------- Global Portals Generator ----------------
 def generate_job_links(keyword, location, country, salary=None, language="en"):
     query = urllib.parse.quote_plus(keyword)
     loc = urllib.parse.quote_plus(location)
-
-    portals = []
+    portals = [
+        ("Google Jobs", google_jobs_url(keyword, location, country, language)),
+        ("Indeed", indeed_url(keyword, location, country, salary, language))
+    ]
     
-    # Common portals for all countries
-    portals.append(("Google Jobs", google_jobs_url(keyword, location, country, language)))
-    portals.append(("Indeed", indeed_url(keyword, location, country, salary, language)))
-    
-    # Country-specific portals
     if country == "USA":
         portals.extend([
             ("Glassdoor", f"https://www.glassdoor.com/Job/jobs.htm?sc.keyword={query}&locKeyword={loc}"),
-            ("Monster", f"https://www.monster.com/jobs/search/?q={query}&where={loc}"),
             ("ZipRecruiter", f"https://www.ziprecruiter.com/jobs-search?search={query}&location={loc}")
-        ])
-    elif country == "UK":
-        portals.extend([
-            ("Reed", f"https://www.reed.co.uk/jobs/{query}-jobs-in-{location.replace(' ', '-')}"),
-            ("TotalJobs", f"https://www.totaljobs.com/jobs/{query}/in-{location.replace(' ', '-')}")
-        ])
-    elif country == "India":
-        portals.extend([
-            ("Naukri", f"https://www.naukri.com/{keyword.replace(' ', '-')}-jobs-in-{location.replace(' ', '-')}"),
-            ("Shine", f"https://www.shine.com/job-search/{keyword.replace(' ', '-')}-jobs-in-{location.replace(' ', '-')}")
         ])
     elif country == "UAE":
         portals.extend([
-            ("Bayt", f"https://www.bayt.com/en/uae/jobs/{keyword.replace(' ', '-')}-jobs-in-{location.replace(' ', '-')}/"),
-            ("GulfTalent", f"https://www.gulftalent.com/jobs/{keyword.replace(' ', '-')}/in-{location.replace(' ', '-')}")
+            ("Bayt", f"https://www.bayt.com/en/uae/jobs/{keyword.replace(' ', '-')}-jobs/"),
+            ("GulfTalent", f"https://www.gulftalent.com/jobs/{keyword.replace(' ', '-')}")
         ])
-    elif country == "Germany":
-        portals.extend([
-            ("StepStone", f"https://www.stepstone.de/jobs/{keyword.replace(' ', '-')}/in-{location.replace(' ', '-')}"),
-            ("Indeed DE", f"https://de.indeed.com/jobs?q={query}&l={loc}")
-        ])
-    
     return portals
 
-# ---------------- UI ----------------
-st.title("🌍 Global AI Job Finder")
-st.markdown("🔎 Get LinkedIn + top job portals for any country with smart filters!")
+def show_interview_prep(job_role):
+    st.subheader(f"🎤 {job_role} Interview Preparation")
+    tab1, tab2 = st.tabs(["🎁 Free Resources", "💎 Premium Resources"])
+    
+    with tab1:
+        if job_role in JOB_RESOURCES:
+            for name, url in JOB_RESOURCES[job_role]["interview"]["free"]:
+                st.markdown(f"🔗 [{name}]({url})")
+        else:
+            st.info("💡 General interview resources:")
+            st.markdown("🔗 [📹 Common Technical Interviews (YouTube)](https://youtu.be/1qw5ITr3k9E)")
+            st.markdown("🔗 [💻 LeetCode Top Questions](https://leetcode.com/problem-list/top-interview-questions)")
+    
+    with tab2:
+        if job_role in JOB_RESOURCES:
+            for name, url in JOB_RESOURCES[job_role]["interview"]["paid"]:
+                st.markdown(f"🔗 [{name}]({url})")
+        else:
+            st.markdown("🔗 [🎓 Interview Prep Courses (Udemy)](https://www.udemy.com/topic/interview-questions/)")
 
-with st.form("job_form"):
-    col1, col2 = st.columns(2)
-    with col1:
-        keyword = st.text_input("Job Title / Keywords", "Data Scientist")
-        location = st.text_input("Preferred Location", "Remote")
-        country = st.selectbox("🌐 Country", ["USA", "UK", "India", "Australia", "Canada", "UAE", "Germany", "New Zealand"])
-        language = st.selectbox("🌍 Language", list(LANGUAGES.keys()))
+def show_free_courses(job_role):
+    st.subheader(f"🎓 Free {job_role} Learning Resources")
     
-    with col2:
-        time_filter = st.selectbox("📅 LinkedIn Date Posted", ["Past 24 hours", "Past week", "Past month", "Any time"])
-        experience = st.selectbox("📈 Experience Level", ["Any", "Internship", "Entry level", "Associate", "Mid-Senior level", "Director"])
-        remote_option = st.selectbox("🏢 Work Type", ["Any", "Remote", "On-site", "Hybrid"])
-        easy_apply = st.checkbox("⚡ Easy Apply only", value=False)
+    if job_role in JOB_RESOURCES:
+        st.markdown("### 🏆 Curated Courses")
+        for name, url in JOB_RESOURCES[job_role]["courses"]["free"]:
+            st.markdown(f"🔗 [{name}]({url})")
     
-    # Salary filter only shown for supported countries
-    if country not in ["India", "UAE"]:
-        salary = st.number_input("💰 Minimum Salary (per year)", min_value=0, value=0, step=10000)
-    else:
-        salary = None
-    
-    submitted = st.form_submit_button("🔍 Find Jobs")
+    st.markdown("### 🔍 Search More Learning Resources")
+    st.markdown(f"🔗 [Coursera ({job_role} courses)](https://www.coursera.org/search?query={urllib.parse.quote(job_role)}&productDifficultyLevel=beginner)")
+    st.markdown(f"🔗 [edX (Free {job_role} courses)](https://www.edx.org/search?q={urllib.parse.quote(job_role)})")
+    st.markdown(f"🔗 [YouTube ({job_role} tutorials)](https://www.youtube.com/results?search_query={urllib.parse.quote(job_role)}+tutorial)")
 
-if submitted:
-    lang_code = LANGUAGES[language]
+# --- Main App ---
+def main():
+    st.sidebar.title("🌍 Navigation")
+    app_mode = st.sidebar.radio("Choose Section", 
+                               ["AI Job Finder", "Interview Preparation", "Free Courses"],
+                               index=0)
     
-    st.subheader("🔗 LinkedIn Smart Search")
-    linkedin_link = linkedin_url(keyword, location, time_filter, experience, remote_option, easy_apply, lang_code)
-    st.markdown(f"✅ [Open LinkedIn Search]({linkedin_link})")
-
-    st.subheader(f"🌐 Job Portals in {country}")
-    for name, url in generate_job_links(keyword, location, country, salary if salary else None, lang_code):
-        st.markdown(f"- 🔗 [{name}]({url})")
-
-    st.success("🎯 All job search links generated successfully!")
+    if app_mode == "AI Job Finder":
+        st.title("🔍 Global AI Job Finder")
+        with st.form("job_form"):
+            col1, col2 = st.columns(2)
+            with col1:
+                keyword = st.text_input("Job Title", "Data Scientist")
+                location = st.text_input("Location", "Remote")
+                country = st.selectbox("Country", ["USA", "UK", "India", "UAE", "Germany", "Canada", "Australia"])
+            with col2:
+                time_filter = st.selectbox("Date Posted", ["Past month", "Past week", "Past 24 hours", "Any time"])
+                experience = st.selectbox("Experience", ["Any", "Entry level", "Mid-Senior level", "Director"])
+                language = st.selectbox("Language", list(LANGUAGES.keys()))
+            
+            if st.form_submit_button("Find Jobs"):
+                lang_code = LANGUAGES[language]
+                st.session_state['job_role'] = keyword
+                
+                st.subheader("🔗 Job Search Results")
+                linkedin_link = linkedin_url(keyword, location, time_filter, experience, "Remote", False, lang_code)
+                st.markdown(f"✅ [LinkedIn Jobs]({linkedin_link})")
+                
+                for name, url in generate_job_links(keyword, location, country, None, lang_code):
+                    st.markdown(f"✅ [{name}]({url})")
     
-    # Career Counseling CTA
-    st.markdown("""
-    <div style='background-color:#f0f2f6; padding:20px; border-radius:10px; margin-top:30px;'>
-        <h3 style='color:#1e3a8a;'>Need career guidance?</h3>
-        <p style='font-size:16px;'>Get personalized career advice in your preferred language</p>
-        <a href='https://careerupskillers-ai-advisor-d8vugggkkncjpxirbrcbx6.streamlit.app/' target='_blank' style='background-color:#1e3a8a; color:white; padding:10px 15px; text-decoration:none; border-radius:5px; display:inline-block; margin-top:10px;'>
-            🚀 Get Free Career Counseling
-        </a>
-    </div>
-    """, unsafe_allow_html=True)
+    elif app_mode == "Interview Preparation":
+        st.title("🎤 AI Interview Preparation")
+        job_role = st.selectbox("Select Job Role", 
+                               list(JOB_RESOURCES.keys()) + ["Other Tech Role"],
+                               index=0)
+        show_interview_prep(job_role)
+    
+    elif app_mode == "Free Courses":
+        st.title("🎓 Free AI/ML Courses")
+        job_role = st.selectbox("Select Learning Path", 
+                               list(JOB_RESOURCES.keys()) + ["Other Tech Field"],
+                               index=0)
+        show_free_courses(job_role)
+
+if __name__ == "__main__":
+    main()
