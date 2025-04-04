@@ -64,5 +64,4 @@ if submitted:
     st.success(f"✅ Generated {len(PORTALS_BY_COUNTRY[country])} job search links")
 
     st.markdown(f"""
-    <div style='background-color:#f0f2f6; padding:20px; border-radius:10px; margin-top:30px;'>
-        <h
+    <div style='background-color:#f0f2f6; padding:20px; border-radius:10px; margin-top:30px;'><h
