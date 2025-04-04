@@ -1,18 +1,17 @@
-# ✅ app.py (updated with fresher logic, interview & courses section live)
+# ✅ app.py (fully merged single script with job finder, interview prep, and courses)
 
 import streamlit as st
 import urllib.parse
 from datetime import datetime
 
 # Hide Streamlit header and footer
-hide_st_style = """
+st.markdown("""
     <style>
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
     </style>
-"""
-st.markdown(hide_st_style, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 st.set_page_config(page_title="🌍 Global AI Career Hub", page_icon="🚀", layout="wide")
 
@@ -22,13 +21,8 @@ page = st.sidebar.radio("Choose Section", ["AI Job Finder", "Interview Preparati
 
 # ---------------- Constants ----------------
 LANGUAGES = {
-    "English": "en",
-    "Arabic": "ar",
-    "Hindi": "hi",
-    "German": "de",
-    "French": "fr",
-    "Spanish": "es",
-    "Chinese": "zh"
+    "English": "en", "Arabic": "ar", "Hindi": "hi", "German": "de",
+    "French": "fr", "Spanish": "es", "Chinese": "zh"
 }
 
 JOB_RESOURCES = {
@@ -110,4 +104,24 @@ elif page == "Free Courses":
     show_course_resources(job)
 
 else:
-    exec(open("/mount/src/careerupskillers-auto-job-apply/app.py").read())
+    st.title("🌍 Global AI Job Finder")
+    st.markdown("🔎 Enter your job preferences to discover global job opportunities.")
+
+    with st.form("job_form"):
+        col1, col2 = st.columns(2)
+        with col1:
+            keyword = st.text_input("Job Title", "Data Scientist")
+            location = st.text_input("Location", "Remote")
+            country = st.selectbox("Country", ["USA", "UK", "India", "UAE", "Germany", "Canada", "Australia"])
+        with col2:
+            time_filter = st.selectbox("Date Posted", ["Past month", "Past week", "Past 24 hours", "Any time"])
+            experience = st.selectbox("Experience", ["Any", "Entry level", "Mid-Senior level", "Director"])
+            language = st.selectbox("Language", list(LANGUAGES.keys()))
+
+        if st.form_submit_button("🔍 Find Jobs"):
+            lang_code = LANGUAGES[language]
+            st.subheader("🔗 Smart Job Links")
+            search_url = f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote_plus(keyword)}&location={urllib.parse.quote_plus(location)}&hl={lang_code}"
+            st.markdown(f"✅ [LinkedIn Job Search]({search_url})")
+            google_url = f"https://www.google.com/search?q={urllib.parse.quote_plus(keyword)}+jobs+in+{urllib.parse.quote_plus(location)}&ibp=htl;jobs"
+            st.markdown(f"✅ [Google Job Listings]({google_url})")
