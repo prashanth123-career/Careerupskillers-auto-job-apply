@@ -1,22 +1,5 @@
-# ✅ app.py (updated with fresher logic, job suggestions, and UI enhancements)
-
 import streamlit as st
 import urllib.parse
-from datetime import datetime
-
-# ✅ MUST be called before any Streamlit command
-st.set_page_config(page_title="🌍 Global AI Job Finder", page_icon="🌎", layout="centered")
-
-# Now safe to hide Streamlit header/footer
-hide_st_style = """
-    <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    </style>
-"""
-st.markdown(hide_st_style, unsafe_allow_html=True)
-
 
 st.set_page_config(page_title="🌍 Global AI Job Finder", page_icon="🌎", layout="centered")
 
@@ -63,15 +46,17 @@ def indeed_url(keyword, location, country, salary=None):
         "Australia": "au.indeed.com",
         "India": "www.indeed.co.in"
     }
-
+    
     base_url = f"https://{domain_map.get(country, 'www.indeed.com')}/jobs"
     params = {
         "q": keyword,
         "l": location
     }
+    
+    # Only add salary parameter for supported countries
     if salary and country != "India":
         params["salary"] = salary
-
+    
     return f"{base_url}?{urllib.parse.urlencode(params)}"
 
 # ---------------- Global Portals Generator ----------------
@@ -80,8 +65,10 @@ def generate_job_links(keyword, location, country, salary=None):
     loc = urllib.parse.quote_plus(location)
 
     portals = []
+    
+    # Generate Indeed URL with salary filter (except for India)
     indeed_link = indeed_url(keyword, location, country, salary)
-
+    
     if country == "USA":
         portals = [
             ("Indeed", indeed_link),
@@ -135,7 +122,7 @@ def generate_job_links(keyword, location, country, salary=None):
             ("Neuvoo", f"https://neuvoo.ca/jobs/?k={query}&l={loc}")
         ]
 
-    else:
+    else:  # Others
         portals = [
             ("Indeed", indeed_link),
             ("Google Jobs", f"https://www.google.com/search?q={query}+jobs+in+{loc}")
@@ -148,26 +135,18 @@ st.title("🌍 Global AI Job Finder")
 st.markdown("🔎 Get LinkedIn + top job portals for any country with smart filters!")
 
 with st.form("job_form"):
-    keyword = st.text_input("Job Title / Keywords (e.g., Data Scientist, ML Engineer, AI Analyst)", "Data Scientist")
+    keyword = st.text_input("Job Title / Keywords", "Data Scientist")
     location = st.text_input("Preferred Location", "Remote")
     country = st.selectbox("🌐 Country", ["USA", "UK", "India", "Australia", "Canada", "Others"])
-
+    
+    # Salary filter only shown for supported countries
     if country != "India":
         salary = st.number_input("💰 Minimum Salary (per year)", min_value=0, value=0, step=10000)
     else:
         salary = None
-
-    experience = st.selectbox("📈 Experience Level", ["Any", "Fresher", "Internship", "Entry level", "Associate", "Mid-Senior level", "Director"])
-
-    if experience == "Fresher":
-        education = st.selectbox("🎓 Your Education Background", ["B.Tech", "M.Tech", "MBA", "B.Sc", "MCA", "BCA", "Other"])
-        passout = st.selectbox("📅 Graduation Year", list(range(datetime.now().year, 2014, -1)))
-        job_pref = st.selectbox("🤔 Do you know what job you're looking for?", ["Yes, I know my job", "I'm open to any job"])
-        if job_pref == "I'm open to any job":
-            st.markdown(f"✅ Based on your background in {education}, here are popular entry-level jobs:")
-            st.markdown("- 💼 Data Analyst\n- 📊 Business Analyst\n- 🤖 AI/ML Intern\n- 🧠 Research Assistant\n- 💬 Chatbot Support Associate")
-
+    
     time_filter = st.selectbox("📅 LinkedIn Date Posted", ["Past 24 hours", "Past week", "Past month", "Any time"])
+    experience = st.selectbox("📈 Experience Level", ["Any", "Internship", "Entry level", "Associate", "Mid-Senior level", "Director"])
     remote_option = st.selectbox("🏢 Work Type", ["Any", "Remote", "On-site", "Hybrid"])
     easy_apply = st.checkbox("⚡ Easy Apply only", value=False)
     submitted = st.form_submit_button("🔍 Find Jobs")
@@ -182,7 +161,8 @@ if submitted:
         st.markdown(f"- 🔗 [{name}]({url})")
 
     st.success("🎯 All job search links generated successfully!")
-
+    
+    # Career Counseling CTA - Now appears after all job listings
     st.markdown("""
     <div style='background-color:#f0f2f6; padding:20px; border-radius:10px; margin-top:30px;'>
         <h3 style='color:#1e3a8a;'>Need career guidance?</h3>
