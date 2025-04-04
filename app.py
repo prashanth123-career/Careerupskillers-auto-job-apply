@@ -64,4 +64,13 @@ if submitted:
     st.success(f"✅ Generated {len(PORTALS_BY_COUNTRY[country])} job search links")
 
     st.markdown(f"""
-    <div style='background-color:#f0f2f6; padding:20px; border-radius:10px; margin-top:30px;'><h
+    <div style='background-color:#f0f2f6; padding:20px; border-radius:10px; margin-top:30px;'>
+        <h3 style='color:#1e3a8a;'>Need more options?</h3>
+        <p>Try these global aggregators:</p>
+        <a href='https://www.google.com/search?q={urllib.parse.quote(keyword)}+jobs+in+{urllib.parse.quote(location)}&ibp=htl;jobs' 
+           target='_blank' 
+           style='background-color:#1e3a8a; color:white; padding:10px 15px; text-decoration:none; border-radius:5px; display:inline-block; margin-top:10px;'>
+            🔍 Search Google Jobs
+        </a>
+    </div>
+    """, unsafe_allow_html=True)
