@@ -6,6 +6,9 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 from datetime import datetime
+from io import BytesIO
+import PyPDF2
+import base64
 
 # --------------------------
 # SETUP & CONFIGURATION
@@ -31,7 +34,41 @@ def load_model():
 model = load_model()
 
 # --------------------------
-# CORE FUNCTIONS
+# FILE HANDLING FUNCTIONS
+# --------------------------
+def extract_text_from_pdf(file):
+    try:
+        reader = PyPDF2.PdfReader(BytesIO(file.read()))
+        text = ""
+        for page in reader.pages:
+            text += page.extract_text() or ""  # Handle None returns
+        return text
+    except Exception as e:
+        st.error(f"PDF extraction error: {str(e)}")
+        return ""
+
+def extract_text_from_txt(file):
+    try:
+        # Try UTF-8 first, fallback to latin-1 if needed
+        try:
+            return file.read().decode("utf-8")
+        except UnicodeDecodeError:
+            return file.read().decode("latin-1")
+    except Exception as e:
+        st.error(f"Text file reading error: {str(e)}")
+        return ""
+
+def process_uploaded_file(uploaded_file):
+    if uploaded_file.type == "application/pdf":
+        return extract_text_from_pdf(uploaded_file)
+    elif uploaded_file.type == "text/plain":
+        return extract_text_from_txt(uploaded_file)
+    else:
+        st.error("Unsupported file type")
+        return ""
+
+# --------------------------
+# CORE JOB SEARCH FUNCTIONS
 # --------------------------
 def linkedin_url(keyword, location, time_filter, experience, remote_option, easy_apply, visa_sponsorship=False):
     time_map = {
@@ -87,14 +124,64 @@ def indeed_url(keyword, location, country, salary=None):
     
     return f"{base_url}?{urllib.parse.urlencode(params)}"
 
-def calculate_match_score(resume_text, job_description):
-    embeddings = model.encode([resume_text, job_description])
-    return float(cosine_similarity([embeddings[0]], [embeddings[1]])[0][0])
+def generate_job_links(keyword, location, country, salary=None):
+    query = urllib.parse.quote_plus(keyword)
+    loc = urllib.parse.quote_plus(location)
 
-def analyze_skills_gap(user_skills, job_skills):
-    user_skills_lower = [s.strip().lower() for s in user_skills.split(",")]
-    job_skills_lower = [s.strip().lower() for s in job_skills.split(",")]
-    return [skill for skill in job_skills_lower if skill not in user_skills_lower][:5]
+    portals = []
+    indeed_link = indeed_url(keyword, location, country, salary)
+    
+    if country == "USA":
+        portals = [
+            ("Indeed", indeed_link),
+            ("Glassdoor", f"https://www.glassdoor.com/Job/jobs.htm?sc.keyword={query}&locKeyword={loc}"),
+            ("SimplyHired", f"https://www.simplyhired.com/search?q={query}&l={loc}")
+        ]
+    elif country == "UK":
+        portals = [
+            ("Indeed UK", indeed_link),
+            ("Reed", f"https://www.reed.co.uk/jobs/{query}-jobs-in-{location.replace(' ', '-')}"),
+            ("CV-Library", f"https://www.cv-library.co.uk/search-jobs?kw={query}&loc={loc}")
+        ]
+    elif country == "India":
+        portals = [
+            ("Naukri", f"https://www.naukri.com/{keyword.replace(' ', '-')}-jobs-in-{location.replace(' ', '-')}"),
+            ("Indeed India", indeed_link),
+            ("Shine", f"https://www.shine.com/job-search/{keyword.replace(' ', '-')}-jobs-in-{location.replace(' ', '-')}")
+        ]
+    else:  # Generic fallback
+        portals = [
+            ("Indeed", indeed_link),
+            ("Google Jobs", f"https://www.google.com/search?q={query}+jobs+in+{loc}")
+        ]
+
+    return portals
+
+# --------------------------
+# AI ANALYSIS FUNCTIONS
+# --------------------------
+def calculate_match_score(resume_text, job_description):
+    try:
+        if not resume_text or not job_description:
+            return 0.0
+            
+        embeddings = model.encode([resume_text, job_description])
+        return float(cosine_similarity([embeddings[0]], [embeddings[1]])[0][0])
+    except Exception as e:
+        st.error(f"Match calculation error: {str(e)}")
+        return 0.0
+
+def analyze_skills_gap(user_skills, job_skills="Python,SQL,Machine Learning,Data Analysis,Statistics"):
+    try:
+        if not user_skills:
+            return []
+            
+        user_skills_lower = [s.strip().lower() for s in user_skills.split(",")]
+        job_skills_lower = [s.strip().lower() for s in job_skills.split(",")]
+        return [skill for skill in job_skills_lower if skill not in user_skills_lower][:3]
+    except Exception as e:
+        st.error(f"Skills analysis error: {str(e)}")
+        return []
 
 # --------------------------
 # UI COMPONENTS
@@ -108,13 +195,20 @@ def show_salary_insights(country, role):
         "Canada": {"avg": 95000, "entry": 65000, "senior": 120000}
     }
     
-    data = salary_data.get(country, {"avg": 0, "entry": 0, "senior": 0})
+    data = salary_data.get(country, salary_data["USA"])  # Default to USA if country not found
     df = pd.DataFrame({
         "Level": ["Entry", "Average", "Senior"],
-        "Salary": [data["entry"], data["avg"], data["senior"]]
+        "Salary": [data["entry"], data["avg"], data["senior"]],
+        "Currency": ["USD" if country == "USA" else 
+                    "GBP" if country == "UK" else 
+                    "INR" if country == "India" else 
+                    "AUD" if country == "Australia" else 
+                    "CAD"]
     })
     
-    fig = px.bar(df, x="Level", y="Salary", title=f"Salary Range for {role} in {country}")
+    fig = px.bar(df, x="Level", y="Salary", text="Currency",
+                title=f"Salary Range for {role} in {country}",
+                color="Level")
     st.plotly_chart(fig, use_container_width=True)
 
 def application_tracker():
@@ -124,10 +218,10 @@ def application_tracker():
             return
             
         df = pd.DataFrame(st.session_state.applications)
-        st.dataframe(
+        edited_df = st.data_editor(
             df,
             column_config={
-                "date": "Date",
+                "date": st.column_config.DateColumn("Date"),
                 "company": "Company",
                 "role": "Position",
                 "status": st.column_config.SelectboxColumn(
@@ -137,29 +231,43 @@ def application_tracker():
                 )
             },
             hide_index=True,
-            use_container_width=True
+            use_container_width=True,
+            num_rows="dynamic"
         )
+        
+        # Update session state if changes were made
+        st.session_state.applications = edited_df.to_dict('records')
 
 # --------------------------
-# MAIN APP
+# MAIN APP LAYOUT
 # --------------------------
 def main():
     st.title("🌍 Global AI Job Finder Pro")
-    st.markdown("🔍 Smart job search with AI-powered matching, salary insights, and application tracking")
+    st.markdown("🔍 Smart job search with AI-powered matching and career tools")
     
-    # Sidebar for resume and skills
+    # Sidebar - User Profile Section
     with st.sidebar:
         st.header("🧑‍💻 My Profile")
-        uploaded_file = st.file_uploader("Upload Resume (PDF/TXT)", type=["pdf", "txt"])
+        
+        # Resume Upload
+        uploaded_file = st.file_uploader("Upload Resume (PDF/TXT)", 
+                                       type=["pdf", "txt"],
+                                       help="Upload your resume for personalized matching")
         if uploaded_file:
-            st.session_state.resume_text = uploaded_file.read().decode("utf-8")
+            st.session_state.resume_text = process_uploaded_file(uploaded_file)
+            if st.session_state.resume_text:
+                with st.expander("View Resume Text"):
+                    st.text(st.session_state.resume_text[:500] + "...")  # Show preview
         
+        # Skills Input
         user_skills = st.text_area("My Skills (comma separated)", 
-                                 "Python, SQL, Machine Learning")
+                                 "Python, SQL, Machine Learning",
+                                 help="List your top skills for better recommendations")
         
+        # Application Tracker
         application_tracker()
     
-    # Main search form
+    # Main Search Form
     with st.form("job_form"):
         col1, col2 = st.columns(2)
         with col1:
@@ -169,25 +277,26 @@ def main():
             
         with col2:
             time_filter = st.selectbox("Date Posted", ["Past week", "Past 24 hours", "Past month", "Any time"])
-            experience = st.selectbox("Experience", ["Any", "Entry level", "Mid-Senior level", "Director"])
+            experience = st.selectbox("Experience Level", ["Any", "Entry level", "Mid-Senior level", "Director"])
             remote_option = st.selectbox("Work Type", ["Remote", "Hybrid", "On-site", "Any"])
         
-        # Conditional fields
-        visa_sponsorship = st.checkbox("Show only visa sponsorship jobs", False)
-        easy_apply = st.checkbox("Easy Apply only", True)
+        # Advanced Filters
+        with st.expander("Advanced Filters"):
+            visa_sponsorship = st.checkbox("Show only visa sponsorship jobs", False)
+            easy_apply = st.checkbox("Easy Apply only", True)
+            
+            if country != "India":
+                salary = st.slider("Minimum Salary", 50000, 250000, 100000, 10000)
+            else:
+                salary = None
         
-        if country != "India":
-            salary = st.slider("Minimum Salary (USD)", 50000, 250000, 100000, 10000)
-        else:
-            salary = None
-        
-        submitted = st.form_submit_button("🔍 Find Jobs")
+        submitted = st.form_submit_button("🔍 Find Jobs", type="primary")
 
     if submitted:
         # --------------------------
-        # RESULTS SECTION
+        # JOB SEARCH RESULTS
         # --------------------------
-        st.success("🎯 Search completed! Here are your optimized job links:")
+        st.success("🎯 Search completed! Analyzing opportunities...")
         
         # LinkedIn Search
         st.subheader("🔗 LinkedIn Smart Search")
@@ -200,16 +309,31 @@ def main():
         
         # Display with match scores if resume exists
         if st.session_state.resume_text:
-            st.info("🔍 Calculating match scores based on your resume...")
             for name, url in portals:
                 score = calculate_match_score(st.session_state.resume_text, f"{keyword} {location}")
-                st.markdown(f"- 🔗 [{name} ({score*100:.0f}% match)]({url})")
+                progress = int(score * 100)
+                st.markdown(f"""
+                <div style="margin-bottom: 10px;">
+                    <a href="{url}" target="_blank" style="text-decoration: none;">
+                        <div style="display: flex; align-items: center;">
+                            <div style="width: 60px; margin-right: 10px;">
+                                <div style="background: linear-gradient(90deg, #4CAF50 {progress}%, #e0e0e0 {progress}%); 
+                                            height: 20px; border-radius: 10px; display: flex; 
+                                            align-items: center; justify-content: center;">
+                                    <span style="color: white; font-size: 12px;">{progress}%</span>
+                                </div>
+                            </div>
+                            <span style="font-weight: bold;">{name}</span>
+                        </div>
+                    </a>
+                </div>
+                """, unsafe_allow_html=True)
         else:
             for name, url in portals:
                 st.markdown(f"- 🔗 [{name}]({url})")
         
         # --------------------------
-        # NEW FEATURES SECTION
+        # CAREER TOOLS SECTION
         # --------------------------
         st.divider()
         
@@ -218,69 +342,73 @@ def main():
             show_salary_insights(country, keyword)
         
         # Skills Gap Analysis
-        if st.session_state.resume_text:
-            with st.expander("📊 Skills Gap Analysis", expanded=True):
-                job_skills = "Python, SQL, Machine Learning, Data Analysis, Statistics, Deep Learning, Cloud Computing"
-                missing_skills = analyze_skills_gap(user_skills, job_skills)
+        with st.expander("📊 Skills Gap Analysis", expanded=True):
+            missing_skills = analyze_skills_gap(user_skills)
+            
+            if missing_skills:
+                st.warning(f"**Top skills to develop:** {', '.join(missing_skills)}")
                 
-                if missing_skills:
-                    st.warning(f"Top skills to learn: {', '.join(missing_skills)}")
-                    st.markdown("""
-                    **Recommended Resources:**
-                    - [Coursera: Machine Learning Specialization](https://www.coursera.org)
-                    - [Udemy: Advanced SQL Course](https://www.udemy.com)
-                    """)
-                else:
-                    st.success("Your skills match well with this job profile!")
+                # Learning Resources
+                st.markdown("""
+                **Recommended Learning Path:**
+                - [Machine Learning Specialization (Coursera)](https://www.coursera.org)
+                - [Advanced SQL Course (Udemy)](https://www.udemy.com)
+                - [Data Visualization with Python (DataCamp)](https://www.datacamp.com)
+                """)
+            else:
+                st.success("Your skills match well with typical requirements for this role!")
         
-        # Interview Prep
-        with st.expander("🎤 Interview Preparation", expanded=True):
-            question = st.selectbox("Practice question:", [
-                "Tell me about yourself",
-                "Why do you want this job?",
-                "Explain a complex project simply"
+        # Interview Preparation
+        with st.expander("🎤 Interview Coach", expanded=True):
+            question_type = st.selectbox("Practice question type:", [
+                "Technical",
+                "Behavioral",
+                "Case Study",
+                "Salary Negotiation"
             ])
             
-            if st.button("Generate AI Response"):
-                with st.spinner("Generating sample answer..."):
-                    st.markdown(f"""
-                    **Sample Answer:**
-                    > "As a {experience} {keyword}, I've developed expertise in {user_skills.split(',')[0]}. 
-                    In my recent role at [Company], I [specific achievement]. This aligns well with 
-                    your need for [job requirement] because..."
-                    """)
+            if st.button("Generate Practice Question"):
+                questions = {
+                    "Technical": f"Explain how you would implement a {keyword} solution for...",
+                    "Behavioral": "Describe a time you solved a difficult problem at work",
+                    "Case Study": f"How would you approach this {keyword} challenge for our company?",
+                    "Salary Negotiation": "What are your salary expectations for this role?"
+                }
+                st.session_state.current_question = questions.get(question_type, "")
+            
+            if 'current_question' in st.session_state:
+                st.text_area("Question:", st.session_state.current_question, disabled=True)
+                
+                if st.button("Show Sample Answer"):
+                    with st.spinner("Generating AI-suggested answer..."):
+                        st.markdown(f"""
+                        **Suggested Answer Approach:**
+                        > "As a {experience} {keyword} professional, I would approach this by...
+                        
+                        **Key Points to Cover:**
+                        1. Technical details about {user_skills.split(',')[0]}
+                        2. Business impact of the solution
+                        3. Lessons learned from past experience
+                        """)
         
         # Application Tracking
-        with st.expander("➕ Track This Application", expanded=True):
+        with st.expander("➕ Track New Application", expanded=True):
             app_col1, app_col2, app_col3 = st.columns(3)
             with app_col1:
-                company = st.text_input("Company Name")
+                company = st.text_input("Company Name", key="app_company")
             with app_col2:
-                role = st.text_input("Position", keyword)
+                role = st.text_input("Position", keyword, key="app_role")
             with app_col3:
-                app_date = st.date_input("Application Date")
+                app_date = st.date_input("Application Date", datetime.now(), key="app_date")
             
-            if st.button("Add to Tracker"):
+            if st.button("Add to Tracker", key="add_tracker"):
                 st.session_state.applications.append({
                     "company": company,
                     "role": role,
                     "date": app_date.strftime("%Y-%m-%d"),
                     "status": "Applied"
                 })
-                st.success("Application tracked!")
-        
-        # Career Counseling CTA
-        st.markdown("""
-        <div style='background-color:#f0f2f6; padding:20px; border-radius:10px; margin-top:30px;'>
-            <h3 style='color:#1e3a8a;'>🚀 Ready to level up your career?</h3>
-            <p>Get personalized 1:1 coaching with our AI Career Advisor:</p>
-            <a href='https://careeradvisor.example.com' target='_blank' 
-               style='background-color:#1e3a8a; color:white; padding:10px 15px; 
-                      text-decoration:none; border-radius:5px; display:inline-block;'>
-                Book Free Session
-            </a>
-        </div>
-        """, unsafe_allow_html=True)
+                st.success("Application tracked! View in sidebar")
 
 if __name__ == "__main__":
     main()
