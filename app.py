@@ -4,10 +4,10 @@ import streamlit as st
 import urllib.parse
 from datetime import datetime
 
-# ✅ Must be first Streamlit command
+# ✅ MUST be called before any Streamlit command
 st.set_page_config(page_title="🌍 Global AI Job Finder", page_icon="🌎", layout="centered")
 
-# Hide Streamlit header and footer
+# Now safe to hide Streamlit header/footer
 hide_st_style = """
     <style>
     #MainMenu {visibility: hidden;}
@@ -16,6 +16,7 @@ hide_st_style = """
     </style>
 """
 st.markdown(hide_st_style, unsafe_allow_html=True)
+
 
 st.set_page_config(page_title="🌍 Global AI Job Finder", page_icon="🌎", layout="centered")
 
