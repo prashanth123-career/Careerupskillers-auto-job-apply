@@ -46,7 +46,7 @@ if submitted:
     st.subheader(f"🌐 {len(PORTALS_BY_COUNTRY[country])} Job Portals in {country}")
 
     for name, url_func in PORTALS_BY_COUNTRY[country]:
-        url = url_func(keyword, location,date posted,experiance level, "")
+        url = url_func(keyword, location,dateposted,experiancelevel, "")
         st.markdown(f"- 🔗 [{name}]({url})")
 
     st.success(f"✅ Generated {len(PORTALS_BY_COUNTRY[country])} job search links")
