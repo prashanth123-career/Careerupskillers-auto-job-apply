@@ -7,33 +7,39 @@ st.set_page_config(page_title="🌍 Mega Job Finder", page_icon="🌐", layout="
 PORTALS_BY_COUNTRY = {
     "USA": [
         ("LinkedIn", lambda k,l,s,e,d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
-        ("Indeed", lambda k,l,s,e,d: f"https://www.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
-        ("Glassdoor", lambda k,l,s,e,d: f"https://www.glassdoor.com/Job/jobs.htm?sc.keyword={urllib.parse.quote(k)}&locKeyword={urllib.parse.quote(l)}"),
-        ("Monster", lambda k,l,s,e,d: f"https://www.monster.com/jobs/search/?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}"),
-        ("ZipRecruiter", lambda k,l,s,e,d: f"https://www.ziprecruiter.com/jobs-search?search={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
-        ("Dice (Tech)", lambda k,l,s,e,d: f"https://www.dice.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}")
+        ("USAJobs (Govt)", lambda k,l,s,e,d: f"https://www.usajobs.gov/Search/Results?k={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
+        ("Indeed", lambda k,l,s,e,d: f"https://www.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}")
     ],
     "UK": [
         ("LinkedIn UK", lambda k,l,s,e,d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
+        ("Guardian Jobs (Govt)", lambda k,l,s,e,d: f"https://jobs.theguardian.com/jobs/{urllib.parse.quote(k)}/in-{urllib.parse.quote(l)}"),
         ("Indeed UK", lambda k,l,s,e,d: f"https://uk.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}")
     ],
     "India": [
         ("LinkedIn India", lambda k,l,s,e,d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
+        ("Government Jobs (India)", lambda k,l,s,e,d: f"https://www.indgovtjobs.in/search/label/{urllib.parse.quote(k)}"),
         ("Indeed India", lambda k,l,s,e,d: f"https://www.indeed.co.in/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}")
     ],
     "Canada": [
         ("LinkedIn Canada", lambda k,l,s,e,d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
+        ("Job Bank (Govt)", lambda k,l,s,e,d: f"https://www.jobbank.gc.ca/jobsearch/jobsearch?searchstring={urllib.parse.quote(k)}&locationstring={urllib.parse.quote(l)}"),
         ("Indeed CA", lambda k,l,s,e,d: f"https://ca.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}")
     ],
     "Australia": [
         ("LinkedIn Australia", lambda k,l,s,e,d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
+        ("APS Jobs (Govt)", lambda k,l,s,e,d: f"https://www.apsjobs.gov.au/s/search?query={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
         ("Indeed AU", lambda k,l,s,e,d: f"https://au.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}")
+    ],
+    "UAE": [
+        ("LinkedIn UAE", lambda k,l,s,e,d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
+        ("Dubai Careers (Govt)", lambda k,l,s,e,d: f"https://dubaicareers.ae/en/Pages/Search.aspx?k={urllib.parse.quote(k)}"),
+        ("Bayt", lambda k,l,s,e,d: f"https://www.bayt.com/en/uae/jobs/{k.lower().replace(' ','-')}-jobs/")
     ]
 }
 
 # --- UI with Enhanced Filters ---
 st.title("🌍 Mega Job Finder")
-st.markdown("🔎 Access **50+ job portals** worldwide with smart filters")
+st.markdown("\ud83d\udd0e Access **50+ job portals** worldwide with smart filters")
 
 with st.form("job_form"):
     col1, col2 = st.columns(2)
@@ -47,12 +53,11 @@ with st.form("job_form"):
         remote_option = st.selectbox("Work Type", ["Any", "Remote", "Hybrid", "On-site"])
         date_posted = st.selectbox("Date Posted", ["Any time", "Past month", "Past week", "Past 24 hours"])
 
-    submitted = st.form_submit_button("🔍 Find Jobs")
+    submitted = st.form_submit_button("\ud83d\udd0d Find Jobs")
 
 if submitted:
     st.subheader(f"🌐 {len(PORTALS_BY_COUNTRY[country])} Job Portals in {country}")
 
-    # Filter mappings for LinkedIn-style portals
     time_map = {
         "Any time": "",
         "Past month": "r2592000",
@@ -74,7 +79,7 @@ if submitted:
             url = url_func(keyword, location, "", e_filter, d_filter)
         else:
             url = url_func(keyword, location, "", "", "")
-        st.markdown(f"- 🔗 [{name}]({url})")
+        st.markdown(f"- \ud83d\udd17 [{name}]({url})")
 
     st.success(f"✅ Generated {len(PORTALS_BY_COUNTRY[country])} job search links")
 
