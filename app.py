@@ -1,134 +1,150 @@
 import streamlit as st
 import urllib.parse
 
-st.set_page_config(page_title="🌍 Mega Job Finder", page_icon="🌐", layout="centered")
+st.set_page_config(page_title="🌍 Career Assistant Pro", page_icon="💼", layout="centered")
 
-# --- Portal database with LinkedIn filter support ---
-PORTALS_BY_COUNTRY = {
-    "USA": [
-        ("LinkedIn", lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
-        ("USAJobs (Govt)", lambda k, l, e, d: f"https://www.usajobs.gov/Search/Results?k={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
-        ("Indeed", lambda k, l, e, d: f"https://www.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
-        ("Glassdoor", lambda k, l, e, d: f"https://www.glassdoor.com/Job/jobs.htm?sc.keyword={urllib.parse.quote(k)}&locT=C&locName={urllib.parse.quote(l)}"),
-        ("Monster", lambda k, l, e, d: f"https://www.monster.com/jobs/search?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}"),
-        ("CareerBuilder", lambda k, l, e, d: f"https://www.careerbuilder.com/jobs?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}")
-    ],
-    "UK": [
-        ("LinkedIn UK", lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
-        ("Guardian Jobs (Govt)", lambda k, l, e, d: f"https://jobs.theguardian.com/jobs/{urllib.parse.quote(k)}/in-{urllib.parse.quote(l)}"),
-        ("Indeed UK", lambda k, l, e, d: f"https://uk.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
-        ("Reed", lambda k, l, e, d: f"https://www.reed.co.uk/jobs?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
-        ("Totaljobs", lambda k, l, e, d: f"https://www.totaljobs.com/jobs/{k.lower().replace(' ', '-')}/in-{l.lower().replace(' ', '-')}"),
-        ("CV-Library", lambda k, l, e, d: f"https://www.cv-library.co.uk/search-jobs?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}")
-    ],
-    "India": [
-        ("LinkedIn India", lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
-        ("Government Jobs (India)", lambda k, l, e, d: f"https://www.indgovtjobs.in/search/label/{urllib.parse.quote(k)}"),
-        ("Indeed India", lambda k, l, e, d: f"https://www.indeed.co.in/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
-        ("Naukri", lambda k, l, e, d: f"https://www.naukri.com/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-') if l != 'Remote' else 'india'}"),
-        ("Shine", lambda k, l, e, d: f"https://www.shine.com/job-search/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
-        ("TimesJobs", lambda k, l, e, d: f"https://www.timesjobs.com/jobs/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
-        ("Freshersworld", lambda k, l, e, d: f"https://www.freshersworld.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}")
-    ],
-    "Canada": [
-        ("LinkedIn Canada", lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
-        ("Job Bank (Govt)", lambda k, l, e, d: f"https://www.jobbank.gc.ca/jobsearch/jobsearch?searchstring={urllib.parse.quote(k)}&locationstring={urllib.parse.quote(l)}"),
-        ("Indeed CA", lambda k, l, e, d: f"https://ca.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
-        ("Workopolis", lambda k, l, e, d: f"https://www.workopolis.com/jobsearch/find-jobs?ak={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
-        ("Monster CA", lambda k, l, e, d: f"https://www.monster.ca/jobs/search?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}"),
-        ("Eluta", lambda k, l, e, d: f"https://www.eluta.ca/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}")
-    ],
-    "Australia": [
-        ("LinkedIn Australia", lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
-        ("APS Jobs (Govt)", lambda k, l, e, d: f"https://www.apsjobs.gov.au/s/search?query={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
-        ("Indeed AU", lambda k, l, e, d: f"https://au.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
-        ("Seek", lambda k, l, e, d: f"https://www.seek.com.au/{k.lower().replace(' ', '-')}-jobs/in-{l.lower().replace(' ', '-')}"),
-        ("CareerOne", lambda k, l, e, d: f"https://www.careerone.com.au/jobs?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
-        ("Jora", lambda k, l, e, d: f"https://au.jora.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}")
-    ],
-    "UAE": [
-        ("LinkedIn UAE", lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
-        ("Dubai Careers (Govt)", lambda k, l, e, d: f"https://dubaicareers.ae/en/Pages/Search.aspx?k={urllib.parse.quote(k)}"),
-        ("Bayt", lambda k, l, e, d: f"https://www.bayt.com/en/uae/jobs/{k.lower().replace(' ', '-')}-jobs/"),
-        ("GulfTalent", lambda k, l, e, d: f"https://www.gulftalent.com/uae/jobs?q={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
-        ("Naukrigulf", lambda k, l, e, d: f"https://www.naukrigulf.com/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
-        ("JobsAbuDhabi", lambda k, l, e, d: f"https://jobsabudhabi.ae/en/search-jobs/?q={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}")
-    ],
-    "Germany": [
-        ("LinkedIn Germany", lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
-        ("StepStone", lambda k, l, e, d: f"https://www.stepstone.de/jobs/{k.lower().replace(' ', '-')}/in-{l.lower().replace(' ', '-')}"),
-        ("Xing", lambda k, l, e, d: f"https://www.xing.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
-        ("Jobware", lambda k, l, e, d: f"https://www.jobware.de/jobs/{k.lower().replace(' ', '-')}/{l.lower().replace(' ', '-')}"),
-        ("Meinestadt", lambda k, l, e, d: f"https://jobs.meinestadt.de/deutschland?query={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
-        ("Bundesagentur für Arbeit (Govt)", lambda k, l, e, d: f"https://jobboerse.arbeitsagentur.de/stellenangebote/suche?was={urllib.parse.quote(k)}&wo={urllib.parse.quote(l)}")
-    ]
-}
+# ================== JOB SEARCH TAB ==================
+def job_search_tab():
+    st.title("🌍 Mega Job Finder")
+    st.markdown("🔍 Access **50+ job portals** worldwide with smart filters")
 
-# --- UI ---
-st.title("🌍 Mega Job Finder")
-st.markdown("🔍 Access **50+ job portals** worldwide with smart filters")
+    with st.form("job_form"):
+        col1, col2 = st.columns(2)
+        with col1:
+            keyword = st.text_input("Job Title / Keywords", "Data Scientist")
+            location = st.text_input("Preferred Location", "Remote")
+            country = st.selectbox("Country", list(PORTALS_BY_COUNTRY.keys()))
+        with col2:
+            experience = st.selectbox("Experience Level", ["Any", "Entry", "Mid", "Senior", "Executive"])
+            date_posted = st.selectbox("Date Posted", ["Any time", "Past month", "Past week", "Past 24 hours"])
 
-with st.form("job_form"):
-    col1, col2 = st.columns(2)
-    with col1:
-        keyword = st.text_input("Job Title / Keywords", "Data Scientist")
-        location = st.text_input("Preferred Location", "Remote")
-        country = st.selectbox("Country", list(PORTALS_BY_COUNTRY.keys()))
-    with col2:
-        experience = st.selectbox("Experience Level", ["Any", "Entry", "Mid", "Senior", "Executive"])
-        date_posted = st.selectbox("Date Posted", ["Any time", "Past month", "Past week", "Past 24 hours"])
+        submitted = st.form_submit_button("🔍 Find Jobs")
 
-    submitted = st.form_submit_button("🔍 Find Jobs")
+    if submitted:
+        # ... (keep existing job search code exactly the same) ...
 
-if submitted:
-    st.subheader(f"🌐 Job Portals in {country}")
+# ================== INTERVIEW PREP TAB ==================
+def interview_prep_tab():
+    st.title("🎯 Interview Preparation Assistant")
+    st.markdown("💡 Get company-specific interview questions and preparation resources")
 
-    # Filters mapping
-    time_map = {
-        "Any time": "",
-        "Past month": "r2592000",
-        "Past week": "r604800",
-        "Past 24 hours": "r86400"
-    }
-    exp_map = {
-        "Any": "",
-        "Entry": "2",
-        "Mid": "3",
-        "Senior": "4",
-        "Executive": "5"
-    }
+    with st.form("interview_form"):
+        col1, col2 = st.columns(2)
+        with col1:
+            company = st.text_input("Company Name", "Google")
+            designation = st.text_input("Job Designation", "Software Engineer")
+        with col2:
+            country = st.selectbox("Country", ["USA", "India", "UK", "Canada", "Australia", "Germany", "UAE"])
+            interview_round = st.selectbox("Interview Round", ["Technical", "HR", "Managerial", "Case Study"])
 
-    d_filter = time_map[date_posted]
-    e_filter = exp_map[experience]
+        submitted = st.form_submit_button("🚀 Get Preparation Guide")
 
-    # Display portals as buttons using HTML for redirection
-    for name, url_func in PORTALS_BY_COUNTRY[country]:
-        if "LinkedIn" in name:
-            url = url_func(keyword, location, e_filter, d_filter)
-        else:
-            url = url_func(keyword, location, "", "")  # Non-LinkedIn portals don’t use exp/date filters here
+    if submitted:
+        st.subheader(f"📚 {company} {designation} Interview Prep")
         
-        # Create a button with HTML that opens in a new tab
-        button_html = f"""
-        <a href="{url}" target="_blank" style="display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; margin: 5px 0;">
-            🔍 Search on {name}
-        </a>
-        <p style="font-size: 12px; color: #666;">If you are logged into {name}, this will take you directly to the relevant job listings.</p>
-        """
-        st.markdown(button_html, unsafe_allow_html=True)
+        # Interview questions database
+        questions_db = {
+            "Google": {
+                "Software Engineer": {
+                    "Technical": "https://www.techinterviewhandbook.org/google-interview/",
+                    "HR": "https://www.glassdoor.com/Interview/Google-HR-Interview-Questions-EI_IE9079.0,6_KO7,9.htm"
+                }
+            },
+            "Amazon": {
+                "Data Scientist": {
+                    "Technical": "https://www.interviewkickstart.com/amazon-data-scientist-interview-questions"
+                }
+            }
+        }
 
-    st.success(f"✅ Generated {len(PORTALS_BY_COUNTRY[country])} job search links.")
+        try:
+            resources = questions_db[company][designation][interview_round]
+            st.markdown(f"""
+            <div style='background-color:#e8f5e9; padding:20px; border-radius:10px; margin-bottom:20px;'>
+                <h4 style='color:#2e7d32;'>🔍 Found Preparation Resources:</h4>
+                <a href='{resources}' target='_blank' style='color:#1b5e20;'>View {interview_round} Round Preparation Guide →</a>
+            </div>
+            """, unsafe_allow_html=True)
+        except KeyError:
+            st.warning(f"⚠️ Specific resources not found. Showing general {designation} interview questions:")
+            st.markdown(f"""
+            <a href='https://www.google.com/search?q={urllib.parse.quote(f"{designation} interview questions {company} {country}")}' 
+               target='_blank' 
+               style='background-color:#ffecb3; color:#000; padding:10px; border-radius:5px; display:block; margin:10px 0;'>
+                🔎 Search Google for {designation} Interview Questions
+            </a>
+            """, unsafe_allow_html=True)
 
-    # Google fallback
-    google_jobs = f"https://www.google.com/search?q={urllib.parse.quote(keyword)}+jobs+in+{urllib.parse.quote(location)}&ibp=htl;jobs"
-    st.markdown(f"""
-    <div style='background-color:#f0f2f6; padding:20px; border-radius:10px; margin-top:30px;'>
-        <h3 style='color:#1e3a8a;'>Need more options?</h3>
-        <p>Try these global aggregators:</p>
-        <a href='{google_jobs}' 
-           target='_blank' 
-           style='background-color:#1e3a8a; color:white; padding:10px 15px; text-decoration:none; border-radius:5px; display:inline-block; margin-top:10px;'>
-            🔍 Search Google Jobs
-        </a>
-    </div>
-    """, unsafe_allow_html=True)
+        # Company culture section
+        st.markdown(f"""
+        <div style='background-color:#e3f2fd; padding:20px; border-radius:10px; margin-top:20px;'>
+            <h4 style='color:#0d47a1;'>🏢 {company} Culture Insights ({country})</h4>
+            <a href='https://www.glassdoor.com/Reviews/{company}-Reviews-E{_get_company_id(company)}.htm' 
+               target='_blank' 
+               style='color:#1565c0; display:block; margin:10px 0;'>
+                📖 Read Employee Reviews →
+            </a>
+            <a href='https://www.youtube.com/results?search_query={urllib.parse.quote(f"{company} work culture {country}")}' 
+               target='_blank' 
+               style='color:#1565c0; display:block; margin:10px 0;'>
+                🎥 Watch Culture Videos →
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
+
+# ================== FREE COURSES TAB ==================  
+def free_courses_tab():
+    st.title("🎓 Free Learning Hub")
+    st.markdown("📚 Discover free certified courses from top platforms")
+
+    COURSES = [
+        {"name": "Google Data Analytics", "platform": "Coursera", "url": "https://www.coursera.org/professional-certificates/google-data-analytics", "skills": ["Data Analysis", "SQL", "R"]},
+        {"name": "IBM Data Science", "platform": "edX", "url": "https://www.edx.org/professional-certificate/ibm-data-science", "skills": ["Python", "Machine Learning", "Data Science"]},
+        {"name": "AWS Fundamentals", "platform": "Coursera", "url": "https://www.coursera.org/specializations/aws-fundamentals", "skills": ["Cloud Computing", "AWS"]},
+        {"name": "Digital Marketing", "platform": "Google Digital Garage", "url": "https://learndigital.withgoogle.com/digitalgarage", "skills": ["Marketing", "SEO", "Social Media"]},
+        {"name": "Python Programming", "platform": "freeCodeCamp", "url": "https://www.freecodecamp.org/learn/scientific-computing-with-python/", "skills": ["Python", "Programming"]}
+    ]
+
+    with st.form("course_form"):
+        search_query = st.text_input("Search Courses/Skills/Designation", "Data Science")
+        submitted = st.form_submit_button("🔍 Find Courses")
+
+    if submitted:
+        st.subheader(f"📖 Courses Matching: {search_query}")
+        results = [c for c in COURSES if 
+                  search_query.lower() in c["name"].lower() or 
+                  any(search_query.lower() in s.lower() for s in c["skills"])]
+        
+        if not results:
+            st.info("💡 No exact matches found. Showing popular courses:")
+            results = COURSES[:3]
+
+        for course in results:
+            st.markdown(f"""
+            <div style='background-color:#f5f5f5; padding:15px; border-radius:10px; margin:10px 0;'>
+                <h4>{course['name']} ({course['platform']})</h4>
+                <p>🔑 Skills: {", ".join(course['skills'])}</p>
+                <a href='{course['url']}' target='_blank' 
+                   style='background-color:#4CAF50; color:white; padding:8px 16px; 
+                          border-radius:5px; text-decoration:none; display:inline-block;'>
+                    Enroll Now →
+                </a>
+            </div>
+            """, unsafe_allow_html=True)
+
+# ================== MAIN APP ==================
+tabs = ["Job Search", "Interview Prep", "Free Courses"]
+page = st.sidebar.selectbox("Choose Section", tabs)
+
+if page == "Job Search":
+    job_search_tab()
+elif page == "Interview Prep":
+    interview_prep_tab()
+elif page == "Free Courses":
+    free_courses_tab()
+
+# Helper function (mock implementation)
+def _get_company_id(company):
+    # This would normally call an API, using mock values
+    company_ids = {"Google": "9079", "Amazon": "6036", "Microsoft": "1651"}
+    return company_ids.get(company, "")
