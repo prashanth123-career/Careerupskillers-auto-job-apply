@@ -78,45 +78,50 @@ with tab1:
         </div>
         """, unsafe_allow_html=True)
 
-# ---------------------- TAB 2: INTERVIEW PREP ----------------------
+# ---------------------- TAB 2: INTERVIEW PREPARATION PLATFORMS ----------------------
 with tab2:
-    st.title("🎯 Interview Preparation")
-    st.markdown("🧠 Get sample questions, prep tips & company culture")
+    st.title("🎯 Smart Interview Preparation")
+    st.markdown("🔍 Get filtered interview prep links based on role, country, and platform.")
 
-    with st.form("interview_form"):
+    with st.form("interview_links_form"):
         col1, col2 = st.columns(2)
         with col1:
-            company = st.text_input("Company Name", "Google")
-            designation = st.text_input("Designation / Role", "Data Scientist")
+            role = st.text_input("Job Role", "Data Scientist")
+            country = st.selectbox("Country", ["India", "USA", "UK", "Canada", "Germany", "UAE", "Australia"])
         with col2:
-            country = st.selectbox("Country", ["USA", "UK", "India", "Canada", "Germany", "Australia", "UAE"])
-            round_level = st.selectbox("Interview Round", ["Not Sure", "HR Round", "Technical Round", "Managerial Round"])
+            platform = st.selectbox("Choose Platform", [
+                "LeetCode", "HackerRank", "GeeksforGeeks", "Glassdoor", "Pramp", 
+                "IndiaBix", "AmbitionBox", "Final Round AI", "Big Interview", "iScalePro"
+            ])
+        link_submit = st.form_submit_button("🔗 Generate Link")
 
-        interview_submit = st.form_submit_button("📋 Get Interview Plan")
+    if link_submit:
+        query = urllib.parse.quote_plus(role + " " + country)
 
-    if interview_submit:
-        st.subheader(f"📄 Interview Questions for {designation} at {company}")
-        
-        if round_level == "HR Round":
-            st.markdown("- Tell me about yourself.\n- Why do you want to join this company?\n- Describe a challenge you overcame.\n- Where do you see yourself in 5 years?")
-        elif round_level == "Technical Round":
-            st.markdown(f"- What are the core responsibilities of a {designation}?\n- Explain a recent project.\n- How would you solve [a typical technical issue]?\n- What tools/languages are you best at?")
-        elif round_level == "Managerial Round":
-            st.markdown("- How do you manage a team?\n- Describe a time you handled a project crisis.\n- What are your strengths as a leader?")
+        PLATFORM_LINKS = {
+            "LeetCode": f"https://leetcode.com/problemset/all/?search={query}",
+            "HackerRank": f"https://www.hackerrank.com/interview/interview-preparation-kit",
+            "GeeksforGeeks": f"https://www.geeksforgeeks.org/?s={query}",
+            "Glassdoor": f"https://www.glassdoor.com/Interview/{query}-interview-questions-SRCH_KO0,{len(query)}.htm",
+            "Pramp": f"https://www.pramp.com/#interview-prep",
+            "IndiaBix": f"https://www.indiabix.com/interview/questions-and-answers/?search={query}",
+            "AmbitionBox": f"https://www.ambitionbox.com/interviews?title={query}",
+            "Final Round AI": f"https://www.finalroundai.com/ai-mock-interview",
+            "Big Interview": f"https://www.biginterview.com/",
+            "iScalePro": f"https://www.iscalepro.com/jobseekers/"
+        }
+
+        if platform in PLATFORM_LINKS:
+            st.markdown(f"### 🔗 Your Custom Interview Prep Link")
+            st.markdown(f"""
+            <a href="{PLATFORM_LINKS[platform]}" target="_blank" style="display:inline-block; background:#2563eb; color:white; padding:12px 24px; border-radius:5px; text-decoration:none;">
+                👉 Prep on {platform}
+            </a>
+            """, unsafe_allow_html=True)
+
+            st.info("Explore company-specific questions, mock interviews, and prep content on this platform.")
         else:
-            st.info(f"Please find the general interview questions based on '{designation}'.")
-            st.markdown("- What does a typical day look like in this role?\n- What are your core technical strengths?\n- How do you stay updated with industry trends?")
-
-        st.subheader("🏢 Company Culture Tips")
-        if country == "India":
-            st.markdown("✅ Be formal and respectful.\n✅ Focus on technical clarity.\n✅ Emphasize loyalty and long-term vision.")
-        elif country == "USA":
-            st.markdown("✅ Be confident and results-driven.\n✅ Show alignment with company mission.\n✅ Highlight innovation and independence.")
-        elif country == "UK":
-            st.markdown("✅ Maintain professionalism.\n✅ Highlight teamwork and precision.\n✅ Be well-prepared and punctual.")
-        else:
-            st.markdown("✅ Read company reviews on Glassdoor.\n✅ Visit their LinkedIn and culture blogs.\n✅ Learn about leadership and work-life policies.")
-
+            st.error("Platform not supported. Please choose another.")
 # ---------------------- TAB 3: FREE COURSES ----------------------
 with tab3:
     st.title("🎓 Free Courses with Certificates")
