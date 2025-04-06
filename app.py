@@ -1,10 +1,18 @@
 import streamlit as st
 import urllib.parse
 
-st.set_page_config(page_title="🌍 Career Assistant Pro", page_icon="💼", layout="centered")
+st.set_page_config(page_title="🌍 Mega Job Finder", page_icon="🌐", layout="centered")
 
-# ================== JOB SEARCH TAB ==================
-def job_search_tab():
+tab1, tab2, tab3 = st.tabs(["🌐 Job Finder", "🎯 Interview Preparation", "🎓 Free Courses"])
+
+# ========================== TAB 1: JOB FINDER ==========================
+with tab1:
+    PORTALS_BY_COUNTRY = {
+        "USA": [...],  # (KEEP YOUR FULL COUNTRY DICT HERE)
+        # ...
+        "Germany": [...]
+    }
+
     st.title("🌍 Mega Job Finder")
     st.markdown("🔍 Access **50+ job portals** worldwide with smart filters")
 
@@ -21,130 +29,99 @@ def job_search_tab():
         submitted = st.form_submit_button("🔍 Find Jobs")
 
     if submitted:
-        # ... (keep existing job search code exactly the same) ...
+        st.subheader(f"🌐 Job Portals in {country}")
+        time_map = {"Any time": "", "Past month": "r2592000", "Past week": "r604800", "Past 24 hours": "r86400"}
+        exp_map = {"Any": "", "Entry": "2", "Mid": "3", "Senior": "4", "Executive": "5"}
+        d_filter = time_map[date_posted]
+        e_filter = exp_map[experience]
 
-# ================== INTERVIEW PREP TAB ==================
-def interview_prep_tab():
-    st.title("🎯 Interview Preparation Assistant")
-    st.markdown("💡 Get company-specific interview questions and preparation resources")
+        for name, url_func in PORTALS_BY_COUNTRY[country]:
+            url = url_func(keyword, location, e_filter, d_filter) if "LinkedIn" in name else url_func(keyword, location, "", "")
+            button_html = f"""
+            <a href="{url}" target="_blank" style="display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; margin: 5px 0;">
+                🔍 Search on {name}
+            </a>
+            <p style="font-size: 12px; color: #666;">If logged into {name}, it opens directly in a new tab.</p>
+            """
+            st.markdown(button_html, unsafe_allow_html=True)
+
+        st.success(f"✅ Generated {len(PORTALS_BY_COUNTRY[country])} job search links.")
+
+        google_jobs = f"https://www.google.com/search?q={urllib.parse.quote(keyword)}+jobs+in+{urllib.parse.quote(location)}&ibp=htl;jobs"
+        st.markdown(f"""
+        <div style='background-color:#f0f2f6; padding:20px; border-radius:10px; margin-top:30px;'>
+            <h3 style='color:#1e3a8a;'>Need more options?</h3>
+            <a href='{google_jobs}' target='_blank' style='background-color:#1e3a8a; color:white; padding:10px 15px; text-decoration:none; border-radius:5px;'>🔍 Search Google Jobs</a>
+        </div>
+        """, unsafe_allow_html=True)
+
+# ========================== TAB 2: INTERVIEW PREPARATION ==========================
+with tab2:
+    st.title("🎯 Interview Preparation")
+    st.markdown("🧠 Get sample interview questions and prep tips")
 
     with st.form("interview_form"):
         col1, col2 = st.columns(2)
         with col1:
             company = st.text_input("Company Name", "Google")
-            designation = st.text_input("Job Designation", "Software Engineer")
+            designation = st.text_input("Designation / Role", "Data Scientist")
         with col2:
-            country = st.selectbox("Country", ["USA", "India", "UK", "Canada", "Australia", "Germany", "UAE"])
-            interview_round = st.selectbox("Interview Round", ["Technical", "HR", "Managerial", "Case Study"])
+            country = st.selectbox("Country", ["USA", "UK", "India", "Canada", "Germany", "Australia", "UAE"])
+            round_level = st.selectbox("Interview Round", ["Not Sure", "HR Round", "Technical Round", "Managerial Round"])
 
-        submitted = st.form_submit_button("🚀 Get Preparation Guide")
+        interview_submit = st.form_submit_button("📋 Get Interview Plan")
 
-    if submitted:
-        st.subheader(f"📚 {company} {designation} Interview Prep")
+    if interview_submit:
+        st.subheader(f"📄 Interview Questions for {designation} at {company}")
         
-        # Interview questions database
-        questions_db = {
-            "Google": {
-                "Software Engineer": {
-                    "Technical": "https://www.techinterviewhandbook.org/google-interview/",
-                    "HR": "https://www.glassdoor.com/Interview/Google-HR-Interview-Questions-EI_IE9079.0,6_KO7,9.htm"
-                }
-            },
-            "Amazon": {
-                "Data Scientist": {
-                    "Technical": "https://www.interviewkickstart.com/amazon-data-scientist-interview-questions"
-                }
-            }
-        }
+        if round_level == "HR Round":
+            st.markdown("- Tell me about yourself.\n- Why do you want to join this company?\n- Describe a challenge you overcame.\n- Where do you see yourself in 5 years?")
+        elif round_level == "Technical Round":
+            st.markdown(f"- What are the core responsibilities of a {designation}?\n- Explain a recent project.\n- How would you solve [common technical problem]?\n- What tools or languages are you comfortable with?")
+        elif round_level == "Managerial Round":
+            st.markdown("- How do you handle team conflict?\n- How do you prioritize tasks?\n- Describe a leadership experience.")
+        else:
+            st.info(f"Please find the interview questions based on the role '{designation}'.")
+            st.markdown("- What does a typical day look like in this role?\n- What technologies are essential for this position?\n- Share one challenging situation you handled professionally.")
 
-        try:
-            resources = questions_db[company][designation][interview_round]
-            st.markdown(f"""
-            <div style='background-color:#e8f5e9; padding:20px; border-radius:10px; margin-bottom:20px;'>
-                <h4 style='color:#2e7d32;'>🔍 Found Preparation Resources:</h4>
-                <a href='{resources}' target='_blank' style='color:#1b5e20;'>View {interview_round} Round Preparation Guide →</a>
-            </div>
-            """, unsafe_allow_html=True)
-        except KeyError:
-            st.warning(f"⚠️ Specific resources not found. Showing general {designation} interview questions:")
-            st.markdown(f"""
-            <a href='https://www.google.com/search?q={urllib.parse.quote(f"{designation} interview questions {company} {country}")}' 
-               target='_blank' 
-               style='background-color:#ffecb3; color:#000; padding:10px; border-radius:5px; display:block; margin:10px 0;'>
-                🔎 Search Google for {designation} Interview Questions
-            </a>
-            """, unsafe_allow_html=True)
+        st.subheader("🏢 Company Culture Tips")
+        if country == "India":
+            st.markdown("✅ Expect formal process.\n✅ Focus on technical depth.\n✅ Show long-term interest.")
+        elif country == "USA":
+            st.markdown("✅ Emphasize innovation.\n✅ Be confident, conversational.\n✅ Cultural fit is important.")
+        elif country == "UK":
+            st.markdown("✅ Show analytical thinking.\n✅ Maintain professional tone.\n✅ Respect punctuality.")
+        else:
+            st.markdown("✅ Do your research on company reviews.\n✅ Read Glassdoor or LinkedIn profiles of employees.")
 
-        # Company culture section
-        st.markdown(f"""
-        <div style='background-color:#e3f2fd; padding:20px; border-radius:10px; margin-top:20px;'>
-            <h4 style='color:#0d47a1;'>🏢 {company} Culture Insights ({country})</h4>
-            <a href='https://www.glassdoor.com/Reviews/{company}-Reviews-E{_get_company_id(company)}.htm' 
-               target='_blank' 
-               style='color:#1565c0; display:block; margin:10px 0;'>
-                📖 Read Employee Reviews →
-            </a>
-            <a href='https://www.youtube.com/results?search_query={urllib.parse.quote(f"{company} work culture {country}")}' 
-               target='_blank' 
-               style='color:#1565c0; display:block; margin:10px 0;'>
-                🎥 Watch Culture Videos →
-            </a>
-        </div>
-        """, unsafe_allow_html=True)
-
-# ================== FREE COURSES TAB ==================  
-def free_courses_tab():
-    st.title("🎓 Free Learning Hub")
-    st.markdown("📚 Discover free certified courses from top platforms")
-
-    COURSES = [
-        {"name": "Google Data Analytics", "platform": "Coursera", "url": "https://www.coursera.org/professional-certificates/google-data-analytics", "skills": ["Data Analysis", "SQL", "R"]},
-        {"name": "IBM Data Science", "platform": "edX", "url": "https://www.edx.org/professional-certificate/ibm-data-science", "skills": ["Python", "Machine Learning", "Data Science"]},
-        {"name": "AWS Fundamentals", "platform": "Coursera", "url": "https://www.coursera.org/specializations/aws-fundamentals", "skills": ["Cloud Computing", "AWS"]},
-        {"name": "Digital Marketing", "platform": "Google Digital Garage", "url": "https://learndigital.withgoogle.com/digitalgarage", "skills": ["Marketing", "SEO", "Social Media"]},
-        {"name": "Python Programming", "platform": "freeCodeCamp", "url": "https://www.freecodecamp.org/learn/scientific-computing-with-python/", "skills": ["Python", "Programming"]}
-    ]
+# ========================== TAB 3: FREE COURSES ==========================
+with tab3:
+    st.title("🎓 Free Courses with Certification")
+    st.markdown("💡 Search free certified courses from top providers like Google, IBM, YouTube, and more.")
 
     with st.form("course_form"):
-        search_query = st.text_input("Search Courses/Skills/Designation", "Data Science")
-        submitted = st.form_submit_button("🔍 Find Courses")
+        course_input = st.text_input("Enter Skill / Designation / Course Topic", "Data Analytics")
+        course_submit = st.form_submit_button("🎯 Find Free Courses")
 
-    if submitted:
-        st.subheader(f"📖 Courses Matching: {search_query}")
-        results = [c for c in COURSES if 
-                  search_query.lower() in c["name"].lower() or 
-                  any(search_query.lower() in s.lower() for s in c["skills"])]
-        
-        if not results:
-            st.info("💡 No exact matches found. Showing popular courses:")
-            results = COURSES[:3]
+    if course_submit:
+        st.subheader(f"🎓 Free Courses Related to '{course_input}'")
 
-        for course in results:
+        search_query = urllib.parse.quote(course_input)
+        course_links = [
+            ("Google Career Certificates", f"https://grow.google/certificates/?q={search_query}"),
+            ("Coursera Free Courses (IBM, Meta, Google)", f"https://www.coursera.org/search?query={search_query}&price=Free"),
+            ("edX Free Courses", f"https://www.edx.org/search?q={search_query}&price=Free"),
+            ("YouTube Learning", f"https://www.youtube.com/results?search_query={search_query}+course"),
+            ("Alison Certifications", f"https://alison.com/courses?query={search_query}"),
+            ("FutureLearn", f"https://www.futurelearn.com/search?q={search_query}"),
+        ]
+
+        for name, url in course_links:
             st.markdown(f"""
-            <div style='background-color:#f5f5f5; padding:15px; border-radius:10px; margin:10px 0;'>
-                <h4>{course['name']} ({course['platform']})</h4>
-                <p>🔑 Skills: {", ".join(course['skills'])}</p>
-                <a href='{course['url']}' target='_blank' 
-                   style='background-color:#4CAF50; color:white; padding:8px 16px; 
-                          border-radius:5px; text-decoration:none; display:inline-block;'>
-                    Enroll Now →
-                </a>
-            </div>
+            <a href="{url}" target="_blank" style="display:block; background:#6366f1; color:white; padding:10px; margin:10px 0; border-radius:5px; text-align:center;">
+                🎓 {name}
+            </a>
             """, unsafe_allow_html=True)
 
-# ================== MAIN APP ==================
-tabs = ["Job Search", "Interview Prep", "Free Courses"]
-page = st.sidebar.selectbox("Choose Section", tabs)
+        st.success("✅ Explore these links to enroll for free with certificates!")
 
-if page == "Job Search":
-    job_search_tab()
-elif page == "Interview Prep":
-    interview_prep_tab()
-elif page == "Free Courses":
-    free_courses_tab()
-
-# Helper function (mock implementation)
-def _get_company_id(company):
-    # This would normally call an API, using mock values
-    company_ids = {"Google": "9079", "Amazon": "6036", "Microsoft": "1651"}
-    return company_ids.get(company, "")
