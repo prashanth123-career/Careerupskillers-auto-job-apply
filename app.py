@@ -1,82 +1,184 @@
 import streamlit as st
 import urllib.parse
 
-st.set_page_config(page_title="🌍 Mega Job Finder", page_icon="🌐", layout="centered")
+st.set_page_config(page_title="🌍 Mega Job Finder Pro", page_icon="💼", layout="centered")
 
-# --- Portal database with LinkedIn filter support ---
-PORTALS_BY_COUNTRY = {
-    "USA": [
-        ("LinkedIn", lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
-        ("USAJobs (Govt)", lambda k, l, e, d: f"https://www.usajobs.gov/Search/Results?k={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
-        ("Indeed", lambda k, l, e, d: f"https://www.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
-        ("Glassdoor", lambda k, l, e, d: f"https://www.glassdoor.com/Job/jobs.htm?sc.keyword={urllib.parse.quote(k)}&locT=C&locName={urllib.parse.quote(l)}"),
-        ("Monster", lambda k, l, e, d: f"https://www.monster.com/jobs/search?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}"),
-        ("CareerBuilder", lambda k, l, e, d: f"https://www.careerbuilder.com/jobs?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}")
+# ================== DATA CONFIGURATION ==================
+ALL_INDIAN_LOCATIONS = [
+    "Bangalore", "Mumbai", "Delhi NCR", "Hyderabad", "Chennai",
+    "Pune", "Kolkata", "Ahmedabad", "Jaipur", "Lucknow",
+    "Surat", "Kochi", "Coimbatore", "Nagpur", "Indore",
+    "Patna", "Bhopal", "Visakhapatnam", "Vadodara", "Remote",
+    "Anywhere in India"
+]
+
+COUNTRIES = ["India", "USA", "UK", "Canada", "Australia", "Germany", "UAE", "Global"]
+
+INDUSTRIES = [
+    "All Industries", "Technology", "Healthcare", "Engineering",
+    "Finance", "Education", "Government", "Creative/Design",
+    "Remote Work", "Visa Sponsorship"
+]
+
+EXP_LEVELS = ["Any", "Entry", "Mid", "Senior", "Executive"]
+DATE_POSTED = ["Any time", "Past 24 hours", "Past week", "Past month"]
+
+# ================== JOB PORTAL CONFIGURATION ==================
+JOB_PORTALS = {
+    "India": [
+        {
+            "name": "LinkedIn (India)",
+            "template": lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}",
+            "filters": ["location", "experience", "date"],
+            "icon": "🔵"
+        },
+        {
+            "name": "Naukri",
+            "template": lambda k, l, e, d: f"https://www.naukri.com/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-') if l != 'Remote' else 'india'}?experience={e}&jobAge={d}",
+            "filters": ["location", "experience", "date"],
+            "icon": "🟡"
+        },
+        {
+            "name": "Indeed India",
+            "template": lambda k, l, e, d: f"https://www.indeed.co.in/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}&fromage={d}&explvl={e}_level",
+            "filters": ["location", "experience", "date"],
+            "icon": "🔴"
+        },
+        {
+            "name": "Monster India",
+            "template": lambda k, l, e, d: f"https://www.monsterindia.com/srp/results?query={urllib.parse.quote(k)}&locations={urllib.parse.quote(l)}&experienceRanges={e}~{e}&jobAge={d}",
+            "filters": ["location", "experience", "date"],
+            "icon": "🟢"
+        }
     ],
-    # ... (keep all other country definitions exactly the same)
+    "Global": [
+        {
+            "name": "LinkedIn Global",
+            "template": lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}",
+            "filters": ["location", "experience", "date"],
+            "icon": "🔵"
+        },
+        {
+            "name": "Indeed Worldwide",
+            "template": lambda k, l, e, d: f"https://www.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}&fromage={d}&explvl={e}_level",
+            "filters": ["location", "experience", "date"],
+            "icon": "🔴"
+        }
+    ]
 }
 
-# --- UI ---
-st.title("🌍 Mega Job Finder")
-st.markdown("🔍 Access **50+ job portals** worldwide with smart filters")
+# ================== FILTER MAPPINGS ==================
+EXP_MAP = {
+    "Any": "",
+    "Entry": "1",
+    "Mid": "2",
+    "Senior": "3",
+    "Executive": "4"
+}
 
-with st.form("job_form"):
+DATE_MAP = {
+    "Any time": "",
+    "Past 24 hours": "1",
+    "Past week": "7",
+    "Past month": "30"
+}
+
+# ================== UI COMPONENTS ==================
+def show_job_card(portal, keyword, location, exp_val, date_val):
+    """Display a job portal card with applied filters"""
+    try:
+        url = portal['template'](
+            k=keyword,
+            l=location if location != "Anywhere in India" else "India",
+            e=exp_val,
+            d=date_val
+        )
+        st.markdown(f"""
+        <div style='background-color:#f8f9fa; padding:15px; border-radius:10px; margin-bottom:15px; 
+                    border-left: 4px solid #0077b5; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+            <div style='display: flex; align-items: center; margin-bottom: 10px;'>
+                <span style='font-size: 24px; margin-right: 12px;'>{portal.get('icon', '🔗')}</span>
+                <h4 style='margin: 0; color: #1a237e;'>{portal['name']}</h4>
+            </div>
+            <div style='margin-bottom: 12px; color: #455a64;'>
+                {f"<b>Location:</b> {location}<br>" if 'location' in portal['filters'] else ""}
+                {f"<b>Experience:</b> {exp_val if exp_val else 'Any'}<br>" if 'experience' in portal['filters'] else ""}
+                {f"<b>Posted:</b> {date_val} days ago<br>" if date_val and 'date' in portal['filters'] else ""}
+            </div>
+            <a href='{url}' target='_blank' 
+               style='background-color: #0077b5; color: white; padding: 8px 16px; 
+                      border-radius: 5px; text-decoration: none; display: inline-block; 
+                      transition: all 0.3s; border: none; cursor: pointer;'
+               onmouseover="this.style.backgroundColor='#0056b3'" 
+               onmouseout="this.style.backgroundColor='#0077b5'">
+                Search Jobs →
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
+    except Exception as e:
+        st.error(f"Error generating URL for {portal['name']}: {str(e)}")
+
+# ================== MAIN APP ==================
+st.title("💼 Mega Job Finder Pro")
+st.markdown("🔍 Advanced job search with precision filters across 50+ portals")
+
+with st.form("job_search_form"):
     col1, col2 = st.columns(2)
+    
     with col1:
-        keyword = st.text_input("Job Title / Keywords", "Data Scientist")
-        location = st.text_input("Preferred Location", "Remote")
-        country = st.selectbox("Country", list(PORTALS_BY_COUNTRY.keys()))
+        keyword = st.text_input("Job Title/Keywords", "Software Engineer")
+        industry = st.selectbox("Industry", INDUSTRIES, index=0)
+        country = st.selectbox("Country", COUNTRIES, index=0)
+        
     with col2:
-        experience = st.selectbox("Experience Level", ["Any", "Entry", "Mid", "Senior", "Executive"])
-        date_posted = st.selectbox("Date Posted", ["Any time", "Past month", "Past week", "Past 24 hours"])
-
-    submitted = st.form_submit_button("🔍 Find Jobs")
+        location = st.selectbox("Location", ALL_INDIAN_LOCATIONS if country == "India" else ["Global"], 
+                               index=0 if country != "India" else 0)
+        experience = st.selectbox("Experience Level", EXP_LEVELS, index=2)
+        date_posted = st.selectbox("Date Posted", DATE_POSTED, index=0)
+    
+    submitted = st.form_submit_button("🚀 Find Jobs")
 
 if submitted:
-    st.subheader(f"🌐 Job Portals in {country}")
-
-    # Filters mapping
-    time_map = {
-        "Any time": "",
-        "Past month": "r2592000",
-        "Past week": "r604800",
-        "Past 24 hours": "r86400"
-    }
-    exp_map = {
-        "Any": "",
-        "Entry": "2",
-        "Mid": "3",
-        "Senior": "4",
-        "Executive": "5"
-    }
-
-    d_filter = time_map[date_posted]
-    e_filter = exp_map[experience]
-
-    # Display portals as buttons
-    for name, url_func in PORTALS_BY_COUNTRY[country]:
-        if "LinkedIn" in name:
-            url = url_func(keyword, location, e_filter, d_filter)
-        else:
-            url = url_func(keyword, location, "", "")  # Non-LinkedIn portals don't use exp/date filters here
+    # Combine keyword with industry if industry is specified
+    search_keyword = keyword
+    if industry != "All Industries":
+        search_keyword = f"{industry} {keyword}".strip()
+    
+    st.subheader(f"🔎 {industry} Jobs in {location if country == 'India' else country}")
+    st.caption(f"Showing {experience.lower()} level jobs posted {date_posted.lower()}")
+    
+    # Convert filters
+    exp_val = EXP_MAP[experience]
+    date_val = DATE_MAP[date_posted]
+    search_location = location if country == "India" else country
+    
+    # Show relevant portals
+    portals = JOB_PORTALS.get(country, JOB_PORTALS["Global"])
+    
+    for portal in portals:
+        show_job_card(portal, search_keyword, search_location, exp_val, date_val)
+    
+    # Additional Resources
+    st.markdown("---")
+    st.subheader("📌 Additional Job Search Tools")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""
+        **Popular Alternatives:**
+        - [Google Jobs](https://www.google.com/search?q=jobs)
+        - [Glassdoor](https://www.glassdoor.com)
+        - [AngelList](https://angel.co/jobs)
+        - [Government Jobs](https://www.india.gov.in/spotlight/government-jobs)
+        """)
         
-        # Create a button with a classic interface
-        if st.button(f"🔍 Search on {name}", key=f"{name}_{country}"):
-            st.markdown(f"[Open {name} Job Search]({url})", unsafe_allow_html=True)
-            st.write(f"If you are logged into {name}, this will take you directly to the relevant job listings.")
-
-    st.success(f"✅ Generated {len(PORTALS_BY_COUNTRY[country])} job search links.")
-
-    # Google fallback
-    google_jobs = f"https://www.google.com/search?q={urllib.parse.quote(keyword)}+jobs+in+{urllib.parse.quote(location)}&ibp=htl;jobs"
-    st.markdown(f"""
-    <div style='background-color:#f0f2f6; padding:20px; border-radius:10px; margin-top:30px;'>
-        <h3 style='color:#1e3a8a;'>Need more options?</h3>
-        <p>Try these global aggregators:</p>
-        <a href='{google_jobs}' 
-           target='_blank' 
-           style='background-color:#1e3a8a; color:white; padding:10px 15px; text-decoration:none; border-radius:5px; display:inline-block; margin-top:10px;'>
-            🔍 Search Google Jobs
-        </a>
-    </div>
-    """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        **Pro Tips:**
+        1. Use exact job titles for better matches
+        2. Combine location + remote filters
+        3. Set up daily email alerts
+        4. Use multiple portals for maximum coverage
+        """)
+    
+    st.success(f"✅ Found {len(portals)} premium job sources for your search!")
