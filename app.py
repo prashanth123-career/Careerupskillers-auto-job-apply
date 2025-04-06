@@ -101,17 +101,21 @@ if submitted:
     d_filter = time_map[date_posted]
     e_filter = exp_map[experience]
 
-    # Display portals as buttons
+    # Display portals as buttons using HTML for redirection
     for name, url_func in PORTALS_BY_COUNTRY[country]:
         if "LinkedIn" in name:
             url = url_func(keyword, location, e_filter, d_filter)
         else:
             url = url_func(keyword, location, "", "")  # Non-LinkedIn portals don’t use exp/date filters here
         
-        # Create a button with a classic interface
-        if st.button(f"🔍 Search on {name}", key=f"{name}_{country}"):
-            st.markdown(f"[Open {name} Job Search]({url})", unsafe_allow_html=True)
-            st.write(f"If you are logged into {name}, this will take you directly to the relevant job listings.")
+        # Create a button with HTML that opens in a new tab
+        button_html = f"""
+        <a href="{url}" target="_blank" style="display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; margin: 5px 0;">
+            🔍 Search on {name}
+        </a>
+        <p style="font-size: 12px; color: #666;">If you are logged into {name}, this will take you directly to the relevant job listings.</p>
+        """
+        st.markdown(button_html, unsafe_allow_html=True)
 
     st.success(f"✅ Generated {len(PORTALS_BY_COUNTRY[country])} job search links.")
 
