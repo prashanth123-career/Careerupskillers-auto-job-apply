@@ -28,25 +28,25 @@ JOB_PORTALS = {
     "India": [
         {
             "name": "LinkedIn (India)",
-            "template": lambda k,l,e,d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}",
+            "template": lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}",
             "filters": ["location", "experience", "date"],
             "icon": "🔵"
         },
         {
             "name": "Naukri",
-            "template": lambda k,l,e,d: f"https://www.naukri.com/{k.lower().replace(' ','-')}-jobs-in-{l.lower().replace(' ','-')}?experience={e}&jobAge={d}",
+            "template": lambda k, l, e, d: f"https://www.naukri.com/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-') if l != 'Remote' else 'india'}?experience={e}&jobAge={d}",
             "filters": ["location", "experience", "date"],
             "icon": "🟡"
         },
         {
             "name": "Indeed India",
-            "template": lambda k,l,e,d: f"https://www.indeed.co.in/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}&fromage={d}&explvl={e}_level",
+            "template": lambda k, l, e, d: f"https://www.indeed.co.in/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}&fromage={d}&explvl={e}_level",
             "filters": ["location", "experience", "date"],
             "icon": "🔴"
         },
         {
             "name": "Monster India",
-            "template": lambda k,l,e,d: f"https://www.monsterindia.com/srp/results?query={urllib.parse.quote(k)}&locations={urllib.parse.quote(l)}&experienceRanges={e}~{e}&jobAge={d}",
+            "template": lambda k, l, e, d: f"https://www.monsterindia.com/srp/results?query={urllib.parse.quote(k)}&locations={urllib.parse.quote(l)}&experienceRanges={e}~{e}&jobAge={d}",
             "filters": ["location", "experience", "date"],
             "icon": "🟢"
         }
@@ -54,13 +54,13 @@ JOB_PORTALS = {
     "Global": [
         {
             "name": "LinkedIn Global",
-            "template": lambda k,l,e,d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}",
+            "template": lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}",
             "filters": ["location", "experience", "date"],
             "icon": "🔵"
         },
         {
             "name": "Indeed Worldwide",
-            "template": lambda k,l,e,d: f"https://www.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}&fromage={d}&explvl={e}_level",
+            "template": lambda k, l, e, d: f"https://www.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}&fromage={d}&explvl={e}_level",
             "filters": ["location", "experience", "date"],
             "icon": "🔴"
         }
@@ -93,32 +93,30 @@ def show_job_card(portal, keyword, location, exp_val, date_val):
             e=exp_val,
             d=date_val
         )
+        st.markdown(f"""
+        <div style='background-color:#f8f9fa; padding:15px; border-radius:10px; margin-bottom:15px; 
+                    border-left: 4px solid #0077b5; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+            <div style='display: flex; align-items: center; margin-bottom: 10px;'>
+                <span style='font-size: 24px; margin-right: 12px;'>{portal.get('icon', '🔗')}</span>
+                <h4 style='margin: 0; color: #1a237e;'>{portal['name']}</h4>
+            </div>
+            <div style='margin-bottom: 12px; color: #455a64;'>
+                {f"<b>Location:</b> {location}<br>" if 'location' in portal['filters'] else ""}
+                {f"<b>Experience:</b> {exp_val if exp_val else 'Any'}<br>" if 'experience' in portal['filters'] else ""}
+                {f"<b>Posted:</b> {date_val} days ago<br>" if date_val and 'date' in portal['filters'] else ""}
+            </div>
+            <a href='{url}' target='_blank' 
+               style='background-color: #0077b5; color: white; padding: 8px 16px; 
+                      border-radius: 5px; text-decoration: none; display: inline-block; 
+                      transition: all 0.3s; border: none; cursor: pointer;'
+               onmouseover="this.style.backgroundColor='#0056b3'" 
+               onmouseout="this.style.backgroundColor='#0077b5'">
+                Search Jobs →
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
     except Exception as e:
         st.error(f"Error generating URL for {portal['name']}: {str(e)}")
-        return
-
-    st.markdown(f"""
-    <div style='background-color:#f8f9fa; padding:15px; border-radius:10px; margin-bottom:15px; 
-                border-left: 4px solid #0077b5; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
-        <div style='display: flex; align-items: center; margin-bottom: 10px;'>
-            <span style='font-size: 24px; margin-right: 12px;'>{portal.get('icon', '🔗')}</span>
-            <h4 style='margin: 0; color: #1a237e;'>{portal['name']}</h4>
-        </div>
-        <div style='margin-bottom: 12px; color: #455a64;'>
-            {f"<b>Location:</b> {location}<br>" if 'location' in portal['filters'] else ""}
-            {f"<b>Experience:</b> {exp_val.replace('_', ' ').title()}<br>" if 'experience' in portal['filters'] else ""}
-            {f"<b>Posted:</b> {date_val} days ago<br>" if date_val and 'date' in portal['filters'] else ""}
-        </div>
-        <a href='{url}' target='_blank' 
-           style='background-color: #0077b5; color: white; padding: 8px 16px; 
-                  border-radius: 5px; text-decoration: none; display: inline-block; 
-                  transition: all 0.3s; border: none; cursor: pointer;'
-           onmouseover="this.style.backgroundColor='#0056b3'" 
-           onmouseout="this.style.backgroundColor='#0077b5'">
-            Search Jobs →
-        </a>
-    </div>
-    """, unsafe_allow_html=True)
 
 # ================== MAIN APP ==================
 st.title("💼 Mega Job Finder Pro")
@@ -141,6 +139,11 @@ with st.form("job_search_form"):
     submitted = st.form_submit_button("🚀 Find Jobs")
 
 if submitted:
+    # Combine keyword with industry if industry is specified
+    search_keyword = keyword
+    if industry != "All Industries":
+        search_keyword = f"{industry} {keyword}".strip()
+    
     st.subheader(f"🔎 {industry} Jobs in {location if country == 'India' else country}")
     st.caption(f"Showing {experience.lower()} level jobs posted {date_posted.lower()}")
     
@@ -153,7 +156,7 @@ if submitted:
     portals = JOB_PORTALS.get(country, JOB_PORTALS["Global"])
     
     for portal in portals:
-        show_job_card(portal, keyword, search_location, exp_val, date_val)
+        show_job_card(portal, search_keyword, search_location, exp_val, date_val)
     
     # Additional Resources
     st.markdown("---")
