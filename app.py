@@ -69,6 +69,18 @@ st.markdown(
         bottom: 0;
         border-top: 1px solid #ffd700;
     }
+    .social-btn {
+        background-color: #003087;
+        color: #ffd700;
+        padding: 8px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        margin: 0 5px;
+        transition: background-color 0.3s;
+    }
+    .social-btn:hover {
+        background-color: #001f5f;
+    }
     </style>
     """,
     unsafe_allow_html=True
@@ -148,6 +160,7 @@ with st.form("job_form"):
         experience = st.selectbox("Experience Level", ["Any", "Entry", "Mid", "Senior", "Executive"], key="experience_select")
         date_posted = st.selectbox("Date Posted", ["Any time", "Past month", "Past week", "Past 24 hours"], key="date_select")
 
+    # Ensure submit button is inside the form
     submitted = st.form_submit_button("🔍 Find Jobs", key="submit_button")
 
 if submitted:
@@ -191,24 +204,63 @@ if submitted:
 
     st.success(f"✅ Generated {len(PORTALS_BY_COUNTRY[country])} job search links.")
 
-    # Google fallback and social link
+    # Google fallback and social links
     google_jobs = f"https://www.google.com/search?q={urllib.parse.quote(keyword)}+jobs+in+{urllib.parse.quote(location)}&ibp=htl;jobs"
-    # Assuming sttsched is a social handle or link (replace with actual URL if different)
-    social_link = "https://twitter.com/sttsched"  # Placeholder, update with your link
+    contact_us = "https://www.careerupskillers.com/post/the-ultimate-ai-career-guide-jobs-freelancing-and-startups#contact"
+    whatsapp = "https://api.whatsapp.com/send/?phone=917892116728&text&type=phone_number&app_absent=0"
+    about_us = "https://www.careerupskillers.com/about-1"
+    privacy = "https://www.careerupskillers.com/about-1"  # Assuming privacy is under about page; update if separate
+    linkedin = "https://www.linkedin.com/company/79362047/admin/dashboard/"
+    instagram = "https://www.instagram.com/careerupskillers?igsh=YWNmOGMwejBrb24z"
+    youtube = "https://www.youtube.com/@Careerupskillers"
+    facebook = "https://www.facebook.com/Careerupskillers?rdid=VxU12OcSC0C7hU8Z&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F18gUeR73H6%2F#"
+
     st.markdown(f"""
     <div style='background-color:#f0f4f8; padding:20px; border-radius:10px; margin-top:30px; text-align:center;'>
         <h3 style='color:#003087;'>Need more options?</h3>
-        <a href='{google_jobs}' target='_blank' style='background-color:#003087; color:#ffd700; padding:10px 15px; text-decoration:none; border-radius:5px; margin-right:10px;'>
+        <a href='{google_jobs}' target='_blank' class='social-btn'>
             🔍 Search Google Jobs
         </a>
-        <a href='{social_link}' target='_blank' style='background-color:#003087; color:#ffd700; padding:10px 15px; text-decoration:none; border-radius:5px;'>
-            🌐 Follow CareerUpSkillers
+        <a href='{contact_us}' target='_blank' class='social-btn'>
+            📧 Contact Us
+        </a>
+        <a href='{whatsapp}' target='_blank' class='social-btn'>
+            💬 WhatsApp
+        </a>
+        <a href='{about_us}' target='_blank' class='social-btn'>
+            ℹ️ About Us
+        </a>
+        <a href='{privacy}' target='_blank' class='social-btn'>
+            🔒 Privacy
+        </a>
+        <a href='{linkedin}' target='_blank' class='social-btn'>
+            💼 LinkedIn
+        </a>
+        <a href='{instagram}' target='_blank' class='social-btn'>
+            📸 Instagram
+        </a>
+        <a href='{youtube}' target='_blank' class='social-btn'>
+            🎥 YouTube
+        </a>
+        <a href='{facebook}' target='_blank' class='social-btn'>
+            👍 Facebook
         </a>
     </div>
     """, unsafe_allow_html=True)
 
-# Footer with social link
+# Footer with social links
 st.markdown(
-    f'<div class="footer">© 2025 CareerUpSkillers | <a href="{social_link}" target="_blank" style="color:#ffd700; text-decoration:none;">Follow Us</a></div>',
+    f"""
+    <div class="footer">
+        © 2025 CareerUpSkillers | 
+        <a href="{contact_us}" target="_blank" style="color:#ffd700; text-decoration:none; margin:0 5px;">Contact</a> | 
+        <a href="{about_us}" target="_blank" style="color:#ffd700; text-decoration:none; margin:0 5px;">About</a> | 
+        <a href="{privacy}" target="_blank" style="color:#ffd700; text-decoration:none; margin:0 5px;">Privacy</a> | 
+        <a href="{linkedin}" target="_blank" style="color:#ffd700; text-decoration:none; margin:0 5px;">LinkedIn</a> | 
+        <a href="{instagram}" target="_blank" style="color:#ffd700; text-decoration:none; margin:0 5px;">Instagram</a> | 
+        <a href="{youtube}" target="_blank" style="color:#ffd700; text-decoration:none; margin:0 5px;">YouTube</a> | 
+        <a href="{facebook}" target="_blank" style="color:#ffd700; text-decoration:none; margin:0 5px;">Facebook</a>
+    </div>
+    """,
     unsafe_allow_html=True
 )
