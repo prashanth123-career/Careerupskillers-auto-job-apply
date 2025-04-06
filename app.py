@@ -124,31 +124,54 @@ with tab2:
             st.error("Platform not supported. Please choose another.")
 # ---------------------- TAB 3: FREE COURSES ----------------------
 with tab3:
-    st.title("🎓 Free Courses with Certificates")
-    st.markdown("💡 Learn free from top platforms: Google, IBM, Coursera, YouTube")
+    st.title("🎓 Explore Free Courses with Certifications")
+    st.markdown("💡 Discover free learning opportunities from Google, IBM, Amazon, Microsoft, Meta, and more.")
 
     with st.form("course_form"):
-        course_input = st.text_input("Search Course / Skill / Designation", "Python for Data Science")
-        course_submit = st.form_submit_button("🔍 Show Free Courses")
+        search = st.text_input("Search by Skill / Course / Job Role", "Data Analyst")
+        course_submit = st.form_submit_button("🔍 Find Free Courses")
 
     if course_submit:
-        st.subheader(f"🎓 Free Courses Related to '{course_input}'")
-        search_query = urllib.parse.quote(course_input)
+        query = urllib.parse.quote_plus(search)
 
-        course_links = [
-            ("Google Career Certificates", f"https://grow.google/certificates/?q={search_query}"),
-            ("Coursera Free (Google, IBM, Meta)", f"https://www.coursera.org/search?query={search_query}&price=Free"),
-            ("edX Free Courses", f"https://www.edx.org/search?q={search_query}&price=Free"),
-            ("YouTube Learning", f"https://www.youtube.com/results?search_query={search_query}+course"),
-            ("Alison Certified Courses", f"https://alison.com/courses?query={search_query}"),
-            ("FutureLearn Free Courses", f"https://www.futurelearn.com/search?q={search_query}")
+        st.subheader("🧠 Tech Giants")
+        tech_giants = [
+            ("Google Courses", f"https://grow.google/certificates/?q={query}"),
+            ("IBM SkillsBuild", f"https://skillsbuild.org/learn?search={query}"),
+            ("Amazon AWS Courses", f"https://explore.skillbuilder.aws/learn?searchTerm={query}"),
+            ("Microsoft (via LinkedIn Learning)", "https://www.linkedin.com/learning/"),
+            ("Meta Blueprint", f"https://www.facebook.com/business/learn/courses?search={query}")
         ]
+        for name, url in tech_giants:
+            st.markdown(f"<a href='{url}' target='_blank' style='display:block; padding:8px; background:#3b82f6; color:white; border-radius:5px; margin-bottom:5px;'>📘 {name}</a>", unsafe_allow_html=True)
 
-        for name, url in course_links:
-            st.markdown(f"""
-            <a href="{url}" target="_blank" style="display:block; background:#6366f1; color:white; padding:10px; margin:10px 0; border-radius:5px; text-align:center;">
-                🎓 {name}
-            </a>
-            """, unsafe_allow_html=True)
+        st.subheader("🌐 Online Learning Platforms")
+        online_platforms = [
+            ("Coursera Free Courses", f"https://www.coursera.org/search?query={query}&price=Free"),
+            ("edX Free Courses", f"https://www.edx.org/search?q={query}&price=Free"),
+            ("FutureLearn", f"https://www.futurelearn.com/search?q={query}"),
+            ("YouTube Learning", f"https://www.youtube.com/results?search_query={query}+course")
+        ]
+        for name, url in online_platforms:
+            st.markdown(f"<a href='{url}' target='_blank' style='display:block; padding:8px; background:#6366f1; color:white; border-radius:5px; margin-bottom:5px;'>🌍 {name}</a>", unsafe_allow_html=True)
 
-        st.success("✅ Explore and start learning for free with certification!")
+        st.subheader("⚙️ Specialized Platforms")
+        specialized = [
+            ("GitLab Certifications", f"https://about.gitlab.com/handbook/learning-and-development/#free-training?search={query}"),
+            ("MongoDB University", f"https://learn.mongodb.com/catalog?search={query}"),
+            ("Salesforce Trailhead", f"https://trailhead.salesforce.com/en/search?keywords={query}"),
+            ("Twitter Flight School", f"https://flightschool.twitter.com/student/catalog/search?query={query}")
+        ]
+        for name, url in specialized:
+            st.markdown(f"<a href='{url}' target='_blank' style='display:block; padding:8px; background:#10b981; color:white; border-radius:5px; margin-bottom:5px;'>🛠️ {name}</a>", unsafe_allow_html=True)
+
+        st.subheader("🎯 Other Platforms")
+        others = [
+            ("Google Digital Garage", f"https://learndigital.withgoogle.com/digitalgarage/courses?search={query}"),
+            ("Google Cloud Skills Boost", f"https://www.cloudskillsboost.google/catalog?search={query}"),
+            ("Google Skillshop", f"https://skillshop.exceedlms.com/student/catalog/search?query={query}")
+        ]
+        for name, url in others:
+            st.markdown(f"<a href='{url}' target='_blank' style='display:block; padding:8px; background:#f59e0b; color:white; border-radius:5px; margin-bottom:5px;'>💼 {name}</a>", unsafe_allow_html=True)
+
+        st.success("✅ Explore and start learning today with globally recognized certifications!")
