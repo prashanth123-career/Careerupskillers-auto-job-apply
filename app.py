@@ -246,7 +246,7 @@ with tab2:
 with tab3:
     st.header(f"🎓 {t['free_courses']}")
 
-    # Curated course list by category
+    # Expanded curated course database
     COURSE_DATABASE = {
         "AI/ML": [
             ("Google", "https://cloudskillsboost.google/journeys/118", "ML Fundamentals", "8h", "✅"),
@@ -256,54 +256,87 @@ with tab3:
         "Programming": [
             ("FreeCodeCamp", "https://www.freecodecamp.org/learn", "Python Basics", "4h", "✅"),
             ("Harvard", "https://cs50.harvard.edu/x/", "CS50: Intro to CS", "10w", "✅"),
+            ("Codecademy", "https://codecademy.com/learn/intro-to-javascript", "JavaScript Basics", "6h", "✅"),
         ],
         "Soft Skills": [
             ("Coursera", "https://www.coursera.org/learn/learning-how-to-learn", "Learning How to Learn", "8h", "✅"),
             ("edX", "https://www.edx.org/course/essential-soft-skills", "Essential Soft Skills", "5h", "✅"),
+            ("Udemy", "https://udemy.com/course/communication-skills-masterclass", "Communication Mastery", "3h", "✅"),
         ],
         "Cloud Computing": [
             ("AWS", "https://www.aws.training", "AWS Cloud Practitioner Essentials", "6h", "✅"),
             ("Google Cloud", "https://cloud.google.com/training", "Cloud Digital Leader", "7h", "✅"),
+            ("Microsoft", "https://learn.microsoft.com/azure-fundamentals", "Azure Fundamentals", "5h", "✅"),
+        ],
+        "Sales": [
+            ("HubSpot", "https://academy.hubspot.com/courses/sales", "Sales Training", "4h", "✅"),
+            ("Coursera", "https://coursera.org/specializations/sales-training", "Sales Strategies", "12h", "✅"),
+            ("Alison", "https://alison.com/course/diploma-in-sales-skills", "Sales Diploma", "8h", "✅"),
         ]
     }
 
     with st.form("course_form"):
-        search_query = st.text_input(t["search_course"], "AI for Business")
-        category = st.selectbox("Category", ["All"] + list(COURSE_DATABASE.keys()))
+        col1, col2 = st.columns([3, 2])
+        with col1:
+            search_query = st.text_input(t["search_course"], "Sales")
+        with col2:
+            category = st.selectbox("Category", ["All"] + list(COURSE_DATABASE.keys()))
         submitted = st.form_submit_button(f"🎯 {t['find_courses']}")
 
     if submitted:
-        st.subheader("🏅 Verified Free Courses")
+        st.subheader("🏅 Verified Courses in Application")
         found = False
+        
+        # Search through all categories
         for cat, courses in COURSE_DATABASE.items():
             if category != "All" and cat != category:
                 continue
+                
+            category_header = False  # Control category headings
+            
             for provider, url, title, duration, cert in courses:
-                if search_query.lower() in title.lower():
-                    found = True
+                if search_query.lower() in title.lower() or search_query.lower() in cat.lower():
+                    if not category_header:
+                        st.markdown(f"### {cat} Courses")
+                        category_header = True
+                        found = True
+                    
+                    # Course card with enhanced styling
                     st.markdown(f"""
-                    <div style="padding:10px; border:1px solid #ccc; border-radius:8px; margin:5px 0;">
-                        <b>{title}</b><br>
-                        🏢 {provider} | ⏳ {duration} | Certificate: {cert}<br>
-                        <a href="{url}" target="_blank" style="color:blue;">Enroll Now →</a>
+                    <div style="padding:15px; border:1px solid #e0e0e0; border-radius:10px; margin:10px 0;
+                                box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="margin:0; color:#1a73e8;">{title}</h4>
+                                <p style="margin:5px 0; color:#5f6368;">🏢 {provider} | ⏳ {duration} | Certificate: {cert}</p>
+                            </div>
+                            <a href="{url}" target="_blank" 
+                               style="background:#1a73e8; color:white; padding:8px 20px; 
+                                      border-radius:5px; text-decoration:none; font-weight:500;">
+                                Enroll Now
+                            </a>
+                        </div>
                     </div>
                     """, unsafe_allow_html=True)
 
         if not found:
-            st.warning("No matching courses found. Try changing the search or category.")
+            st.warning("No matching courses found. Try broadening your search terms.")
 
-        # Suggested Learning Path
-        st.subheader("🗺 Suggested Learning Path")
+        # Enhanced learning paths
+        st.subheader("🗺 Career Learning Paths")
         paths = {
-            "AI/ML": "1. Math Basics → 2. Python Programming → 3. ML Fundamentals → 4. Deep Learning",
-            "Programming": "1. Programming Basics → 2. Algorithms → 3. Version Control → 4. Projects",
-            "Soft Skills": "1. Communication → 2. Time Management → 3. Problem Solving → 4. Leadership",
-            "Cloud Computing": "1. Cloud Basics → 2. AWS/GCP Intro → 3. Security & DevOps → 4. Certification"
+            "AI/ML": "1. Math Basics → 2. Python Programming → 3. ML Fundamentals → 4. Deep Learning → 5. NLP Specialization",
+            "Programming": "1. Programming Basics → 2. Algorithms → 3. Version Control → 4. Project Development → 5. Open Source Contributions",
+            "Soft Skills": "1. Communication → 2. Time Management → 3. Critical Thinking → 4. Leadership → 5. Negotiation",
+            "Cloud Computing": "1. Cloud Basics → 2. IaaS/PaaS → 3. Security & DevOps → 4. Certification Prep → 5. Cloud Architecture",
+            "Sales": "1. Sales Fundamentals → 2. CRM Tools → 3. Negotiation Tactics → 4. Client Management → 5. Sales Leadership"
         }
 
-        if category in paths:
-            st.markdown(f"""
-            <div style="padding:15px; background:#e3f2fd; border-radius:10px;">
-                {paths[category]}
-            </div>
-            """, unsafe_allow_html=True)
+        selected_path = paths.get(category, "General Skills Development Path")
+        st.markdown(f"""
+        <div style="padding:20px; background:#f8f9fa; border-radius:10px; margin-top:15px;
+                    border-left: 4px solid #1a73e8;">
+            <h4 style="margin:0 0 10px 0; color:#202124;">{category if category != 'All' else 'General'} Career Path</h4>
+            <p style="margin:0; color:#5f6368; line-height:1.6;">{selected_path}</p>
+        </div>
+        """, unsafe_allow_html=True)
