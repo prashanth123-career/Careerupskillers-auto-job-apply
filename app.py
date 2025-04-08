@@ -69,7 +69,18 @@ tab1, tab2, tab3 = st.tabs([f"🌐 {t['job_finder']}", f"🎯 {t['interview_prep
 with tab1:
     st.header(f"🌐 {t['job_finder']}")
 
-    PORTALS_BY_COUNTRY = { ... }  # Keep your full dictionary as-is above
+    PORTALS_BY_COUNTRY = {
+        "India": [...],
+        "USA": [...],
+        "UK": [...],
+        "UAE": [...],
+        "Germany": [...],
+        "Australia": [...],
+        "New Zealand": [...],
+        "Russia": [...],
+        "China": [...],
+        "Japan": [...]
+    }
 
     with st.form("job_form"):
         col1, col2 = st.columns(2)
@@ -111,18 +122,19 @@ with tab1:
             url = url_func(keyword, location, e_filter, d_filter)
             icon = f"https://logo.clearbit.com/{name.lower().replace(' ', '')}.com"
             st.markdown(
-                f'<a href="{url}" target="_blank" style="display:flex; align-items:center; gap:10px; padding:10px 20px; background:#4CAF50; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">'
-                f'<img src="{icon}" alt="{name}" style="width:24px; height:24px; border-radius:4px;"> {name}'
-                f'</a>',
+                f'<a href="{url}" target="_blank" '
+                f'style="display:flex; align-items:center; gap:10px; padding:10px 20px; '
+                f'background:#4CAF50; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">'
+                f'<img src="{icon}" alt="{name}" style="width:24px; height:24px; border-radius:4px;"> {name}</a>',
                 unsafe_allow_html=True
             )
 
-        # Add Google Jobs at the end for all countries
+        # Google Jobs fallback
         google_jobs_url = f"https://www.google.com/search?q={urllib.parse.quote(keyword + ' jobs in ' + location)}"
         st.markdown(
-            f'<a href="{google_jobs_url}" target="_blank" style="display:inline-block; padding:10px 20px; background:#4285F4; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">'
-            f'Search on Google Jobs'
-            f'</a>',
+            f'<a href="{google_jobs_url}" target="_blank" '
+            f'style="display:inline-block; padding:10px 20px; background:#4285F4; color:white; '
+            f'border-radius:5px; text-decoration:none; margin-bottom:5px;">Search on Google Jobs</a>',
             unsafe_allow_html=True
         )
 
