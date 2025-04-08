@@ -48,42 +48,133 @@ st.markdown(f"<p style='text-align:center'>{t['description']}</p>", unsafe_allow
 # ---------------- TABS ----------------
 tab1, tab2, tab3 = st.tabs([f"🌍 {t['job_finder']}", f"🧠 {t['interview_prep']}", f"🎓 {t['free_courses']}"])
 
-# ---------------- TAB 1: JOB FINDER ----------------
-with tab1:
-    st.subheader(f"🌍 {t['job_finder']}")
-    keyword = st.text_input(t["job_title"], "Data Scientist")
-    location = st.text_input(t["location"], "Remote")
-    experience = st.selectbox(t["experience"], t["experience_options"])
-    date_posted = st.selectbox(t["date_posted"], t["date_posted_options"])
-    country = st.selectbox(t["country"], [
-        "India", "USA", "UK", "UAE", "Germany", "Australia", "New Zealand",
-        "Japan", "China", "Russia", "Singapore", "Malaysia"
-    ])
-    if st.button(f"🔍 {t['find_jobs']}"):
-        time_map = {
-            t["date_posted_options"][0]: "",
-            t["date_posted_options"][1]: "r2592000",
-            t["date_posted_options"][2]: "r604800",
-            t["date_posted_options"][3]: "r86400"
-        }
-        exp_map = {
-            t["experience_options"][0]: "",
-            t["experience_options"][1]: "entry",
-            t["experience_options"][2]: "mid",
-            t["experience_options"][3]: "senior",
-            t["experience_options"][4]: "executive"
-        }
-        d_filter = time_map[date_posted]
-        e_filter = exp_map[experience]
-        st.markdown("### 🔗 Job Portals:")
-        portals = [
-            ("LinkedIn", f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(keyword)}&location={urllib.parse.quote(location)}&f_E={e_filter}&f_TPR={d_filter}"),
-            ("Indeed", f"https://www.indeed.com/jobs?q={urllib.parse.quote(keyword)}&l={urllib.parse.quote(location)}&explvl={e_filter}"),
-            ("Monster", f"https://www.monster.com/jobs/search/?q={urllib.parse.quote(keyword)}&where={urllib.parse.quote(location)}"),
-            ("Google Jobs", f"https://www.google.com/search?q={urllib.parse.quote(keyword + ' jobs in ' + location)}")
-        ]
-        for name, url in portals:
-            st.markdown(f"<a href='{url}' target='_blank' style='display:block; padding:10px; margin:5px; background:#4CAF50; color:white; border-radius:5px; text-decoration:none;'>🔗 {name}</a>", unsafe_allow_html=True)
+# ------------------ JOB FINDER TAB ------------------
+st.title("🌍 AI Job Hub – Global Job Finder")
+
+# Input section
+keyword = st.text_input("🔍 Job Title / Keywords", "Data Scientist")
+location = st.text_input("📍 Preferred Location", "Remote")
+experience = st.selectbox("🎓 Experience Level", ["Any", "Entry", "Mid", "Senior", "Executive"])
+date_posted = st.selectbox("🗓 Date Posted", ["Any time", "Past month", "Past week", "Past 24 hours"])
+country = st.selectbox("🌐 Country", [
+    "India", "USA", "UK", "UAE", "Germany", "Australia", "New Zealand", 
+    "Japan", "China", "Russia", "Singapore", "Malaysia"
+])
+
+# Filter mappings
+time_map = {
+    "Any time": "", "Past month": "r2592000",
+    "Past week": "r604800", "Past 24 hours": "r86400"
+}
+exp_map = {
+    "Any": "", "Entry": "entry", "Mid": "mid", "Senior": "senior", "Executive": "executive"
+}
+d_filter = time_map[date_posted]
+e_filter = exp_map[experience]
+
+# Portal definitions with filters
+PORTALS = {
+    "India": [
+        ("LinkedIn", lambda k, l: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_E={e_filter}&f_TPR={d_filter}"),
+        ("Indeed", lambda k, l: f"https://in.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}&explvl={e_filter}"),
+        ("Naukri", lambda k, l: f"https://www.naukri.com/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
+        ("Shine", lambda k, l: f"https://www.shine.com/job-search/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}")
+    ],
+    "USA": [
+        ("LinkedIn", lambda k, l: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_E={e_filter}&f_TPR={d_filter}"),
+        ("Indeed", lambda k, l: f"https://www.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}&explvl={e_filter}"),
+        ("USAJobs", lambda k, l: f"https://www.usajobs.gov/Search/Results?k={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
+        ("Monster", lambda k, l: f"https://www.monster.com/jobs/search/?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}")
+    ],
+    "UK": [
+        ("LinkedIn", lambda k, l: f"https://uk.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_E={e_filter}&f_TPR={d_filter}"),
+        ("Indeed", lambda k, l: f"https://uk.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}&explvl={e_filter}"),
+        ("Reed", lambda k, l: f"https://www.reed.co.uk/jobs/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
+        ("TotalJobs", lambda k, l: f"https://www.totaljobs.com/jobs/{k.lower().replace(' ', '-')}/in-{l.lower().replace(' ', '-')}")
+    ],
+    "UAE": [
+        ("LinkedIn", lambda k, l: f"https://ae.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_E={e_filter}&f_TPR={d_filter}"),
+        ("Bayt", lambda k, l: f"https://www.bayt.com/en/uae/jobs/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
+        ("GulfTalent", lambda k, l: f"https://www.gulftalent.com/uae/jobs/title/{k.lower().replace(' ', '-')}"),
+        ("NaukriGulf", lambda k, l: f"https://www.naukrigulf.com/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}")
+    ],
+    "Germany": [
+        ("LinkedIn", lambda k, l: f"https://de.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_E={e_filter}&f_TPR={d_filter}"),
+        ("StepStone", lambda k, l: f"https://www.stepstone.de/jobs/{k.lower().replace(' ', '-')}/in-{l.lower().replace(' ', '-')}.html"),
+        ("Monster DE", lambda k, l: f"https://www.monster.de/jobs/suche/?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}"),
+        ("XING", lambda k, l: f"https://www.xing.com/jobs/search?q={urllib.parse.quote(k)}")
+    ],
+    "Australia": [
+        ("LinkedIn", lambda k, l: f"https://au.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_E={e_filter}&f_TPR={d_filter}"),
+        ("Seek", lambda k, l: f"https://www.seek.com.au/{k.lower().replace(' ', '-')}-jobs/in-{l.lower().replace(' ', '-')}"),
+        ("Adzuna", lambda k, l: f"https://www.adzuna.com.au/search?q={urllib.parse.quote(k)}&loc={urllib.parse.quote(l)}"),
+        ("CareerOne", lambda k, l: f"https://www.careerone.com.au/jobs?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}")
+    ],
+    "New Zealand": [
+        ("Seek NZ", lambda k, l: f"https://www.seek.co.nz/{k.lower().replace(' ', '-')}-jobs/in-{l.lower().replace(' ', '-')}"),
+        ("TradeMe Jobs", lambda k, l: f"https://www.trademe.co.nz/a/jobs/search?search_string={urllib.parse.quote(k)}"),
+        ("MyJobSpace", lambda k, l: f"https://www.myjobspace.co.nz/jobs?q={urllib.parse.quote(k)}"),
+        ("Indeed NZ", lambda k, l: f"https://nz.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}")
+    ],
+    "Singapore": [
+        ("JobStreet", lambda k, l: f"https://www.jobstreet.com.sg/en/job-search/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
+        ("JobsCentral", lambda k, l: f"https://jobscentral.com.sg/search/{urllib.parse.quote(k)}"),
+        ("FastJobs", lambda k, l: f"https://www.fastjobs.sg/singapore-job-ad/{urllib.parse.quote(k)}"),
+        ("LinkedIn", lambda k, l: f"https://sg.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}")
+    ],
+    "Malaysia": [
+        ("JobStreet MY", lambda k, l: f"https://www.jobstreet.com.my/en/job-search/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
+        ("Indeed MY", lambda k, l: f"https://my.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
+        ("LinkedIn", lambda k, l: f"https://my.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
+        ("Jobstore", lambda k, l: f"https://www.jobstore.com/my/browse/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}")
+    ],
+    "Japan": [
+        ("Daijob", lambda k, l: f"https://www.daijob.com/en/jobs/search?keyword={urllib.parse.quote(k)}"),
+        ("Jobs in Japan", lambda k, l: f"https://jobsinjapan.com/jobs/?search={urllib.parse.quote(k)}"),
+        ("LinkedIn", lambda k, l: f"https://jp.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
+        ("GaijinPot", lambda k, l: f"https://jobs.gaijinpot.com/index/index/search?keywords={urllib.parse.quote(k)}")
+    ],
+    "China": [
+        ("51Job", lambda k, l: f"https://search.51job.com/list/000000,000000,0000,00,9,99,{urllib.parse.quote(k)},2,1.html"),
+        ("Zhaopin", lambda k, l: f"https://sou.zhaopin.com/?jl=530&kw={urllib.parse.quote(k)}"),
+        ("Liepin", lambda k, l: f"https://www.liepin.com/zhaopin/?key={urllib.parse.quote(k)}"),
+        ("LinkedIn", lambda k, l: f"https://cn.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}")
+    ],
+    "Russia": [
+        ("hh.ru", lambda k, l: f"https://hh.ru/search/vacancy?text={urllib.parse.quote(k)}&area=113"),
+        ("SuperJob", lambda k, l: f"https://www.superjob.ru/vacancy/search/?keywords={urllib.parse.quote(k)}"),
+        ("Rabota", lambda k, l: f"https://www.rabota.ru/vacancy?query={urllib.parse.quote(k)}"),
+        ("LinkedIn", lambda k, l: f"https://ru.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}")
+    ]
+}
+
+# Submit and list jobs
+if st.button("🔍 Find Jobs"):
+    st.subheader(f"🔗 Job Search Links in {country}")
+    for name, url_func in PORTALS[country]:
+        try:
+            url = url_func(keyword, location)
+            st.markdown(f"### 🔹 {name}")
+            st.markdown(f"[Open {name} →]({url})", unsafe_allow_html=True)
+
+            if "linkedin.com" in url or "usajobs.gov" in url:
+                st.info("Preview not supported for this portal.")
+                continue
+
+            headers = {"User-Agent": "Mozilla/5.0"}
+            res = requests.get(url, headers=headers, timeout=5)
+            soup = BeautifulSoup(res.text, "html.parser")
+            results = soup.find_all(["h2", "a", "div"], text=True)
+            jobs = [j.get_text(strip=True) for j in results if keyword.lower() in j.get_text(strip=True).lower()]
+            for job in list(dict.fromkeys(jobs))[:5]:
+                st.write("• " + job)
+        except Exception as e:
+            st.error(f"⚠️ Could not fetch results from {name}: {str(e)}")
+
+    # Google Jobs fallback
+    google_jobs_url = f"https://www.google.com/search?q={urllib.parse.quote(keyword + ' jobs in ' + location)}"
+    st.markdown(f"### 🔹 Google Jobs")
+    st.markdown(f"[Search on Google →]({google_jobs_url})", unsafe_allow_html=True)
 
 # ---------------- TAB 2: INTERVIEW PREP ----------------
 with tab2:
