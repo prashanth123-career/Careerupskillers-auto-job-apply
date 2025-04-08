@@ -108,17 +108,16 @@ with tab1:
     st.header(f"🌐 {t['job_finder']}")
 
     PORTALS_BY_COUNTRY = {
-        "India": [
-            ("LinkedIn", lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
-            ("Naukri", lambda k, l, e, d: f"https://www.naukri.com/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-') if l != 'Remote' else 'india'}"),
-            ("Indeed", lambda k, l, e, d: f"https://www.indeed.co.in/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
-            ("Shine", lambda k, l, e, d: f"https://www.shine.com/job-search/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}")
-        ],
-        "USA": [
-            ("LinkedIn", lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
-            ("USAJobs", lambda k, l, e, d: f"https://www.usajobs.gov/Search/Results?k={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
-            ("Indeed", lambda k, l, e, d: f"https://www.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}")
-        ]
+        "India": [...],
+        "USA": [...],
+        "UK": [...],
+        "UAE": [...],
+        "Germany": [...],
+        "Australia": [...],
+        "New Zealand": [...],
+        "Russia": [...],
+        "China": [...],
+        "Japan": [...]
     }
 
     with st.form("job_form"):
@@ -126,25 +125,32 @@ with tab1:
         with col1:
             keyword = st.text_input(t["job_title"], "Data Scientist")
             location = st.text_input(t["location"], "Remote")
-            country = st.selectbox(t["country"], list(PORTALS_BY_COUNTRY.keys()))
+            manual_mode = st.checkbox("Manually select country", value=True)
+            if manual_mode:
+                country = st.selectbox(t["country"], list(PORTALS_BY_COUNTRY.keys()))
+            else:
+                import geocoder
+                user_location = geocoder.ip('me')
+                country = user_location.country if user_location and user_location.country in PORTALS_BY_COUNTRY else "India"
+                st.markdown(f"**🌍 Detected Country:** {country}")
         with col2:
             experience = st.selectbox(t["experience"], t["experience_options"])
             date_posted = st.selectbox(t["date_posted"], t["date_posted_options"])
-        submitted = st.form_submit_button(f"🔍 {t['find_jobs']}")
+        submitted = st.form_submit_button(t["find_jobs"])
 
     if submitted:
         time_map = {
-            t["date_posted_options"][0]: "",  # "Any time" or equivalent
-            t["date_posted_options"][1]: "r2592000",  # "Past month"
-            t["date_posted_options"][2]: "r604800",   # "Past week"
-            t["date_posted_options"][3]: "r86400"     # "Past 24 hours"
+            t["date_posted_options"][0]: "",
+            t["date_posted_options"][1]: "r2592000",
+            t["date_posted_options"][2]: "r604800",
+            t["date_posted_options"][3]: "r86400"
         }
         exp_map = {
-            t["experience_options"][0]: "",  # "Any"
-            t["experience_options"][1]: "2", # "Entry"
-            t["experience_options"][2]: "3", # "Mid"
-            t["experience_options"][3]: "4", # "Senior"
-            t["experience_options"][4]: "5"  # "Executive"
+            t["experience_options"][0]: "",
+            t["experience_options"][1]: "2",
+            t["experience_options"][2]: "3",
+            t["experience_options"][3]: "4",
+            t["experience_options"][4]: "5"
         }
         d_filter = time_map[date_posted]
         e_filter = exp_map[experience]
@@ -152,11 +158,23 @@ with tab1:
         st.subheader(f"🔗 Job Search Links in {country}")
         for name, url_func in PORTALS_BY_COUNTRY[country]:
             url = url_func(keyword, location, e_filter, d_filter)
-            st.markdown(f"""
-            <a href="{url}" target="_blank" style="display:inline-block; padding:10px 20px; background:#4CAF50; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">
-                🔍 Search on {name}
-            </a>
-            """, unsafe_allow_html=True)
+            icon = f"https://logo.clearbit.com/{name.lower().replace(' ', '')}.com"
+            st.markdown(
+                f'<a href="{url}" target="_blank" '
+                f'style="display:flex; align-items:center; gap:10px; padding:10px 20px; '
+                f'background:#4CAF50; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">'
+                f'<img src="{icon}" alt="{name}" style="width:24px; height:24px; border-radius:4px;"> {name}</a>',
+                unsafe_allow_html=True
+            )
+
+        # Google Jobs fallback
+        google_jobs_url = f"https://www.google.com/search?q={urllib.parse.quote(keyword + ' jobs in ' + location)}"
+        st.markdown(
+            f'<a href="{google_jobs_url}" target="_blank" '
+            f'style="display:inline-block; padding:10px 20px; background:#4285F4; color:white; '
+            f'border-radius:5px; text-decoration:none; margin-bottom:5px;">Search on Google Jobs</a>',
+            unsafe_allow_html=True
+        )
 
 # ----------------- TAB 2: INTERVIEW PREPARATION -----------------
 with tab2:
