@@ -6,6 +6,7 @@
 
 import streamlit as st
 import urllib.parse
+from bs4 import BeautifulSoup
 
 # ---------- LANGUAGE SUPPORT ----------
 LANGUAGES = {
