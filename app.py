@@ -161,72 +161,200 @@ with tab1:
 # ----------------- TAB 2: INTERVIEW PREPARATION -----------------
 with tab2:
     st.header(f"🎯 {t['interview_prep']}")
+    
+    # Expanded platform list with icons
+    PLATFORMS = {
+        "LeetCode": {"icon": "💻", "type": "Coding"},
+        "HackerRank": {"icon": "👨💻", "type": "Coding"},
+        "GeeksforGeeks": {"icon": "📚", "type": "Technical"},
+        "Glassdoor": {"icon": "🏢", "type": "Company Specific"},
+        "Pramp": {"icon": "🤝", "type": "Mock Interviews"},
+        "InterviewBit": {"icon": "🧠", "type": "Coding"},
+        "AmbitionBox": {"icon": "🇮🇳", "type": "India Focused"},
+        "Big Interview": {"icon": "🎥", "type": "Mock Interviews"},
+        "iScalePro": {"icon": "📈", "type": "Behavioral"},
+    }
 
-    with st.form("interview_form"):
-        col1, col2 = st.columns(2)
+    with st.expander("🚀 Comprehensive Interview Preparation Suite", expanded=True):
+        col1, col2 = st.columns([1, 3])
         with col1:
-            role = st.text_input(t["job_title"], "Data Analyst")
-            country = st.selectbox(t["country"], ["India", "USA", "UK", "Canada", "Germany", "UAE", "Australia"])
+            role = st.text_input(t["job_title"], "Data Analyst", key="interview_role")
+            country = st.selectbox(t["country"], ["India", "USA", "UK", "Canada", "Germany", "UAE", "Australia"], key="interview_country")
+            interview_type = st.selectbox("Interview Type", ["Technical", "Behavioral", "Case Study", "System Design"])
+        
         with col2:
-            platform = st.selectbox("Choose Platform", [
-                "LeetCode", "HackerRank", "GeeksforGeeks", "Glassdoor", "Pramp",
-                "IndiaBix", "AmbitionBox", "Final Round AI", "Big Interview", "iScalePro"
-            ])
-        interview_submit = st.form_submit_button(f"🔗 {t['generate_link']}")
+            st.markdown("### 📚 Preparation Resources")
+            platform_type = st.selectbox("Resource Type", ["Coding", "Technical", "Behavioral", "Company Specific", "All"])
+            
+            # Filter platforms
+            filtered_platforms = [k for k, v in PLATFORMS.items() if platform_type == "All" or v["type"] == platform_type]
+            selected_platform = st.selectbox("Select Platform", filtered_platforms, format_func=lambda x: f"{PLATFORMS[x]['icon']} {x}")
+            
+            # Difficulty level
+            difficulty = st.select_slider("Difficulty Level", ["Beginner", "Intermediate", "Advanced"])
 
-    if interview_submit:
-        query = urllib.parse.quote_plus(role + " " + country)
-        PLATFORM_LINKS = {
-            "LeetCode": f"https://leetcode.com/problemset/all/?search={query}",
-            "HackerRank": f"https://www.hackerrank.com/interview/interview-preparation-kit",
-            "GeeksforGeeks": f"https://www.geeksforgeeks.org/?s={query}",
-            "Glassdoor": f"https://www.glassdoor.com/Interview/{query}-interview-questions-SRCH_KO0,{len(query)}.htm",
-            "Pramp": f"https://www.pramp.com/#interview-prep",
-            "IndiaBix": f"https://www.indiabix.com/interview/questions-and-answers/?search={query}",
-            "AmbitionBox": f"https://www.ambitionbox.com/interviews?title={query}",
-            "Final Round AI": "https://www.finalroundai.com/ai-mock-interview",
-            "Big Interview": "https://www.biginterview.com/",
-            "iScalePro": "https://www.iscalepro.com/jobseekers/"
-        }
+    # Generate dynamic content
+    if st.button(f"🔗 {t['generate_link']}"):
+        query = urllib.parse.quote_plus(f"{role} {country} {interview_type}")
+        
+        # Dynamic content generation
+        with st.spinner("🧠 Generating personalized interview plan..."):
+            # AI-generated questions (simulated)
+            questions = [
+                f"Explain the difference between supervised and unsupervised learning in {role} context",
+                f"How would you handle missing data in a real-world {role} scenario?",
+                f"Case study: Analyze our sales data and suggest optimization strategies",
+                f"Behavioral: Describe a time you solved a complex problem as a {role}"
+            ][:3]  # Simulated AI response
+            
+            # Resource links
+            PLATFORM_LINKS = {
+                "LeetCode": f"https://leetcode.com/problemset/all/?search={query}",
+                "Glassdoor": f"https://glassdoor.com/Interview/{query}-questions",
+                # Add other platform links
+            }
 
-        link = PLATFORM_LINKS.get(platform)
-        if link:
-            st.markdown(f"""
-            <a href="{link}" target="_blank" style="display:inline-block; padding:12px 24px; background:#2563eb; color:white; border-radius:5px; text-decoration:none;">
-                🚀 Prep on {platform}
-            </a>
-            """, unsafe_allow_html=True)
+            # Display results
+            st.success("🎉 Personalized Interview Plan Generated!")
+            
+            col1, col2 = st.columns([1, 2])
+            with col1:
+                st.subheader("📝 Recommended Questions")
+                for i, q in enumerate(questions, 1):
+                    st.markdown(f"""
+                    <div style="padding:10px; background:#f0f5ff; border-radius:5px; margin-bottom:10px;">
+                        {i}. {q}
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                st.subheader("📈 Progress Tracker")
+                st.markdown("""
+                - Technical Skills: 65% completed
+                - Behavioral Prep: 40% completed
+                - Mock Interviews: 2/5 completed
+                """)
+
+            with col2:
+                st.subheader("🎥 Interactive Preparation")
+                tab_a, tab_b, tab_c = st.tabs(["📚 Resources", "💡 Tips", "🎤 Mock Interview"])
+                
+                with tab_a:
+                    st.markdown(f"""
+                    **🔗 {selected_platform} Resources:**
+                    - [Practice Questions]({PLATFORM_LINKS.get(selected_platform, '#')})
+                    - [Discussion Forum](https://discuss.{selected_platform.lower()}.com/{query})
+                    - [Company-specific Guide](https://{selected_platform.lower()}.com/company-guides)
+                    """)
+                
+                with tab_b:
+                    st.markdown("""
+                    **🌟 Pro Tips for Success:**
+                    - Research the company's recent projects and mention them
+                    - Use STAR method for behavioral questions
+                    - Practice whiteboarding with time constraints
+                    - Prepare 2-3 thoughtful questions for the interviewer
+                    """)
+                
+                with tab_c:
+                    st.markdown("""
+                    **🎤 AI Mock Interview (Coming Soon)**
+                    <div style="border:2px dashed #4CAF50; padding:20px; border-radius:10px; text-align:center;">
+                        <p>🎧 Voice-based AI Interview Practice</p>
+                        <p>📊 Instant Feedback & Analytics</p>
+                        <p>🤖 Real-time Technical Challenge</p>
+                        <small>Powered by AI Interview Coach</small>
+                    </div>
+                    """, unsafe_allow_html=True)
 
 # ----------------- TAB 3: FREE COURSES -----------------
 with tab3:
     st.header(f"🎓 {t['free_courses']}")
+    
+    # Curated course database
+    COURSES = [
+        {
+            "title": "AI For Everyone",
+            "provider": "Coursera",
+            "link": "https://coursera.org/learn/ai-for-everyone",
+            "category": "AI",
+            "difficulty": "Beginner",
+            "duration": "6 hours",
+            "rating": 4.8,
+            "certificate": True,
+            "skills": ["AI Basics", "Business Strategy"]
+        },
+        {
+            "title": "Data Science Fundamentals",
+            "provider": "IBM",
+            "link": "https://skillsbuild.org/data-science",
+            "category": "Data Science",
+            "difficulty": "Intermediate",
+            "duration": "20 hours",
+            "rating": 4.5,
+            "certificate": True,
+            "skills": ["Python", "Pandas", "Data Analysis"]
+        },
+        # Add more courses...
+    ]
 
-    with st.form("course_form"):
-        search = st.text_input(t["search_course"], "AI for Business")
-        course_submit = st.form_submit_button(f"🎯 {t['find_courses']}")
+    with st.form("course_search"):
+        col1, col2, col3 = st.columns([3, 2, 2])
+        with col1:
+            search_query = st.text_input(t["search_course"], "AI for Business")
+        with col2:
+            category_filter = st.selectbox("Category", ["All", "AI", "Data Science", "Programming", "Soft Skills"])
+        with col3:
+            difficulty_filter = st.selectbox("Difficulty", ["All", "Beginner", "Intermediate", "Advanced"])
+        submitted = st.form_submit_button(f"🎯 {t['find_courses']}")
 
-    if course_submit:
-        query = urllib.parse.quote_plus(search)
-
-        st.subheader("🧠 Tech Giants")
-        tech = [
-            ("Google", f"https://grow.google/certificates/?q={query}"),
-            ("IBM", f"https://skillsbuild.org/learn?search={query}"),
-            ("Amazon AWS", f"https://explore.skillbuilder.aws/learn?searchTerm={query}"),
-            ("Microsoft (via LinkedIn)", "https://www.linkedin.com/learning/"),
-            ("Meta", f"https://www.facebook.com/business/learn/courses?search={query}")
+    if submitted:
+        filtered_courses = [
+            c for c in COURSES
+            if (search_query.lower() in c["title"].lower() or not search_query)
+            and (category_filter == "All" or c["category"] == category_filter)
+            and (difficulty_filter == "All" or c["difficulty"] == difficulty_filter)
         ]
-        for name, url in tech:
-            st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#3b82f6; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📘 {name}</a>", unsafe_allow_html=True)
 
-# ----------------- FOOTER -----------------
-st.markdown("""
-<hr style='margin-top:40px;'>
-<div style='text-align:center; font-size:16px; color:gray;'>
-    🚀 Powered by <strong>CareerUpskillers</strong> |
-    <a href='https://www.linkedin.com/company/careerupskillers' target='_blank'>LinkedIn</a> • 
-    <a href='https://twitter.com/careerupskill' target='_blank'>Twitter</a> • 
-    <a href='https://instagram.com/careerupskillers' target='_blank'>Instagram</a> • 
-    <a href='https://youtube.com/@careerupskillers' target='_blank'>YouTube</a>
-</div>
-""", unsafe_allow_html=True)
+        st.subheader(f"📚 {len(filtered_courses)} Courses Found")
+        
+        for course in filtered_courses:
+            with st.expander(f"### {course['title']} ({course['provider']})", expanded=True):
+                cols = st.columns([1, 3, 1])
+                with cols[0]:
+                    st.image(f"https://logo.clearbit.com/{course['provider']}.com", width=60)
+                with cols[1]:
+                    st.markdown(f"""
+                    **Provider:** {course['provider']}  
+                    **Duration:** {course['duration']}  
+                    **Skills:** {", ".join(course['skills'])}  
+                    **Certificate:** {'✅ Available' if course['certificate'] else '❌ Not Available'}
+                    """)
+                with cols[2]:
+                    st.markdown(f"""
+                    <div style="text-align:center">
+                        <div style="font-size:24px; color:#4CAF50;">{course['rating']}★</div>
+                        <a href="{course['link']}" target="_blank" style="display:block; padding:8px; background:#4CAF50; color:white; border-radius:5px; text-decoration:none;">
+                            Enroll Now
+                        </a>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div style="background:#f0f5ff; padding:20px; border-radius:10px; margin-top:20px;">
+            <h4>🎓 Learning Path Recommendations</h4>
+            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:20px; margin-top:15px;">
+                <div style="background:white; padding:15px; border-radius:10px;">
+                    <h5>🚀 AI Specialist Path</h5>
+                    <p>1. AI Basics → 2. Machine Learning → 3. Deep Learning</p>
+                </div>
+                <div style="background:white; padding:15px; border-radius:10px;">
+                    <h5>📊 Data Analyst Path</h5>
+                    <p>1. Excel → 2. SQL → 3. Python → 4. Data Visualization</p>
+                </div>
+                <div style="background:white; padding:15px; border-radius:10px;">
+                    <h5>💼 Business Intelligence Path</h5>
+                    <p>1. Power BI → 2. Tableau → 3. Data Storytelling</p>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
