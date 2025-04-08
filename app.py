@@ -4,31 +4,14 @@ import urllib.parse
 # ----------------- LANGUAGE SUPPORT -----------------
 LANGUAGES = {
     "English": "en",
-    "Assamese": "as",
-    "Bengali": "bn",
-    "Bodo": "brx",
-    "Dogri": "doi",
-    "Gujarati": "gu",
     "Hindi": "hi",
-    "Kannada": "kn",
-    "Kashmiri": "ks",
-    "Konkani": "kok",
-    "Maithili": "mai",
-    "Malayalam": "ml",
-    "Manipuri": "mni",
-    "Marathi": "mr",
-    "Nepali": "ne",
-    "Odia": "or",
-    "Punjabi": "pa",
-    "Santhali": "sat",
-    "Sindhi": "sd",
     "Tamil": "ta",
     "Telugu": "te",
-    "Urdu": "ur",
+    "Malayalam": "ml",
     "French": "fr",
     "German": "de",
     "Arabic": "ar",
-    "Spanish": "es",
+    # Add more languages as needed
 }
 
 TRANSLATIONS = {
@@ -48,6 +31,8 @@ TRANSLATIONS = {
         "experience": "Experience Level",
         "date_posted": "Date Posted",
         "search_course": "Search Course / Skill / Job Title",
+        "experience_options": ["Any", "Entry", "Mid", "Senior", "Executive"],
+        "date_posted_options": ["Any time", "Past month", "Past week", "Past 24 hours"],
     },
     "hi": {
         "title": "कैरियर अपस्किलर्स | एआई जॉब हब",
@@ -65,6 +50,8 @@ TRANSLATIONS = {
         "experience": "अनुभव स्तर",
         "date_posted": "पोस्ट की तारीख",
         "search_course": "पाठ्यक्रम / कौशल / नौकरी शीर्षक खोजें",
+        "experience_options": ["कोई भी", "प्रारंभिक", "मध्य", "वरिष्ठ", "कार्यकारी"],
+        "date_posted_options": ["कभी भी", "पिछला महीना", "पिछला सप्ताह", "पिछले 24 घंटे"],
     },
     "ta": {
         "title": "கரியர் அப்ஸ்கிலர்ஸ் | ஏஐ வேலை மையம்",
@@ -82,17 +69,18 @@ TRANSLATIONS = {
         "experience": "அனுபவ நிலை",
         "date_posted": "பதிவு தேதி",
         "search_course": "படிப்பு / திறன் / வேலை தலைப்பு தேடு",
+        "experience_options": ["எதுவும்", "ஆரம்பம்", "நடுத்தரம்", "மூத்தவர்", "நிர்வாகி"],
+        "date_posted_options": ["எப்போது வேண்டுமானாலும்", "கடந்த மாதம்", "கடந்த வாரம்", "கடந்த 24 மணி நேரம்"],
     },
-    # Add more translations as needed
+    # Add more languages as needed
 }
 
 # ----------------- SETUP -----------------
-# Set page config ONCE at the top (must be the first Streamlit command)
 st.set_page_config(page_title="CareerUpskillers | AI Job Hub", page_icon="🌟", layout="centered")
 
 # Language selection
-lang = st.sidebar.selectbox("Select Language / भाषा चुनें / Sprache wählen", list(LANGUAGES.keys()), index=0)
-t = TRANSLATIONS.get(LANGUAGES[lang], TRANSLATIONS["en"])  # Default to English
+lang = st.sidebar.selectbox("Select Language", list(LANGUAGES.keys()), index=0)
+t = TRANSLATIONS.get(LANGUAGES[lang], TRANSLATIONS["en"])  # Default to English if not found
 
 # Hide Streamlit default elements
 st.markdown("""
@@ -140,17 +128,23 @@ with tab1:
             location = st.text_input(t["location"], "Remote")
             country = st.selectbox(t["country"], list(PORTALS_BY_COUNTRY.keys()))
         with col2:
-            experience = st.selectbox(t["experience"], ["Any", "Entry", "Mid", "Senior", "Executive"])
-            date_posted = st.selectbox(t["date_posted"], ["Any time", "Past month", "Past week", "Past 24 hours"])
+            experience = st.selectbox(t["experience"], t["experience_options"])
+            date_posted = st.selectbox(t["date_posted"], t["date_posted_options"])
         submitted = st.form_submit_button(f"🔍 {t['find_jobs']}")
 
     if submitted:
         time_map = {
-            "Any time": "", "Past month": "r2592000",
-            "Past week": "r604800", "Past 24 hours": "r86400"
+            t["date_posted_options"][0]: "",  # "Any time" or equivalent
+            t["date_posted_options"][1]: "r2592000",  # "Past month"
+            t["date_posted_options"][2]: "r604800",   # "Past week"
+            t["date_posted_options"][3]: "r86400"     # "Past 24 hours"
         }
         exp_map = {
-            "Any": "", "Entry": "2", "Mid": "3", "Senior": "4", "Executive": "5"
+            t["experience_options"][0]: "",  # "Any"
+            t["experience_options"][1]: "2", # "Entry"
+            t["experience_options"][2]: "3", # "Mid"
+            t["experience_options"][3]: "4", # "Senior"
+            t["experience_options"][4]: "5"  # "Executive"
         }
         d_filter = time_map[date_posted]
         e_filter = exp_map[experience]
@@ -175,7 +169,7 @@ with tab2:
             country = st.selectbox(t["country"], ["India", "USA", "UK", "Canada", "Germany", "UAE", "Australia"])
         with col2:
             platform = st.selectbox("Choose Platform", [
-                "LeetCode", "HackerRank", "GeeksforGeeks", "Glassdoor", "Pramp", 
+                "LeetCode", "HackerRank", "GeeksforGeeks", "Glassdoor", "Pramp",
                 "IndiaBix", "AmbitionBox", "Final Round AI", "Big Interview", "iScalePro"
             ])
         interview_submit = st.form_submit_button(f"🔗 {t['generate_link']}")
@@ -224,8 +218,6 @@ with tab3:
         ]
         for name, url in tech:
             st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#3b82f6; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📘 {name}</a>", unsafe_allow_html=True)
-
-        # Add more sections as in your original code...
 
 # ----------------- FOOTER -----------------
 st.markdown("""
