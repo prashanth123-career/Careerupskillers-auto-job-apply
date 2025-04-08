@@ -296,4 +296,4 @@ with tab3:
         paths = {
             "AI/ML": "1. Math Basics → 2. Python Programming → 3. ML Fundamentals → 4. Deep Learning",
             "Programming": "1. Programming Basics → 2. Algorithms → 3. Version Control → 4. Projects",
-            "Soft Skills": "1. Communication → 2. Time Management → 3. Problem Solving → 4.
+            "Soft Skills": "1. Communication → 2. Time Management → 3. Problem Solving → 4. Leadership",
