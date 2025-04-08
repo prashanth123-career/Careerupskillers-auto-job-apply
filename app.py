@@ -194,8 +194,12 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# ----------------- TABS -----------------
-tab1, tab2, tab3 = st.tabs([f"🌐 {t['job_finder']}", f"🎯 {t['interview_prep']}", f"🎓 {t['free_courses']}"])
+tab1, tab2, tab3, tab4 = st.tabs([
+    f"🌐 {t['job_finder']}", 
+    f"🎯 {t['interview_prep']}", 
+    f"🎓 {t['free_courses']}", 
+    f"💼 Freelance & Remote Jobs"
+])
 
 # ----------------- TAB 1: JOB FINDER -----------------
 with tab1:
