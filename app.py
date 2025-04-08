@@ -4,7 +4,6 @@ import urllib.parse
 # ----------------- LANGUAGE SUPPORT -----------------
 LANGUAGES = {
     "English": "en",
-    # Indian Languages (22 Official Languages)
     "Assamese": "as",
     "Bengali": "bn",
     "Bodo": "brx",
@@ -26,14 +25,12 @@ LANGUAGES = {
     "Tamil": "ta",
     "Telugu": "te",
     "Urdu": "ur",
-    # International Languages from mentioned countries
-    "French": "fr",  # Canada
-    "German": "de",  # Germany
-    "Arabic": "ar",  # UAE
-    "Spanish": "es",  # USA (optional)
+    "French": "fr",
+    "German": "de",
+    "Arabic": "ar",
+    "Spanish": "es",
 }
 
-# Translation dictionary (expanded for more Indian languages)
 TRANSLATIONS = {
     "en": {
         "title": "CareerUpskillers | AI Job Hub",
@@ -86,70 +83,16 @@ TRANSLATIONS = {
         "date_posted": "பதிவு தேதி",
         "search_course": "படிப்பு / திறன் / வேலை தலைப்பு தேடு",
     },
-    "te": {
-        "title": "కెరీర్ అప్‌స్కిలర్స్ | ఏఐ జాబ్ హబ్",
-        "tagline": "మీ ఏఐ-శక్తితో కూడిన కెరీర్ లాంచ్‌ప్యాడ్",
-        "description": "స్మార్ట్ జాబ్ సెర్చ్ | ఇంటర్వ్యూ ప్రిపరేషన్ | ఉచిత సర్టిఫికెట్లు",
-        "job_finder": "జాబ్ ఫైండర్",
-        "interview_prep": "ఇంటర్వ్యూ ప్రిపరేషన్",
-        "free_courses": "ఉచిత కోర్సులు",
-        "find_jobs": "ఉద్యోగాలను కనుగొనండి",
-        "generate_link": "ఇంటర్వ్యూ ప్రిపరేషన్ లింక్‌ను రూపొందించండి",
-        "find_courses": "కోర్సులను కనుగొనండి",
-        "job_title": "ఉద్యోగ శీర్షిక / కీలక పదాలు",
-        "location": "ప్రాధాన్య స్థానం",
-        "country": "దేశం",
-        "experience": "అనుభవ స్థాయి",
-        "date_posted": "పోస్ట్ చేసిన తేదీ",
-        "search_course": "కోర్సు / నైపుణ్యం / ఉద్యోగ శీర్షికను శోధించండి",
-    },
-    "ml": {
-        "title": "കരിയർ അപ്‌സ്കില്ലേഴ്‌സ് | എഐ ജോബ് ഹബ്",
-        "tagline": "നിന്റെ എഐ-ശക്തിയുള്ള കരിയർ ലോഞ്ച്പാഡ്",
-        "description": "സ്മാർട്ട് ജോബ് സെർച്ച് | ഇന്റർ ്‌സർവ്യൂ പ്രിപ്പറേഷൻ | സൗജന്യ സർട്ടിഫിക്കറ്റുകൾ",
-        "job_finder": "ജോബ് ഫൈൻഡർ",
-        "interview_prep": "ഇന്റർവ്യൂ പ്രിപ്പറേഷൻ",
-        "free_courses": "സൗജന്യ കോഴ്‌സുകൾ",
-        "find_jobs": "ജോലികൾ കണ്ടെത്തുക",
-        "generate_link": "ഇന്റർവ്യൂ പ്രിപ്പറേഷൻ ലിങ്ക് സൃഷ്ടിക്കുക",
-        "find_courses": "കോഴ്‌സുകൾ കണ്ടെത്തുക",
-        "job_title": "ജോലി ശീർഷകം / കീവേഡുകൾ",
-        "location": "തിരഞ്ഞെടുത്ത സ്ഥലം",
-        "country": "രാജ്യം",
-        "experience": "പരിചയ നിലവാരം",
-        "date_posted": "പോസ്റ്റ് ചെയ്ത തീയതി",
-        "search_course": "കോഴ്‌സ് / കഴിവ് / ജോലി ശീർഷകം തിരയുക",
-    },
-    # Add translations for other languages (Assamese, Bengali, etc.) similarly
-    "de": {
-        "title": "CareerUpskillers | KI-Job-Hub",
-        "tagline": "Ihr KI-gestützter Karrierestart",
-        "description": "Intelligente Jobsuche | Interviewvorbereitung | Kostenlose Zertifikate",
-        "job_finder": "Jobfinder",
-        "interview_prep": "Interviewvorbereitung",
-        "free_courses": "Kostenlose Kurse",
-        "find_jobs": "Jobs finden",
-        "generate_link": "Interview-Vorbereitungslink erstellen",
-        "find_courses": "Kurse finden",
-        "job_title": "Jobtitel / Schlüsselwörter",
-        "location": "Bevorzugter Standort",
-        "country": "Land",
-        "experience": "Erfahrungsstufe",
-        "date_posted": "Veröffentlichungsdatum",
-        "search_course": "Kurs / Fähigkeit / Jobtitel suchen",
-    },
-    # Add more languages as needed
+    # Add more translations as needed
 }
 
 # ----------------- SETUP -----------------
+# Set page config ONCE at the top (must be the first Streamlit command)
 st.set_page_config(page_title="CareerUpskillers | AI Job Hub", page_icon="🌟", layout="centered")
 
 # Language selection
 lang = st.sidebar.selectbox("Select Language / भाषा चुनें / Sprache wählen", list(LANGUAGES.keys()), index=0)
-t = TRANSLATIONS.get(LANGUAGES[lang], TRANSLATIONS["en"])  # Default to English if lang not found
-
-# Update page title dynamically
-st.set_page_config(page_title=t["title"], page_icon="🌟", layout="centered")
+t = TRANSLATIONS.get(LANGUAGES[lang], TRANSLATIONS["en"])  # Default to English
 
 # Hide Streamlit default elements
 st.markdown("""
@@ -163,7 +106,7 @@ st.markdown("""
 # ----------------- BRANDING -----------------
 st.markdown(f"""
 <div style='text-align:center; padding:10px 0;'>
-    <h1 style='color:#1f2937;'>🚀 CareerUpskillers</h1>
+    <h1 style='color:#1f2937;'>🚀 {t["title"]}</h1>
     <h4 style='color:#374151;'>{t["tagline"]}</h4>
     <p style='font-size:16px;'>{t["description"]}</p>
 </div>
@@ -216,10 +159,10 @@ with tab1:
         for name, url_func in PORTALS_BY_COUNTRY[country]:
             url = url_func(keyword, location, e_filter, d_filter)
             st.markdown(f"""
-            <a href="{{url}}" target="_blank" style="display:inline-block; padding:10px 20px; background:#4CAF50; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">
+            <a href="{url}" target="_blank" style="display:inline-block; padding:10px 20px; background:#4CAF50; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">
                 🔍 Search on {name}
             </a>
-            """.format(url=url), unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
 
 # ----------------- TAB 2: INTERVIEW PREPARATION -----------------
 with tab2:
