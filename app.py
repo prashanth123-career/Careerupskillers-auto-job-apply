@@ -407,17 +407,40 @@ with tab3:
     if course_submit:
         query = urllib.parse.quote_plus(search)
 
-        st.subheader("🧠 Tech Giants")
-        tech = [
-            ("Google", f"https://grow.google/certificates/?q={query}"),
-            ("IBM", f"https://skillsbuild.org/learn?search={query}"),
-            ("Amazon AWS", f"https://explore.skillbuilder.aws/learn?searchTerm={query}"),
-            ("Microsoft (via LinkedIn)", "https://www.linkedin.com/learning/"),
-            ("Meta", f"https://www.facebook.com/business/learn/courses?search={query}")
+        # ----------- Section 1: Free Courses -----------
+        st.subheader("🎓 Free Courses")
+        free_courses = [
+            ("Coursera Free", f"https://www.coursera.org/search?query={query}&price=1"),
+            ("edX Free Courses", f"https://www.edx.org/search?q={query}&price=Free"),
+            ("Harvard Online", f"https://pll.harvard.edu/catalog?search_api_fulltext={query}&f%5B0%5D=course_feature_free%3A1"),
+            ("YouTube Tutorials", f"https://www.youtube.com/results?search_query=free+{query}+course")
         ]
-        for name, url in tech:
-            st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#3b82f6; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📘 {name}</a>", unsafe_allow_html=True)
+        for name, url in free_courses:
+            st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#6366f1; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📘 {name}</a>", unsafe_allow_html=True)
 
+        # ----------- Section 2: Free Courses with Certification -----------
+        st.subheader("📜 Free Courses with Certification")
+        certified_courses = [
+            ("Google Career Certificates", f"https://grow.google/certificates/?q={query}"),
+            ("IBM SkillsBuild", f"https://skillsbuild.org/learn?search={query}"),
+            ("Meta Blueprint", f"https://www.facebook.com/business/learn/courses?search={query}"),
+            ("AWS Skill Builder", f"https://explore.skillbuilder.aws/learn?searchTerm={query}"),
+            ("Google Cloud Skills Boost", f"https://www.cloudskillsboost.google/catalog?search={query}")
+        ]
+        for name, url in certified_courses:
+            st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#10b981; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📜 {name}</a>", unsafe_allow_html=True)
+
+        # ----------- Section 3: Free Hands-on Platforms -----------
+        st.subheader("🛠️ Free Platforms for Hands-on Experience")
+        platforms = [
+            ("GitHub Learning Lab", "https://lab.github.com/"),
+            ("Microsoft Learn", f"https://learn.microsoft.com/en-us/training/browse/?terms={query}"),
+            ("Kaggle Courses", f"https://www.kaggle.com/learn/search?q={query}"),
+            ("Codecademy Free", f"https://www.codecademy.com/catalog/all?query={query}&level=free"),
+            ("DataCamp Free", f"https://www.datacamp.com/search?q={query}")
+        ]
+        for name, url in platforms:
+            st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#f97316; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>🛠️ {name}</a>", unsafe_allow_html=True)
 # ----------------- FOOTER -----------------
 st.markdown("""
 <hr style='margin-top:40px;'>
