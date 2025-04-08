@@ -69,64 +69,7 @@ tab1, tab2, tab3 = st.tabs([f"🌐 {t['job_finder']}", f"🎯 {t['interview_prep
 with tab1:
     st.header(f"🌐 {t['job_finder']}")
 
-    PORTALS_BY_COUNTRY = {
-        "India": [
-            ("LinkedIn", lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
-            ("Naukri", lambda k, l, e, d: f"https://www.naukri.com/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-') if l != 'Remote' else 'india'}"),
-            ("Indeed", lambda k, l, e, d: f"https://www.indeed.co.in/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
-            ("Shine", lambda k, l, e, d: f"https://www.shine.com/job-search/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}")
-        ],
-        "USA": [
-            ("LinkedIn", lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
-            ("USAJobs", lambda k, l, e, d: f"https://www.usajobs.gov/Search/Results?k={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
-            ("Indeed", lambda k, l, e, d: f"https://www.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
-            ("Monster", lambda k, l, e, d: f"https://www.monster.com/jobs/search/?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}")
-        ],
-        "UK": [
-            ("LinkedIn", lambda k, l, e, d: f"https://uk.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
-            ("Reed", lambda k, l, e, d: f"https://www.reed.co.uk/jobs/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
-            ("TotalJobs", lambda k, l, e, d: f"https://www.totaljobs.com/jobs/{k.lower().replace(' ', '-')}/in-{l.lower().replace(' ', '-')}"),
-            ("CV-Library", lambda k, l, e, d: f"https://www.cv-library.co.uk/search-jobs/{k.lower().replace(' ', '-')}/in-{l.lower().replace(' ', '-')}")
-        ],
-        "UAE": [
-            ("LinkedIn", lambda k, l, e, d: f"https://ae.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
-            ("Bayt", lambda k, l, e, d: f"https://www.bayt.com/en/uae/jobs/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
-            ("NaukriGulf", lambda k, l, e, d: f"https://www.naukrigulf.com/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
-            ("GulfTalent", lambda k, l, e, d: f"https://www.gulftalent.com/uae/jobs/title/{k.lower().replace(' ', '-')}")
-        ],
-        "Germany": [
-            ("LinkedIn", lambda k, l, e, d: f"https://de.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
-            ("StepStone", lambda k, l, e, d: f"https://www.stepstone.de/jobs/{k.lower().replace(' ', '-')}/in-{l.lower().replace(' ', '-')}.html"),
-            ("XING", lambda k, l, e, d: f"https://www.xing.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
-            ("Monster DE", lambda k, l, e, d: f"https://www.monster.de/jobs/suche/?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}")
-        ],
-        "Australia": [
-            ("LinkedIn", lambda k, l, e, d: f"https://au.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
-            ("Seek", lambda k, l, e, d: f"https://www.seek.com.au/{k.lower().replace(' ', '-')}-jobs/in-{l.lower().replace(' ', '-')}"),
-            ("Adzuna", lambda k, l, e, d: f"https://www.adzuna.com.au/search?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}"),
-            ("CareerOne", lambda k, l, e, d: f"https://www.careerone.com.au/jobs/{k.lower().replace(' ', '-')}/in-{l.lower().replace(' ', '-')}")
-        ],
-        "New Zealand": [
-            ("Seek NZ", lambda k, l, e, d: f"https://www.seek.co.nz/{k.lower().replace(' ', '-')}-jobs/in-{l.lower().replace(' ', '-')}"),
-            ("TradeMe Jobs", lambda k, l, e, d: f"https://www.trademe.co.nz/jobs?q={urllib.parse.quote(k)}"),
-            ("MyJobSpace", lambda k, l, e, d: f"https://www.myjobspace.co.nz/jobs/{k.lower().replace(' ', '-')}/in-{l.lower().replace(' ', '-')}")
-        ],
-        "Russia": [
-            ("hh.ru", lambda k, l, e, d: f"https://hh.ru/search/vacancy?text={urllib.parse.quote(k)}&area=113"),
-            ("SuperJob", lambda k, l, e, d: f"https://www.superjob.ru/vacancy/search/?keywords={urllib.parse.quote(k)}"),
-            ("Rabota.ru", lambda k, l, e, d: f"https://www.rabota.ru/vacancy?query={urllib.parse.quote(k)}")
-        ],
-        "China": [
-            ("51Job", lambda k, l, e, d: f"https://search.51job.com/list/000000,000000,0000,00,9,99,{urllib.parse.quote(k)},2,1.html"),
-            ("Zhaopin", lambda k, l, e, d: f"https://sou.zhaopin.com/?jl=530&kw={urllib.parse.quote(k)}"),
-            ("Liepin", lambda k, l, e, d: f"https://www.liepin.com/zhaopin/?key={urllib.parse.quote(k)}")
-        ],
-        "Japan": [
-            ("Daijob", lambda k, l, e, d: f"https://www.daijob.com/en/jobs/search?keyword={urllib.parse.quote(k)}"),
-            ("Jobs in Japan", lambda k, l, e, d: f"https://jobsinjapan.com/jobs/?search={urllib.parse.quote(k)}"),
-            ("GaijinPot", lambda k, l, e, d: f"https://jobs.gaijinpot.com/job/index/lang/en/search/{urllib.parse.quote(k)}")
-        ]
-    }
+    PORTALS_BY_COUNTRY = { ... }  # Keep your full dictionary as-is above
 
     with st.form("job_form"):
         col1, col2 = st.columns(2)
@@ -135,7 +78,7 @@ with tab1:
             location = st.text_input(t["location"], "Remote")
             manual_mode = st.checkbox("Manually select country", value=True)
             if manual_mode:
-                # Replaced by manual/auto-detect mode above
+                country = st.selectbox(t["country"], list(PORTALS_BY_COUNTRY.keys()))
             else:
                 import geocoder
                 user_location = geocoder.ip('me')
@@ -144,7 +87,7 @@ with tab1:
         with col2:
             experience = st.selectbox(t["experience"], t["experience_options"])
             date_posted = st.selectbox(t["date_posted"], t["date_posted_options"])
-        submitted = st.form_submit_button(f"🔍 {t['find_jobs']}")
+        submitted = st.form_submit_button(t["find_jobs"])
 
     if submitted:
         time_map = {
@@ -167,23 +110,21 @@ with tab1:
         for name, url_func in PORTALS_BY_COUNTRY[country]:
             url = url_func(keyword, location, e_filter, d_filter)
             icon = f"https://logo.clearbit.com/{name.lower().replace(' ', '')}.com"
-            st.markdown(f"""
-            <a href="{url}" target="_blank" style="display:flex; align-items:center; gap:10px; padding:10px 20px; background:#4CAF50; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">
-                <img src="{icon}" alt="{name}" style="width:24px; height:24px; border-radius:4px;"> 🔍 {name}
-            </a>
-            """, unsafe_allow_html=True)
-            <a href="{url}" target="_blank" style="display:inline-block; padding:10px 20px; background:#4CAF50; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">
-                🔍 Search on {name}
-            </a>
-            """, unsafe_allow_html=True)
+            st.markdown(
+                f'<a href="{url}" target="_blank" style="display:flex; align-items:center; gap:10px; padding:10px 20px; background:#4CAF50; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">'
+                f'<img src="{icon}" alt="{name}" style="width:24px; height:24px; border-radius:4px;"> {name}'
+                f'</a>',
+                unsafe_allow_html=True
+            )
 
         # Add Google Jobs at the end for all countries
         google_jobs_url = f"https://www.google.com/search?q={urllib.parse.quote(keyword + ' jobs in ' + location)}"
-        st.markdown(f"""
-        <a href="{google_jobs_url}" target="_blank" style="display:inline-block; padding:10px 20px; background:#4285F4; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">
-            🔍 Search on Google Jobs
-        </a>
-        """, unsafe_allow_html=True)
+        st.markdown(
+            f'<a href="{google_jobs_url}" target="_blank" style="display:inline-block; padding:10px 20px; background:#4285F4; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">'
+            f'Search on Google Jobs'
+            f'</a>',
+            unsafe_allow_html=True
+        )
 
 # ----------------- TAB 2: INTERVIEW PREPARATION -----------------
 with tab2:
