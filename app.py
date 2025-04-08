@@ -162,199 +162,149 @@ with tab1:
 with tab2:
     st.header(f"🎯 {t['interview_prep']}")
     
-    # Expanded platform list with icons
-    PLATFORMS = {
-        "LeetCode": {"icon": "💻", "type": "Coding"},
-        "HackerRank": {"icon": "👨💻", "type": "Coding"},
-        "GeeksforGeeks": {"icon": "📚", "type": "Technical"},
-        "Glassdoor": {"icon": "🏢", "type": "Company Specific"},
-        "Pramp": {"icon": "🤝", "type": "Mock Interviews"},
-        "InterviewBit": {"icon": "🧠", "type": "Coding"},
-        "AmbitionBox": {"icon": "🇮🇳", "type": "India Focused"},
-        "Big Interview": {"icon": "🎥", "type": "Mock Interviews"},
-        "iScalePro": {"icon": "📈", "type": "Behavioral"},
-    }
-
-    with st.expander("🚀 Comprehensive Interview Preparation Suite", expanded=True):
-        col1, col2 = st.columns([1, 3])
+    # Expanded preparation matrix
+    with st.form("interview_form"):
+        col1, col2 = st.columns([1, 2])
         with col1:
-            role = st.text_input(t["job_title"], "Data Analyst", key="interview_role")
-            country = st.selectbox(t["country"], ["India", "USA", "UK", "Canada", "Germany", "UAE", "Australia"], key="interview_country")
-            interview_type = st.selectbox("Interview Type", ["Technical", "Behavioral", "Case Study", "System Design"])
+            role = st.text_input(t["job_title"], "Data Analyst", key="int_role")
+            country = st.selectbox(t["country"], ["India", "USA", "UK", "Canada"], key="int_country")
+            exp_level = st.selectbox(t["experience"], t["experience_options"])
         
         with col2:
-            st.markdown("### 📚 Preparation Resources")
-            platform_type = st.selectbox("Resource Type", ["Coding", "Technical", "Behavioral", "Company Specific", "All"])
+            prep_type = st.selectbox("Preparation Type", [
+                "Technical Questions", 
+                "Behavioral Questions",
+                "Case Studies",
+                "Salary Negotiation",
+                "Resume Tips"
+            ])
             
-            # Filter platforms
-            filtered_platforms = [k for k, v in PLATFORMS.items() if platform_type == "All" or v["type"] == platform_type]
-            selected_platform = st.selectbox("Select Platform", filtered_platforms, format_func=lambda x: f"{PLATFORMS[x]['icon']} {x}")
-            
-            # Difficulty level
-            difficulty = st.select_slider("Difficulty Level", ["Beginner", "Intermediate", "Advanced"])
-
-    # Generate dynamic content
-    if st.button(f"🔗 {t['generate_link']}"):
-        query = urllib.parse.quote_plus(f"{role} {country} {interview_type}")
+            company = st.text_input("Target Company (optional)", placeholder="Google, TCS, etc.")
         
-        # Dynamic content generation
-        with st.spinner("🧠 Generating personalized interview plan..."):
-            # AI-generated questions (simulated)
-            questions = [
-                f"Explain the difference between supervised and unsupervised learning in {role} context",
-                f"How would you handle missing data in a real-world {role} scenario?",
-                f"Case study: Analyze our sales data and suggest optimization strategies",
-                f"Behavioral: Describe a time you solved a complex problem as a {role}"
-            ][:3]  # Simulated AI response
-            
-            # Resource links
-            PLATFORM_LINKS = {
-                "LeetCode": f"https://leetcode.com/problemset/all/?search={query}",
-                "Glassdoor": f"https://glassdoor.com/Interview/{query}-questions",
-                # Add other platform links
-            }
+        submitted = st.form_submit_button(f"🔗 {t['generate_link']}")
 
-            # Display results
-            st.success("🎉 Personalized Interview Plan Generated!")
-            
-            col1, col2 = st.columns([1, 2])
-            with col1:
-                st.subheader("📝 Recommended Questions")
-                for i, q in enumerate(questions, 1):
-                    st.markdown(f"""
-                    <div style="padding:10px; background:#f0f5ff; border-radius:5px; margin-bottom:10px;">
-                        {i}. {q}
-                    </div>
-                    """, unsafe_allow_html=True)
-                
-                st.subheader("📈 Progress Tracker")
-                st.markdown("""
-                - Technical Skills: 65% completed
-                - Behavioral Prep: 40% completed
-                - Mock Interviews: 2/5 completed
-                """)
+    if submitted:
+        # Create smart Google search queries
+        base_query = f"{role} {prep_type} {exp_level} {company} {country}"
+        encoded_query = urllib.parse.quote_plus(base_query)
+        
+        st.subheader("🔍 Best Preparation Resources")
+        
+        # Curated resource matrix
+        RESOURCE_MATRIX = {
+            "Technical Questions": {
+                "India": "https://www.indiabix.com",
+                "Global": "https://leetcode.com"
+            },
+            "Behavioral Questions": {
+                "India": "https://www.ambitionbox.com/interviews",
+                "Global": "https://www.themuse.com/advice/behavioral-interview-questions"
+            },
+            # Add more categories
+        }
+        
+        # Show curated resources first
+        main_resource = RESOURCE_MATRIX.get(prep_type, {}).get("India" if country == "India" else "Global")
+        if main_resource:
+            st.markdown(f"""
+            <div style="padding:15px; background:#e8f5e9; border-radius:10px; margin-bottom:20px;">
+                <h4>🎯 Recommended Resource</h4>
+                <a href="{main_resource}" target="_blank" style="color:#2e7d32; font-weight:bold;">
+                    Best {prep_type} Guide for {country} → 
+                </a>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Smart Google fallback
+        st.markdown(f"""
+        <div style="padding:15px; background:#fff3e0; border-radius:10px;">
+            <h4>🔎 More Resources via Smart Search</h4>
+            <a href="https://www.google.com/search?q={encoded_query}+filetype:pdf" target="_blank">
+                📄 Find PDF Guides
+            </a><br>
+            <a href="https://www.google.com/search?q={encoded_query}+site:youtube.com" target="_blank">
+                🎥 Video Tutorials
+            </a><br>
+            <a href="https://www.google.com/search?q={encoded_query}+forum" target="_blank">
+                💬 Discussion Forums
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
 
-            with col2:
-                st.subheader("🎥 Interactive Preparation")
-                tab_a, tab_b, tab_c = st.tabs(["📚 Resources", "💡 Tips", "🎤 Mock Interview"])
-                
-                with tab_a:
-                    st.markdown(f"""
-                    **🔗 {selected_platform} Resources:**
-                    - [Practice Questions]({PLATFORM_LINKS.get(selected_platform, '#')})
-                    - [Discussion Forum](https://discuss.{selected_platform.lower()}.com/{query})
-                    - [Company-specific Guide](https://{selected_platform.lower()}.com/company-guides)
-                    """)
-                
-                with tab_b:
-                    st.markdown("""
-                    **🌟 Pro Tips for Success:**
-                    - Research the company's recent projects and mention them
-                    - Use STAR method for behavioral questions
-                    - Practice whiteboarding with time constraints
-                    - Prepare 2-3 thoughtful questions for the interviewer
-                    """)
-                
-                with tab_c:
-                    st.markdown("""
-                    **🎤 AI Mock Interview (Coming Soon)**
-                    <div style="border:2px dashed #4CAF50; padding:20px; border-radius:10px; text-align:center;">
-                        <p>🎧 Voice-based AI Interview Practice</p>
-                        <p>📊 Instant Feedback & Analytics</p>
-                        <p>🤖 Real-time Technical Challenge</p>
-                        <small>Powered by AI Interview Coach</small>
-                    </div>
-                    """, unsafe_allow_html=True)
+        # Preparation checklist
+        st.subheader("✅ Personalized Checklist")
+        checklist_items = {
+            "Technical Questions": ["Review core concepts", "Practice coding problems", "Study system design"],
+            "Behavioral Questions": ["Prepare STAR stories", "Research company values", "Practice timing"],
+            # Add more categories
+        }.get(prep_type, [])
+        
+        for item in checklist_items:
+            st.checkbox(item, key=f"check_{item}")
 
 # ----------------- TAB 3: FREE COURSES -----------------
 with tab3:
     st.header(f"🎓 {t['free_courses']}")
     
     # Curated course database
-    COURSES = [
-        {
-            "title": "AI For Everyone",
-            "provider": "Coursera",
-            "link": "https://coursera.org/learn/ai-for-everyone",
-            "category": "AI",
-            "difficulty": "Beginner",
-            "duration": "6 hours",
-            "rating": 4.8,
-            "certificate": True,
-            "skills": ["AI Basics", "Business Strategy"]
-        },
-        {
-            "title": "Data Science Fundamentals",
-            "provider": "IBM",
-            "link": "https://skillsbuild.org/data-science",
-            "category": "Data Science",
-            "difficulty": "Intermediate",
-            "duration": "20 hours",
-            "rating": 4.5,
-            "certificate": True,
-            "skills": ["Python", "Pandas", "Data Analysis"]
-        },
-        # Add more courses...
-    ]
+    COURSE_DATABASE = {
+        "AI/ML": [
+            ("Google", "https://cloudskillsboost.google/journeys/118", "ML Fundamentals", "8h", "✅"),
+            ("Microsoft", "https://learn.microsoft.com/ai", "AI Principles", "6h", "✅"),
+        ],
+        "Programming": [
+            ("FreeCodeCamp", "https://freecodecamp.org", "Python Basics", "4h", "✅"),
+            ("Udemy", "https://udemy.com/free-courses", "Java Crash Course", "3h", "❌"),
+        ],
+        # Add more categories
+    }
 
-    with st.form("course_search"):
-        col1, col2, col3 = st.columns([3, 2, 2])
-        with col1:
-            search_query = st.text_input(t["search_course"], "AI for Business")
-        with col2:
-            category_filter = st.selectbox("Category", ["All", "AI", "Data Science", "Programming", "Soft Skills"])
-        with col3:
-            difficulty_filter = st.selectbox("Difficulty", ["All", "Beginner", "Intermediate", "Advanced"])
+    with st.form("course_form"):
+        search_query = st.text_input(t["search_course"], "AI for Business")
+        category = st.selectbox("Category", ["All", "AI/ML", "Programming", "Soft Skills", "Cloud Computing"])
         submitted = st.form_submit_button(f"🎯 {t['find_courses']}")
 
     if submitted:
-        filtered_courses = [
-            c for c in COURSES
-            if (search_query.lower() in c["title"].lower() or not search_query)
-            and (category_filter == "All" or c["category"] == category_filter)
-            and (difficulty_filter == "All" or c["difficulty"] == difficulty_filter)
-        ]
-
-        st.subheader(f"📚 {len(filtered_courses)} Courses Found")
-        
-        for course in filtered_courses:
-            with st.expander(f"### {course['title']} ({course['provider']})", expanded=True):
-                cols = st.columns([1, 3, 1])
-                with cols[0]:
-                    st.image(f"https://logo.clearbit.com/{course['provider']}.com", width=60)
-                with cols[1]:
+        # Show curated courses first
+        st.subheader("🏅 Verified Free Courses")
+        for cat, courses in COURSE_DATABASE.items():
+            if category != "All" and cat != category:
+                continue
+            for provider, url, title, duration, cert in courses:
+                if search_query.lower() in title.lower():
                     st.markdown(f"""
-                    **Provider:** {course['provider']}  
-                    **Duration:** {course['duration']}  
-                    **Skills:** {", ".join(course['skills'])}  
-                    **Certificate:** {'✅ Available' if course['certificate'] else '❌ Not Available'}
-                    """)
-                with cols[2]:
-                    st.markdown(f"""
-                    <div style="text-align:center">
-                        <div style="font-size:24px; color:#4CAF50;">{course['rating']}★</div>
-                        <a href="{course['link']}" target="_blank" style="display:block; padding:8px; background:#4CAF50; color:white; border-radius:5px; text-decoration:none;">
-                            Enroll Now
-                        </a>
+                    <div style="padding:10px; border:1px solid #e0e0e0; border-radius:5px; margin:5px 0;">
+                        <b>{title}</b><br>
+                        🏢 {provider} | ⏳ {duration} | Certificate: {cert}<br>
+                        <a href="{url}" target="_blank">Enroll Now →</a>
                     </div>
                     """, unsafe_allow_html=True)
-
-        st.markdown("""
-        <div style="background:#f0f5ff; padding:20px; border-radius:10px; margin-top:20px;">
-            <h4>🎓 Learning Path Recommendations</h4>
-            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:20px; margin-top:15px;">
-                <div style="background:white; padding:15px; border-radius:10px;">
-                    <h5>🚀 AI Specialist Path</h5>
-                    <p>1. AI Basics → 2. Machine Learning → 3. Deep Learning</p>
-                </div>
-                <div style="background:white; padding:15px; border-radius:10px;">
-                    <h5>📊 Data Analyst Path</h5>
-                    <p>1. Excel → 2. SQL → 3. Python → 4. Data Visualization</p>
-                </div>
-                <div style="background:white; padding:15px; border-radius:10px;">
-                    <h5>💼 Business Intelligence Path</h5>
-                    <p>1. Power BI → 2. Tableau → 3. Data Storytelling</p>
-                </div>
-            </div>
+        
+        # Google fallback with smart search
+        encoded_course_search = urllib.parse.quote_plus(
+            f"{search_query} free course {category} with certificate"
+        )
+        st.markdown(f"""
+        <div style="margin-top:20px; padding:15px; background:#f5f5f5; border-radius:10px;">
+            <h4>🔍 Find More Options</h4>
+            <a href="https://www.google.com/search?q={encoded_course_search}" target="_blank">
+                Search Google for "{search_query}" courses with certificates
+            </a><br>
+            <a href="https://www.youtube.com/results?search_query={encoded_course_search}" target="_blank">
+                Find YouTube tutorials for "{search_query}"
+            </a>
         </div>
         """, unsafe_allow_html=True)
+
+        # Learning path suggestions
+        st.subheader("🗺 Suggested Learning Path")
+        paths = {
+            "AI/ML": "1. Math Basics → 2. Python Programming → 3. ML Fundamentals → 4. Deep Learning",
+            "Programming": "1. Programming Basics → 2. Algorithms → 3. Version Control → 4. Projects",
+        }
+        if category in paths:
+            st.markdown(f"""
+            <div style="padding:15px; background:#e3f2fd; border-radius:10px;">
+                {paths[category]}
+            </div>
+            """, unsafe_allow_html=True)
