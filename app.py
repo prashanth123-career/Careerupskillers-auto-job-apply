@@ -222,15 +222,18 @@ with tab1:
 # ----------------- TAB 2: INTERVIEW PREPARATION -----------------
 with tab2:
     st.header(f"🎯 {t['interview_prep']}")
-    
-    # Expanded preparation matrix
+
+    # Lambda URL generators
+    GOOGLE_SEARCH = lambda query, extra="": f"https://www.google.com/search?q={urllib.parse.quote_plus(query)}{extra}"
+    YOUTUBE_SEARCH = lambda query: GOOGLE_SEARCH(query, "+site:youtube.com")
+    FORUM_SEARCH = lambda query: GOOGLE_SEARCH(query, "+forum")
+
     with st.form("interview_form"):
         col1, col2 = st.columns([1, 2])
         with col1:
             role = st.text_input(t["job_title"], "Data Analyst", key="int_role")
             country = st.selectbox(t["country"], ["India", "USA", "UK", "Canada"], key="int_country")
             exp_level = st.selectbox(t["experience"], t["experience_options"])
-        
         with col2:
             prep_type = st.selectbox("Preparation Type", [
                 "Technical Questions", 
@@ -239,19 +242,15 @@ with tab2:
                 "Salary Negotiation",
                 "Resume Tips"
             ])
-            
             company = st.text_input("Target Company (optional)", placeholder="Google, TCS, etc.")
-        
         submitted = st.form_submit_button(f"🔗 {t['generate_link']}")
 
     if submitted:
-        # Create smart Google search queries
         base_query = f"{role} {prep_type} {exp_level} {company} {country}"
         encoded_query = urllib.parse.quote_plus(base_query)
-        
+
         st.subheader("🔍 Best Preparation Resources")
-        
-        # Curated resource matrix
+
         RESOURCE_MATRIX = {
             "Technical Questions": {
                 "India": "https://www.indiabix.com",
@@ -260,69 +259,61 @@ with tab2:
             "Behavioral Questions": {
                 "India": "https://www.ambitionbox.com/interviews",
                 "Global": "https://www.themuse.com/advice/behavioral-interview-questions"
-            },
-            # Add more categories
+            }
         }
-        
-        # Show curated resources first
+
         main_resource = RESOURCE_MATRIX.get(prep_type, {}).get("India" if country == "India" else "Global")
         if main_resource:
             st.markdown(f"""
             <div style="padding:15px; background:#e8f5e9; border-radius:10px; margin-bottom:20px;">
                 <h4>🎯 Recommended Resource</h4>
                 <a href="{main_resource}" target="_blank" style="color:#2e7d32; font-weight:bold;">
-                    Best {prep_type} Guide for {country} → 
+                    Best {prep_type} Guide for {country} →
                 </a>
             </div>
             """, unsafe_allow_html=True)
-        
-        # Smart Google fallback
+
         st.markdown(f"""
         <div style="padding:15px; background:#fff3e0; border-radius:10px;">
             <h4>🔎 More Resources via Smart Search</h4>
-            <a href="https://www.google.com/search?q={encoded_query}+filetype:pdf" target="_blank">
-                📄 Find PDF Guides
-            </a><br>
-            <a href="https://www.google.com/search?q={encoded_query}+site:youtube.com" target="_blank">
-                🎥 Video Tutorials
-            </a><br>
-            <a href="https://www.google.com/search?q={encoded_query}+forum" target="_blank">
-                💬 Discussion Forums
-            </a>
+            <a href="{GOOGLE_SEARCH(base_query, '+filetype:pdf')}" target="_blank">📄 Find PDF Guides</a><br>
+            <a href="{YOUTUBE_SEARCH(base_query)}" target="_blank">🎥 Video Tutorials</a><br>
+            <a href="{FORUM_SEARCH(base_query)}" target="_blank">💬 Discussion Forums</a>
         </div>
         """, unsafe_allow_html=True)
 
-        # Preparation checklist
         st.subheader("✅ Personalized Checklist")
         checklist_items = {
             "Technical Questions": ["Review core concepts", "Practice coding problems", "Study system design"],
-            "Behavioral Questions": ["Prepare STAR stories", "Research company values", "Practice timing"],
-            # Add more categories
+            "Behavioral Questions": ["Prepare STAR stories", "Research company values", "Practice timing"]
         }.get(prep_type, [])
-        
+
         for item in checklist_items:
             st.checkbox(item, key=f"check_{item}")
+           st.checkbox(item, key=f"check_{item}")
+           
 # ----------------- TAB 3: FREE COURSES -----------------
 with tab3:
     st.header(f"🎓 {t['free_courses']}")
+
+    # Platform URL generators using lambda
+    COURSE_LINKS = {
+        "Google": lambda q: f"https://grow.google/certificates/?q={urllib.parse.quote_plus(q)}",
+        "IBM": lambda q: f"https://skillsbuild.org/learn?search={urllib.parse.quote_plus(q)}",
+        "AWS": lambda q: f"https://explore.skillbuilder.aws/learn?searchTerm={urllib.parse.quote_plus(q)}",
+        "Microsoft (via LinkedIn)": lambda q: "https://www.linkedin.com/learning/",
+        "Meta": lambda q: f"https://www.facebook.com/business/learn/courses?search={urllib.parse.quote_plus(q)}"
+    }
 
     with st.form("course_form"):
         search = st.text_input(t["search_course"], "AI for Business")
         course_submit = st.form_submit_button(f"🎯 {t['find_courses']}")
 
     if course_submit:
-        query = urllib.parse.quote_plus(search)
-
         st.subheader("🧠 Tech Giants")
-        tech = [
-            ("Google", f"https://grow.google/certificates/?q={query}"),
-            ("IBM", f"https://skillsbuild.org/learn?search={query}"),
-            ("Amazon AWS", f"https://explore.skillbuilder.aws/learn?searchTerm={query}"),
-            ("Microsoft (via LinkedIn)", "https://www.linkedin.com/learning/"),
-            ("Meta", f"https://www.facebook.com/business/learn/courses?search={query}")
-        ]
-        for name, url in tech:
-            st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#3b82f6; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📘 {name}</a>", unsafe_allow_html=True)
+        for name, url_func in COURSE_LINKS.items():
+            course_url = url_func(search)
+            st.markdown(f"<a href='{course_url}' target='_blank' style='display:block; background:#3b82f6; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📘 {name}</a>", unsafe_allow_html=True)
 
 # ----------------- FOOTER -----------------
 st.markdown("""
