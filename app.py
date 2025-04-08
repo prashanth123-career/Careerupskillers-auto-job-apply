@@ -441,6 +441,65 @@ with tab3:
         ]
         for name, url in platforms:
             st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#f97316; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>🛠️ {name}</a>", unsafe_allow_html=True)
+
+            # ----------------- TAB 4: FREELANCE & REMOTE JOBS -----------------
+with tab4:
+    st.header("💼 Freelance & Remote Jobs")
+
+    with st.form("freelance_form"):
+        keyword = st.text_input("🛠️ Skill / Job Title", "Python Developer")
+        job_type = st.selectbox("💼 Job Type", ["Freelance", "Remote", "Both"])
+        region = st.selectbox("🌍 Region", ["Global", "India", "USA", "UK", "Canada", "Germany", "UAE"])
+        submit = st.form_submit_button("🔎 Find Jobs")
+
+    if submit:
+        q = urllib.parse.quote_plus(keyword)
+
+        st.subheader("🚀 Job Boards with Smart Links")
+
+        platforms = []
+
+        if job_type in ["Freelance", "Both"]:
+            platforms += [
+                ("Upwork", f"https://www.upwork.com/search/jobs/?q={q}"),
+                ("Fiverr", f"https://www.fiverr.com/search/gigs?query={q}"),
+                ("Freelancer", f"https://www.freelancer.com/jobs/{q}"),
+                ("PeoplePerHour", f"https://www.peopleperhour.com/freelance-jobs?q={q}"),
+                ("Toptal", "https://www.toptal.com/freelance-jobs"),
+                ("Guru", f"https://www.guru.com/d/jobs/skill/{q}/"),
+            ]
+
+        if job_type in ["Remote", "Both"]:
+            region_map = {
+                "Global": "",
+                "India": "&location=India",
+                "USA": "&location=United+States",
+                "UK": "&location=United+Kingdom",
+                "Canada": "&location=Canada",
+                "Germany": "&location=Germany",
+                "UAE": "&location=United+Arab+Emirates"
+            }
+
+            region_filter = region_map.get(region, "")
+            platforms += [
+                ("Remote OK", f"https://remoteok.com/remote-{q}-jobs"),
+                ("We Work Remotely", f"https://weworkremotely.com/remote-jobs/search?term={q}"),
+                ("AngelList Talent", f"https://angel.co/jobs?remote=true&keyword={q}{region_filter}"),
+                ("Jobspresso", f"https://jobspresso.co/?s={q}"),
+                ("Remotive", f"https://remotive.io/remote-jobs/search/{q}"),
+                ("Outsourcely", f"https://www.outsourcely.com/remote-jobs/search?q={q}")
+            ]
+
+        for name, url in platforms:
+            st.markdown(
+                f"<a href='{url}' target='_blank' style='display:block; background:#0f766e; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>🌍 {name}</a>",
+                unsafe_allow_html=True
+            )
+
+        # Google fallback
+        st.markdown("---")
+        st.markdown(f"<a href='https://www.google.com/search?q={q}+{job_type}+jobs+{region}' target='_blank' style='display:block; background:#dc2626; color:white; padding:10px; border-radius:5px;'>🔍 Search on Google Jobs</a>", unsafe_allow_html=True)
+
 # ----------------- FOOTER -----------------
 st.markdown("""
 <hr style='margin-top:40px;'>
