@@ -241,7 +241,6 @@ with tab2:
         
         for item in checklist_items:
             st.checkbox(item, key=f"check_{item}")
-
 ----------------- TAB 3: FREE COURSES -----------------
 with tab3:
     st.header(f"🎓 {t['free_courses']}")
