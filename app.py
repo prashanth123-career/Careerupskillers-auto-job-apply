@@ -169,9 +169,6 @@ TRANSLATIONS = {
     },
 }
 
-    # Add more languages as needed
-}
-
 # ----------------- SETUP -----------------
 st.set_page_config(page_title="CareerUpskillers | AI Job Hub", page_icon="🌟", layout="centered")
 
