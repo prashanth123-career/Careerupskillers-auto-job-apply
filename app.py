@@ -246,6 +246,7 @@ with tab2:
 with tab3:
     st.header(f"🎓 {t['free_courses']}")
 
+    # Curated course list by category
     COURSE_DATABASE = {
         "AI/ML": [
             ("Google", "https://cloudskillsboost.google/journeys/118", "ML Fundamentals", "8h", "✅"),
@@ -291,9 +292,18 @@ with tab3:
         if not found:
             st.warning("No matching courses found. Try changing the search or category.")
 
-        # Learning Path
+        # Suggested Learning Path
         st.subheader("🗺 Suggested Learning Path")
         paths = {
             "AI/ML": "1. Math Basics → 2. Python Programming → 3. ML Fundamentals → 4. Deep Learning",
             "Programming": "1. Programming Basics → 2. Algorithms → 3. Version Control → 4. Projects",
             "Soft Skills": "1. Communication → 2. Time Management → 3. Problem Solving → 4. Leadership",
+            "Cloud Computing": "1. Cloud Basics → 2. AWS/GCP Intro → 3. Security & DevOps → 4. Certification"
+        }
+
+        if category in paths:
+            st.markdown(f"""
+            <div style="padding:15px; background:#e3f2fd; border-radius:10px;">
+                {paths[category]}
+            </div>
+            """, unsafe_allow_html=True)
