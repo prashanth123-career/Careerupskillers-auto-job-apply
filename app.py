@@ -1,11 +1,17 @@
 import streamlit as st
 import urllib.parse
 
-# ---------------- LANGUAGE SUPPORT ----------------
+# ----------------- LANGUAGE SUPPORT -----------------
 LANGUAGES = {
-    "English": "en", "Hindi": "hi", "Tamil": "ta", "Telugu": "te",
-    "Malayalam": "ml", "Kannada": "kn", "Mandarin": "zh", "Japanese": "ja",
-    "German": "de", "French": "fr", "Arabic": "ar"
+    "English": "en",
+    "Hindi": "hi",
+    "Tamil": "ta",
+    "Telugu": "te",
+    "Malayalam": "ml",
+    "French": "fr",
+    "German": "de",
+    "Arabic": "ar",
+    # Add more languages as needed
 }
 
 TRANSLATIONS = {
@@ -13,184 +19,319 @@ TRANSLATIONS = {
         "title": "CareerUpskillers | AI Job Hub",
         "tagline": "Your AI-powered career launchpad",
         "description": "Smart Job Search | Interview Prep | Free Certifications",
-        "job_finder": "Job Finder", "interview_prep": "Interview Preparation", "free_courses": "Free Courses",
-        "find_jobs": "Find Jobs", "generate_link": "Generate Interview Prep Link", "find_courses": "Find Courses",
-        "job_title": "Job Title / Keywords", "location": "Preferred Location", "country": "Country",
-        "experience": "Experience Level", "date_posted": "Date Posted",
+        "job_finder": "Job Finder",
+        "interview_prep": "Interview Preparation",
+        "free_courses": "Free Courses",
+        "find_jobs": "Find Jobs",
+        "generate_link": "Generate Interview Prep Link",
+        "find_courses": "Find Courses",
+        "job_title": "Job Title / Keywords",
+        "location": "Preferred Location",
+        "country": "Country",
+        "experience": "Experience Level",
+        "date_posted": "Date Posted",
         "search_course": "Search Course / Skill / Job Title",
         "experience_options": ["Any", "Entry", "Mid", "Senior", "Executive"],
         "date_posted_options": ["Any time", "Past month", "Past week", "Past 24 hours"],
     },
     "hi": {
-        "title": "कैरियर अपस्किलर्स | एआई जॉब हब", "tagline": "आपका एआई-संचालित करियर लॉन्चपैड",
-        "description": "स्मार्ट जॉब खोज | इंटरव्यू तैयारी | मुफ्त प्रमाणपत्र",
-        "job_finder": "नौकरी खोजें", "interview_prep": "इंटरव्यू तैयारी", "free_courses": "नि:शुल्क पाठ्यक्रम",
-        "find_jobs": "नौकरी ढूंढें", "generate_link": "इंटरव्यू लिंक बनाएँ", "find_courses": "पाठ्यक्रम ढूंढें",
-        "job_title": "नौकरी शीर्षक / कीवर्ड", "location": "पसंदीदा स्थान", "country": "देश",
-        "experience": "अनुभव स्तर", "date_posted": "पोस्ट की तारीख",
-        "search_course": "कोर्स / स्किल / नौकरी शीर्षक खोजें",
-        "experience_options": ["कोई भी", "प्रवेश स्तर", "मध्यम", "वरिष्ठ", "कार्यकारी"],
+        "title": "कैरियर अपस्किलर्स | एआई जॉब हब",
+        "tagline": "आपका एआई-संचालित करियर लॉन्चपैड",
+        "description": "स्मार्ट जॉब सर्च | साक्षात्कार तैयारी | मुफ्त प्रमाणपत्र",
+        "job_finder": "जॉब खोजक",
+        "interview_prep": "साक्षात्कार तैयारी",
+        "free_courses": "मुफ्त पाठ्यक्रम",
+        "find_jobs": "नौकरियाँ खोजें",
+        "generate_link": "साक्षात्कार तैयारी लिंक बनाएँ",
+        "find_courses": "पाठ्यक्रम खोजें",
+        "job_title": "नौकरी शीर्षक / कीवर्ड",
+        "location": "पसंदीदा स्थान",
+        "country": "देश",
+        "experience": "अनुभव स्तर",
+        "date_posted": "पोस्ट की तारीख",
+        "search_course": "पाठ्यक्रम / कौशल / नौकरी शीर्षक खोजें",
+        "experience_options": ["कोई भी", "प्रारंभिक", "मध्य", "वरिष्ठ", "कार्यकारी"],
         "date_posted_options": ["कभी भी", "पिछला महीना", "पिछला सप्ताह", "पिछले 24 घंटे"],
     },
-    # Add other languages if needed
+    "ta": {
+        "title": "கரியர் அப்ஸ்கிலர்ஸ் | ஏஐ வேலை மையம்",
+        "tagline": "உங்கள் ஏஐ-இயக்கப்பட்ட தொழில் தொடக்கப்புள்ளி",
+        "description": "புத்திசாலி வேலை தேடல் | நேர்காணல் தயாரிப்பு | இலவச சான்றிதழ்கள்",
+        "job_finder": "வேலை தேடுபவர்",
+        "interview_prep": "நேர்காணல் தயாரிப்பு",
+        "free_courses": "இலவச படிப்புகள்",
+        "find_jobs": "வேலைகளைத் தேடு",
+        "generate_link": "நேர்காணல் தயாரிப்பு இணைப்பை உருவாக்கு",
+        "find_courses": "படிப்புகளைத் தேடு",
+        "job_title": "வேலை தலைப்பு / முக்கிய சொற்கள்",
+        "location": "விருப்பமான இடம்",
+        "country": "நாடு",
+        "experience": "அனுபவ நிலை",
+        "date_posted": "பதிவு தேதி",
+        "search_course": "படிப்பு / திறன் / வேலை தலைப்பு தேடு",
+        "experience_options": ["எதுவும்", "ஆரம்பம்", "நடுத்தரம்", "மூத்தவர்", "நிர்வாகி"],
+        "date_posted_options": ["எப்போது வேண்டுமானாலும்", "கடந்த மாதம்", "கடந்த வாரம்", "கடந்த 24 மணி நேரம்"],
+    },
+    # Add more languages as needed
 }
 
-# ---------------- SETUP ----------------
+# ----------------- SETUP -----------------
 st.set_page_config(page_title="CareerUpskillers | AI Job Hub", page_icon="🌟", layout="centered")
-lang = st.sidebar.selectbox("🌐 Select Language", list(LANGUAGES.keys()))
-t = TRANSLATIONS.get(LANGUAGES[lang], TRANSLATIONS["en"])
 
-# Branding
-st.markdown(f"<h1 style='text-align:center'>{t['title']}</h1>", unsafe_allow_html=True)
-st.markdown(f"<p style='text-align:center'>{t['tagline']}</p>", unsafe_allow_html=True)
-st.markdown(f"<p style='text-align:center'>{t['description']}</p>", unsafe_allow_html=True)
+# Language selection
+lang = st.sidebar.selectbox("Select Language", list(LANGUAGES.keys()), index=0)
+t = TRANSLATIONS.get(LANGUAGES[lang], TRANSLATIONS["en"])  # Default to English if not found
 
-# ---------------- TABS ----------------
-tab1, tab2, tab3 = st.tabs([f"🌍 {t['job_finder']}", f"🧠 {t['interview_prep']}", f"🎓 {t['free_courses']}"])
+# Hide Streamlit default elements
+st.markdown("""
+    <style>
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header {visibility: hidden;}
+    </style>
+""", unsafe_allow_html=True)
+
+# ----------------- BRANDING -----------------
+st.markdown(f"""
+<div style='text-align:center; padding:10px 0;'>
+    <h1 style='color:#1f2937;'>🚀 {t["title"]}</h1>
+    <h4 style='color:#374151;'>{t["tagline"]}</h4>
+    <p style='font-size:16px;'>{t["description"]}</p>
+</div>
+""", unsafe_allow_html=True)
+
+# ----------------- TABS -----------------
+tab1, tab2, tab3 = st.tabs([f"🌐 {t['job_finder']}", f"🎯 {t['interview_prep']}", f"🎓 {t['free_courses']}"])
 
 # ----------------- TAB 1: JOB FINDER -----------------
 with tab1:
-    st.subheader("🌍 Smart Job Links by Country")
+    st.header(f"🌐 {t['job_finder']}")
 
-    keyword = st.text_input(t["job_title"], "Data Scientist")
-    location = st.text_input(t["location"], "Remote")
-    experience = st.selectbox(t["experience"], t["experience_options"])
-    date_posted = st.selectbox(t["date_posted"], t["date_posted_options"])
-    country = st.selectbox(t["country"], [
-        "India", "USA", "UK", "UAE", "Germany", "Australia", "New Zealand",
-        "Japan", "China", "Russia", "Singapore", "Malaysia"
-    ])
-
-    # Filter mappings
-    time_map = {
-        "Any time": "", "Past month": "r2592000",
-        "Past week": "r604800", "Past 24 hours": "r86400"
+    PORTALS_BY_COUNTRY = {
+        "India": [
+            ("LinkedIn", lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
+            ("Naukri", lambda k, l, e, d: f"https://www.naukri.com/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-') if l != 'Remote' else 'india'}"),
+            ("Indeed", lambda k, l, e, d: f"https://www.indeed.co.in/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
+            ("Shine", lambda k, l, e, d: f"https://www.shine.com/job-search/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}")
+        ],
+        "USA": [
+            ("LinkedIn", lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
+            ("USAJobs", lambda k, l, e, d: f"https://www.usajobs.gov/Search/Results?k={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
+            ("Indeed", lambda k, l, e, d: f"https://www.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
+            ("Monster", lambda k, l, e, d: f"https://www.monster.com/jobs/search/?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}")
+        ],
+        "UK": [
+            ("LinkedIn", lambda k, l, e, d: f"https://uk.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
+            ("Reed", lambda k, l, e, d: f"https://www.reed.co.uk/jobs/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
+            ("TotalJobs", lambda k, l, e, d: f"https://www.totaljobs.com/jobs/{k.lower().replace(' ', '-')}/in-{l.lower().replace(' ', '-')}"),
+            ("CV-Library", lambda k, l, e, d: f"https://www.cv-library.co.uk/search-jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}")
+        ],
+        "UAE": [
+            ("LinkedIn", lambda k, l, e, d: f"https://ae.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
+            ("Bayt", lambda k, l, e, d: f"https://www.bayt.com/en/uae/jobs/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
+            ("NaukriGulf", lambda k, l, e, d: f"https://www.naukrigulf.com/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
+            ("GulfTalent", lambda k, l, e, d: f"https://www.gulftalent.com/uae/jobs/title/{k.lower().replace(' ', '-')}")
+        ],
+        "Germany": [
+            ("LinkedIn", lambda k, l, e, d: f"https://de.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
+            ("StepStone", lambda k, l, e, d: f"https://www.stepstone.de/jobs/{k.lower().replace(' ', '-')}/in-{l.lower().replace(' ', '-')}.html"),
+            ("XING", lambda k, l, e, d: f"https://www.xing.com/jobs/search?q={urllib.parse.quote(k)}"),
+            ("Monster DE", lambda k, l, e, d: f"https://www.monster.de/jobs/suche/?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}")
+        ],
+        "Australia": [
+            ("LinkedIn", lambda k, l, e, d: f"https://au.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
+            ("Seek", lambda k, l, e, d: f"https://www.seek.com.au/{k.lower().replace(' ', '-')}-jobs/in-{l.lower().replace(' ', '-')}"),
+            ("Adzuna", lambda k, l, e, d: f"https://www.adzuna.com.au/search?q={urllib.parse.quote(k)}&loc={urllib.parse.quote(l)}"),
+            ("CareerOne", lambda k, l, e, d: f"https://www.careerone.com.au/jobs?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}")
+        ],
+        "New Zealand": [
+            ("Seek NZ", lambda k, l, e, d: f"https://www.seek.co.nz/{k.lower().replace(' ', '-')}-jobs/in-{l.lower().replace(' ', '-')}"),
+            ("TradeMe Jobs", lambda k, l, e, d: f"https://www.trademe.co.nz/a/jobs/search?search_string={urllib.parse.quote(k)}"),
+            ("MyJobSpace", lambda k, l, e, d: f"https://www.myjobspace.co.nz/jobs?q={urllib.parse.quote(k)}")
+        ],
+        "Russia": [
+            ("hh.ru", lambda k, l, e, d: f"https://hh.ru/search/vacancy?text={urllib.parse.quote(k)}&area=113"),
+            ("SuperJob", lambda k, l, e, d: f"https://www.superjob.ru/vacancy/search/?keywords={urllib.parse.quote(k)}"),
+            ("Rabota.ru", lambda k, l, e, d: f"https://www.rabota.ru/vacancy?query={urllib.parse.quote(k)}")
+        ],
+        "China": [
+            ("51Job", lambda k, l, e, d: f"https://search.51job.com/list/000000,000000,0000,00,9,99,{urllib.parse.quote(k)},2,1.html"),
+            ("Zhaopin", lambda k, l, e, d: f"https://sou.zhaopin.com/?jl=530&kw={urllib.parse.quote(k)}"),
+            ("Liepin", lambda k, l, e, d: f"https://www.liepin.com/zhaopin/?key={urllib.parse.quote(k)}")
+        ],
+        "Japan": [
+            ("Daijob", lambda k, l, e, d: f"https://www.daijob.com/en/jobs/search?keyword={urllib.parse.quote(k)}"),
+            ("Jobs in Japan", lambda k, l, e, d: f"https://jobsinjapan.com/jobs/?search={urllib.parse.quote(k)}"),
+            ("GaijinPot", lambda k, l, e, d: f"https://jobs.gaijinpot.com/index/index/search?keywords={urllib.parse.quote(k)}")
+        ]
     }
-    exp_map = {
-        "Any": "", "Entry": "2", "Mid": "3", "Senior": "4", "Executive": "5"
-    }
-    d_filter = time_map[date_posted]
-    e_filter = exp_map[experience]
 
-    if st.button(t["find_jobs"]):
-        st.subheader(f"🔗 Job Portals in {country}")
+    with st.form("job_form"):
+        col1, col2 = st.columns(2)
+        with col1:
+            keyword = st.text_input(t["job_title"], "Data Scientist")
+            location = st.text_input(t["location"], "Remote")
+            manual_mode = st.checkbox("Manually select country", value=True)
+            if manual_mode:
+                country = st.selectbox(t["country"], list(PORTALS_BY_COUNTRY.keys()))
+            else:
+                import geocoder
+                user_location = geocoder.ip('me')
+                detected_country = user_location.country if user_location else "India"
+                country = detected_country if detected_country in PORTALS_BY_COUNTRY else "India"
+                st.markdown(f"**🌍 Detected Country:** {country}")
+        with col2:
+            experience = st.selectbox(t["experience"], t["experience_options"])
+            date_posted = st.selectbox(t["date_posted"], t["date_posted_options"])
+        submitted = st.form_submit_button(t["find_jobs"])
 
-        portals = {
-            "India": [
-                ("LinkedIn", f"https://www.linkedin.com/jobs/search/?keywords={keyword}&location={location}&f_E={e_filter}&f_TPR={d_filter}"),
-                ("Indeed", f"https://in.indeed.com/jobs?q={keyword}&l={location}"),
-                ("Naukri", f"https://www.naukri.com/{keyword.lower().replace(' ', '-')}-jobs-in-{location.lower().replace(' ', '-')}"),
-                ("Shine", f"https://www.shine.com/job-search/{keyword.lower().replace(' ', '-')}-jobs-in-{location.lower().replace(' ', '-')}"),
-            ],
-            "USA": [
-                ("LinkedIn", f"https://www.linkedin.com/jobs/search/?keywords={keyword}&location={location}&f_E={e_filter}&f_TPR={d_filter}"),
-                ("Indeed", f"https://www.indeed.com/jobs?q={keyword}&l={location}"),
-                ("USAJobs", f"https://www.usajobs.gov/Search/Results?k={keyword}&l={location}"),
-                ("Monster", f"https://www.monster.com/jobs/search/?q={keyword}&where={location}"),
-            ],
-            "UK": [
-                ("LinkedIn", f"https://uk.linkedin.com/jobs/search/?keywords={keyword}&location={location}"),
-                ("Indeed", f"https://uk.indeed.com/jobs?q={keyword}&l={location}"),
-                ("Reed", f"https://www.reed.co.uk/jobs/{keyword.lower().replace(' ', '-')}-jobs-in-{location.lower().replace(' ', '-')}"),
-                ("TotalJobs", f"https://www.totaljobs.com/jobs/{keyword.lower().replace(' ', '-')}/in-{location.lower().replace(' ', '-')}")
-            ],
-            "UAE": [
-                ("LinkedIn", f"https://ae.linkedin.com/jobs/search/?keywords={keyword}&location={location}"),
-                ("Bayt", f"https://www.bayt.com/en/uae/jobs/{keyword.lower().replace(' ', '-')}-jobs-in-{location.lower().replace(' ', '-')}"),
-                ("GulfTalent", f"https://www.gulftalent.com/uae/jobs/title/{keyword.lower().replace(' ', '-')}"),
-                ("NaukriGulf", f"https://www.naukrigulf.com/{keyword.lower().replace(' ', '-')}-jobs-in-{location.lower().replace(' ', '-')}"),
-            ],
-            "Germany": [
-                ("LinkedIn", f"https://de.linkedin.com/jobs/search/?keywords={keyword}&location={location}"),
-                ("StepStone", f"https://www.stepstone.de/jobs/{keyword.lower().replace(' ', '-')}/in-{location.lower().replace(' ', '-')}.html"),
-                ("Monster DE", f"https://www.monster.de/jobs/suche/?q={keyword}&where={location}"),
-                ("XING", f"https://www.xing.com/jobs/search?q={keyword}"),
-            ],
-            "Australia": [
-                ("LinkedIn", f"https://au.linkedin.com/jobs/search/?keywords={keyword}&location={location}"),
-                ("Seek", f"https://www.seek.com.au/{keyword.lower().replace(' ', '-')}-jobs/in-{location.lower().replace(' ', '-')}"),
-                ("Adzuna", f"https://www.adzuna.com.au/search?q={keyword}&loc={location}"),
-                ("CareerOne", f"https://www.careerone.com.au/jobs?q={keyword}&where={location}"),
-            ],
-            "New Zealand": [
-                ("Seek NZ", f"https://www.seek.co.nz/{keyword.lower().replace(' ', '-')}-jobs/in-{location.lower().replace(' ', '-')}"),
-                ("TradeMe", f"https://www.trademe.co.nz/a/jobs/search?search_string={keyword}"),
-                ("MyJobSpace", f"https://www.myjobspace.co.nz/jobs?q={keyword}"),
-                ("Indeed NZ", f"https://nz.indeed.com/jobs?q={keyword}&l={location}"),
-            ],
-            "Singapore": [
-                ("LinkedIn", f"https://sg.linkedin.com/jobs/search/?keywords={keyword}&location={location}"),
-                ("JobStreet", f"https://www.jobstreet.com.sg/en/job-search/{keyword.lower().replace(' ', '-')}-jobs-in-{location.lower().replace(' ', '-')}"),
-                ("JobsCentral", f"https://jobscentral.com.sg/search/{keyword}"),
-                ("FastJobs", f"https://www.fastjobs.sg/singapore-job-ad/{keyword}"),
-            ],
-            "Malaysia": [
-                ("LinkedIn", f"https://my.linkedin.com/jobs/search/?keywords={keyword}&location={location}"),
-                ("JobStreet MY", f"https://www.jobstreet.com.my/en/job-search/{keyword.lower().replace(' ', '-')}-jobs-in-{location.lower().replace(' ', '-')}"),
-                ("Indeed MY", f"https://my.indeed.com/jobs?q={keyword}&l={location}"),
-                ("Jobstore", f"https://www.jobstore.com/my/browse/{keyword.lower().replace(' ', '-')}-jobs-in-{location.lower().replace(' ', '-')}"),
-            ],
-            "Japan": [
-                ("LinkedIn", f"https://jp.linkedin.com/jobs/search/?keywords={keyword}&location={location}"),
-                ("Daijob", f"https://www.daijob.com/en/jobs/search?keyword={keyword}"),
-                ("Jobs in Japan", f"https://jobsinjapan.com/jobs/?search={keyword}"),
-                ("GaijinPot", f"https://jobs.gaijinpot.com/index/index/search?keywords={keyword}"),
-            ],
-            "China": [
-                ("LinkedIn", f"https://cn.linkedin.com/jobs/search/?keywords={keyword}&location={location}"),
-                ("51Job", f"https://search.51job.com/list/000000,000000,0000,00,9,99,{keyword},2,1.html"),
-                ("Zhaopin", f"https://sou.zhaopin.com/?jl=530&kw={keyword}"),
-                ("Liepin", f"https://www.liepin.com/zhaopin/?key={keyword}"),
-            ],
-            "Russia": [
-                ("LinkedIn", f"https://ru.linkedin.com/jobs/search/?keywords={keyword}&location={location}"),
-                ("hh.ru", f"https://hh.ru/search/vacancy?text={keyword}&area=113"),
-                ("SuperJob", f"https://www.superjob.ru/vacancy/search/?keywords={keyword}"),
-                ("Rabota", f"https://www.rabota.ru/vacancy?query={keyword}"),
-            ],
+    if submitted:
+        time_map = {
+            t["date_posted_options"][0]: "",
+            t["date_posted_options"][1]: "r2592000",
+            t["date_posted_options"][2]: "r604800",
+            t["date_posted_options"][3]: "r86400"
         }
+        exp_map = {
+            t["experience_options"][0]: "",
+            t["experience_options"][1]: "2",
+            t["experience_options"][2]: "3",
+            t["experience_options"][3]: "4",
+            t["experience_options"][4]: "5"
+        }
+        d_filter = time_map[date_posted]
+        e_filter = exp_map[experience]
 
-        for name, url in portals.get(country, []):
-            st.markdown(f"🔹 [{name}]({url})")
+        st.subheader(f"🔗 Job Search Links in {country}")
+        for name, url_func in PORTALS_BY_COUNTRY.get(country, PORTALS_BY_COUNTRY["India"]):
+            url = url_func(keyword, location, e_filter, d_filter)
+            st.markdown(
+                f'<a href="{url}" target="_blank" style="display:inline-block; padding:10px 20px; background:#4CAF50; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">'
+                f'Search on {name}</a>',
+                unsafe_allow_html=True
+            )
 
         # Google Jobs fallback
-        g_url = f"https://www.google.com/search?q={urllib.parse.quote(keyword + ' jobs in ' + location)}"
-        st.markdown(f"\n🌐 [Search on Google Jobs]({g_url})")
+        google_jobs_url = f"https://www.google.com/search?q={urllib.parse.quote(keyword + ' jobs in ' + location)}"
+        st.markdown(
+            f'<a href="{google_jobs_url}" target="_blank" style="display:inline-block; padding:10px 20px; background:#4285F4; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">'
+            f'Search on Google Jobs</a>',
+            unsafe_allow_html=True
+        )
 
-# ---------------- TAB 2: INTERVIEW PREP ----------------
+# ----------------- TAB 2: INTERVIEW PREPARATION -----------------
 with tab2:
-    st.subheader(f"🧠 {t['interview_prep']}")
-    role = st.text_input(t["job_title"], "Software Engineer")
-    company = st.text_input("Company", "Google")
-    prep_type = st.selectbox("Prep Type", ["Technical", "Behavioral", "Case Study", "HR", "Salary Negotiation"])
-    if st.button(f"🎯 {t['generate_link']}"):
-        query = f"{role} interview questions {prep_type} {company}"
-        st.markdown(f"[🔍 Google Search](https://www.google.com/search?q={urllib.parse.quote_plus(query)})", unsafe_allow_html=True)
-        st.markdown(f"[🎥 YouTube Videos](https://www.youtube.com/results?search_query={urllib.parse.quote_plus(query)})", unsafe_allow_html=True)
-        st.markdown(f"[📄 PDF Guides](https://www.google.com/search?q={urllib.parse.quote_plus(query)}+filetype:pdf)", unsafe_allow_html=True)
+    st.header(f"🎯 {t['interview_prep']}")
+    
+    # Expanded preparation matrix
+    with st.form("interview_form"):
+        col1, col2 = st.columns([1, 2])
+        with col1:
+            role = st.text_input(t["job_title"], "Data Analyst", key="int_role")
+            country = st.selectbox(t["country"], ["India", "USA", "UK", "Canada"], key="int_country")
+            exp_level = st.selectbox(t["experience"], t["experience_options"])
+        
+        with col2:
+            prep_type = st.selectbox("Preparation Type", [
+                "Technical Questions", 
+                "Behavioral Questions",
+                "Case Studies",
+                "Salary Negotiation",
+                "Resume Tips"
+            ])
+            
+            company = st.text_input("Target Company (optional)", placeholder="Google, TCS, etc.")
+        
+        submitted = st.form_submit_button(f"🔗 {t['generate_link']}")
 
-# ---------------- TAB 3: FREE COURSES ----------------
-with tab3:
-    st.subheader(f"🎓 {t['free_courses']}")
-    course = st.text_input(t["search_course"], "Machine Learning")
-    if st.button(f"🎓 {t['find_courses']}"):
-        platforms = {
-            "Google": f"https://grow.google/certificates/?q={urllib.parse.quote_plus(course)}",
-            "IBM": f"https://skillsbuild.org/learn?search={urllib.parse.quote_plus(course)}",
-            "AWS": f"https://explore.skillbuilder.aws/learn?searchTerm={urllib.parse.quote_plus(course)}",
-            "Microsoft": "https://learn.microsoft.com/en-us/training/",
-            "LinkedIn Learning": "https://www.linkedin.com/learning/",
-            "YouTube": f"https://www.youtube.com/results?search_query={urllib.parse.quote_plus(course)}+free+course"
+    if submitted:
+        # Create smart Google search queries
+        base_query = f"{role} {prep_type} {exp_level} {company} {country}"
+        encoded_query = urllib.parse.quote_plus(base_query)
+        
+        st.subheader("🔍 Best Preparation Resources")
+        
+        # Curated resource matrix
+        RESOURCE_MATRIX = {
+            "Technical Questions": {
+                "India": "https://www.indiabix.com",
+                "Global": "https://leetcode.com"
+            },
+            "Behavioral Questions": {
+                "India": "https://www.ambitionbox.com/interviews",
+                "Global": "https://www.themuse.com/advice/behavioral-interview-questions"
+            },
+            # Add more categories
         }
-        for name, url in platforms.items():
-            st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#6366f1; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📘 {name}</a>", unsafe_allow_html=True)
+        
+        # Show curated resources first
+        main_resource = RESOURCE_MATRIX.get(prep_type, {}).get("India" if country == "India" else "Global")
+        if main_resource:
+            st.markdown(f"""
+            <div style="padding:15px; background:#e8f5e9; border-radius:10px; margin-bottom:20px;">
+                <h4>🎯 Recommended Resource</h4>
+                <a href="{main_resource}" target="_blank" style="color:#2e7d32; font-weight:bold;">
+                    Best {prep_type} Guide for {country} → 
+                </a>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Smart Google fallback
+        st.markdown(f"""
+        <div style="padding:15px; background:#fff3e0; border-radius:10px;">
+            <h4>🔎 More Resources via Smart Search</h4>
+            <a href="https://www.google.com/search?q={encoded_query}+filetype:pdf" target="_blank">
+                📄 Find PDF Guides
+            </a><br>
+            <a href="https://www.google.com/search?q={encoded_query}+site:youtube.com" target="_blank">
+                🎥 Video Tutorials
+            </a><br>
+            <a href="https://www.google.com/search?q={encoded_query}+forum" target="_blank">
+                💬 Discussion Forums
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
 
-# ---------------- FOOTER ----------------
+        # Preparation checklist
+        st.subheader("✅ Personalized Checklist")
+        checklist_items = {
+            "Technical Questions": ["Review core concepts", "Practice coding problems", "Study system design"],
+            "Behavioral Questions": ["Prepare STAR stories", "Research company values", "Practice timing"],
+            # Add more categories
+        }.get(prep_type, [])
+        
+        for item in checklist_items:
+            st.checkbox(item, key=f"check_{item}")
+# ----------------- TAB 3: FREE COURSES -----------------
+with tab3:
+    st.header(f"🎓 {t['free_courses']}")
+
+    with st.form("course_form"):
+        search = st.text_input(t["search_course"], "AI for Business")
+        course_submit = st.form_submit_button(f"🎯 {t['find_courses']}")
+
+    if course_submit:
+        query = urllib.parse.quote_plus(search)
+
+        st.subheader("🧠 Tech Giants")
+        tech = [
+            ("Google", f"https://grow.google/certificates/?q={query}"),
+            ("IBM", f"https://skillsbuild.org/learn?search={query}"),
+            ("Amazon AWS", f"https://explore.skillbuilder.aws/learn?searchTerm={query}"),
+            ("Microsoft (via LinkedIn)", "https://www.linkedin.com/learning/"),
+            ("Meta", f"https://www.facebook.com/business/learn/courses?search={query}")
+        ]
+        for name, url in tech:
+            st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#3b82f6; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📘 {name}</a>", unsafe_allow_html=True)
+
+# ----------------- FOOTER -----------------
 st.markdown("""
----
-<div style='text-align:center; font-size:14px;'>
-    🚀 Built by <b>CareerUpskillers</b> • 
+<hr style='margin-top:40px;'>
+<div style='text-align:center; font-size:16px; color:gray;'>
+    🚀 Powered by <strong>CareerUpskillers</strong> |
     <a href='https://www.linkedin.com/company/careerupskillers' target='_blank'>LinkedIn</a> • 
-    <a href='https://instagram.com/careerupskillers' target='_blank'>Instagram</a>
+    <a href='https://twitter.com/careerupskill' target='_blank'>Twitter</a> • 
+    <a href='https://instagram.com/careerupskillers' target='_blank'>Instagram</a> • 
+    <a href='https://youtube.com/@careerupskillers' target='_blank'>YouTube</a>
 </div>
 """, unsafe_allow_html=True)
