@@ -245,66 +245,55 @@ with tab2:
 # ----------------- TAB 3: FREE COURSES -----------------
 with tab3:
     st.header(f"🎓 {t['free_courses']}")
-    
-    # Curated course database
+
     COURSE_DATABASE = {
         "AI/ML": [
             ("Google", "https://cloudskillsboost.google/journeys/118", "ML Fundamentals", "8h", "✅"),
             ("Microsoft", "https://learn.microsoft.com/ai", "AI Principles", "6h", "✅"),
+            ("IBM", "https://cognitiveclass.ai/learn/ai", "AI Foundations", "10h", "✅"),
         ],
         "Programming": [
-            ("FreeCodeCamp", "https://freecodecamp.org", "Python Basics", "4h", "✅"),
-            ("Udemy", "https://udemy.com/free-courses", "Java Crash Course", "3h", "❌"),
+            ("FreeCodeCamp", "https://www.freecodecamp.org/learn", "Python Basics", "4h", "✅"),
+            ("Harvard", "https://cs50.harvard.edu/x/", "CS50: Intro to CS", "10w", "✅"),
         ],
-        # Add more categories
+        "Soft Skills": [
+            ("Coursera", "https://www.coursera.org/learn/learning-how-to-learn", "Learning How to Learn", "8h", "✅"),
+            ("edX", "https://www.edx.org/course/essential-soft-skills", "Essential Soft Skills", "5h", "✅"),
+        ],
+        "Cloud Computing": [
+            ("AWS", "https://www.aws.training", "AWS Cloud Practitioner Essentials", "6h", "✅"),
+            ("Google Cloud", "https://cloud.google.com/training", "Cloud Digital Leader", "7h", "✅"),
+        ]
     }
 
     with st.form("course_form"):
         search_query = st.text_input(t["search_course"], "AI for Business")
-        category = st.selectbox("Category", ["All", "AI/ML", "Programming", "Soft Skills", "Cloud Computing"])
+        category = st.selectbox("Category", ["All"] + list(COURSE_DATABASE.keys()))
         submitted = st.form_submit_button(f"🎯 {t['find_courses']}")
 
     if submitted:
-        # Show curated courses first
         st.subheader("🏅 Verified Free Courses")
+        found = False
         for cat, courses in COURSE_DATABASE.items():
             if category != "All" and cat != category:
                 continue
             for provider, url, title, duration, cert in courses:
                 if search_query.lower() in title.lower():
+                    found = True
                     st.markdown(f"""
-                    <div style="padding:10px; border:1px solid #e0e0e0; border-radius:5px; margin:5px 0;">
+                    <div style="padding:10px; border:1px solid #ccc; border-radius:8px; margin:5px 0;">
                         <b>{title}</b><br>
                         🏢 {provider} | ⏳ {duration} | Certificate: {cert}<br>
-                        <a href="{url}" target="_blank">Enroll Now →</a>
+                        <a href="{url}" target="_blank" style="color:blue;">Enroll Now →</a>
                     </div>
                     """, unsafe_allow_html=True)
-        
-        # Google fallback with smart search
-        encoded_course_search = urllib.parse.quote_plus(
-            f"{search_query} free course {category} with certificate"
-        )
-        st.markdown(f"""
-        <div style="margin-top:20px; padding:15px; background:#f5f5f5; border-radius:10px;">
-            <h4>🔍 Find More Options</h4>
-            <a href="https://www.google.com/search?q={encoded_course_search}" target="_blank">
-                Search Google for "{search_query}" courses with certificates
-            </a><br>
-            <a href="https://www.youtube.com/results?search_query={encoded_course_search}" target="_blank">
-                Find YouTube tutorials for "{search_query}"
-            </a>
-        </div>
-        """, unsafe_allow_html=True)
 
-        # Learning path suggestions
+        if not found:
+            st.warning("No matching courses found. Try changing the search or category.")
+
+        # Learning Path
         st.subheader("🗺 Suggested Learning Path")
         paths = {
             "AI/ML": "1. Math Basics → 2. Python Programming → 3. ML Fundamentals → 4. Deep Learning",
             "Programming": "1. Programming Basics → 2. Algorithms → 3. Version Control → 4. Projects",
-        }
-        if category in paths:
-            st.markdown(f"""
-            <div style="padding:15px; background:#e3f2fd; border-radius:10px;">
-                {paths[category]}
-            </div>
-            """, unsafe_allow_html=True)
+            "Soft Skills": "1. Communication → 2. Time Management → 3. Problem Solving → 4.
