@@ -1,17 +1,10 @@
 import streamlit as st
 import urllib.parse
+import geocoder
 
 # ----------------- LANGUAGE SUPPORT -----------------
 LANGUAGES = {
     "English": "en",
-    "Hindi": "hi",
-    "Tamil": "ta",
-    "Telugu": "te",
-    "Malayalam": "ml",
-    "French": "fr",
-    "German": "de",
-    "Arabic": "ar",
-    # Add more languages as needed
 }
 
 TRANSLATIONS = {
@@ -34,64 +27,14 @@ TRANSLATIONS = {
         "experience_options": ["Any", "Entry", "Mid", "Senior", "Executive"],
         "date_posted_options": ["Any time", "Past month", "Past week", "Past 24 hours"],
     },
-    "hi": {
-        "title": "कैरियर अपस्किलर्स | एआई जॉब हब",
-        "tagline": "आपका एआई-संचालित करियर लॉन्चपैड",
-        "description": "स्मार्ट जॉब सर्च | साक्षात्कार तैयारी | मुफ्त प्रमाणपत्र",
-        "job_finder": "जॉब खोजक",
-        "interview_prep": "साक्षात्कार तैयारी",
-        "free_courses": "मुफ्त पाठ्यक्रम",
-        "find_jobs": "नौकरियाँ खोजें",
-        "generate_link": "साक्षात्कार तैयारी लिंक बनाएँ",
-        "find_courses": "पाठ्यक्रम खोजें",
-        "job_title": "नौकरी शीर्षक / कीवर्ड",
-        "location": "पसंदीदा स्थान",
-        "country": "देश",
-        "experience": "अनुभव स्तर",
-        "date_posted": "पोस्ट की तारीख",
-        "search_course": "पाठ्यक्रम / कौशल / नौकरी शीर्षक खोजें",
-        "experience_options": ["कोई भी", "प्रारंभिक", "मध्य", "वरिष्ठ", "कार्यकारी"],
-        "date_posted_options": ["कभी भी", "पिछला महीना", "पिछला सप्ताह", "पिछले 24 घंटे"],
-    },
-    "ta": {
-        "title": "கரியர் அப்ஸ்கிலர்ஸ் | ஏஐ வேலை மையம்",
-        "tagline": "உங்கள் ஏஐ-இயக்கப்பட்ட தொழில் தொடக்கப்புள்ளி",
-        "description": "புத்திசாலி வேலை தேடல் | நேர்காணல் தயாரிப்பு | இலவச சான்றிதழ்கள்",
-        "job_finder": "வேலை தேடுபவர்",
-        "interview_prep": "நேர்காணல் தயாரிப்பு",
-        "free_courses": "இலவச படிப்புகள்",
-        "find_jobs": "வேலைகளைத் தேடு",
-        "generate_link": "நேர்காணல் தயாரிப்பு இணைப்பை உருவாக்கு",
-        "find_courses": "படிப்புகளைத் தேடு",
-        "job_title": "வேலை தலைப்பு / முக்கிய சொற்கள்",
-        "location": "விருப்பமான இடம்",
-        "country": "நாடு",
-        "experience": "அனுபவ நிலை",
-        "date_posted": "பதிவு தேதி",
-        "search_course": "படிப்பு / திறன் / வேலை தலைப்பு தேடு",
-        "experience_options": ["எதுவும்", "ஆரம்பம்", "நடுத்தரம்", "மூத்தவர்", "நிர்வாகி"],
-        "date_posted_options": ["எப்போது வேண்டுமானாலும்", "கடந்த மாதம்", "கடந்த வாரம்", "கடந்த 24 மணி நேரம்"],
-    },
-    # Add more languages as needed
 }
 
 # ----------------- SETUP -----------------
 st.set_page_config(page_title="CareerUpskillers | AI Job Hub", page_icon="🌟", layout="centered")
-
-# Language selection
 lang = st.sidebar.selectbox("Select Language", list(LANGUAGES.keys()), index=0)
-t = TRANSLATIONS.get(LANGUAGES[lang], TRANSLATIONS["en"])  # Default to English if not found
+t = TRANSLATIONS.get(LANGUAGES[lang], TRANSLATIONS["en"])
 
-# Hide Streamlit default elements
-st.markdown("""
-    <style>
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        header {visibility: hidden;}
-    </style>
-""", unsafe_allow_html=True)
-
-# ----------------- BRANDING -----------------
+# Branding
 st.markdown(f"""
 <div style='text-align:center; padding:10px 0;'>
     <h1 style='color:#1f2937;'>🚀 {t["title"]}</h1>
@@ -107,6 +50,22 @@ tab1, tab2, tab3 = st.tabs([f"🌐 {t['job_finder']}", f"🎯 {t['interview_prep
 with tab1:
     st.header(f"🌐 {t['job_finder']}")
 
+    # Filter maps
+    time_map = {
+        t["date_posted_options"][0]: "",
+        t["date_posted_options"][1]: "r2592000",
+        t["date_posted_options"][2]: "r604800",
+        t["date_posted_options"][3]: "r86400"
+    }
+    exp_map = {
+        t["experience_options"][0]: "",
+        t["experience_options"][1]: "2",
+        t["experience_options"][2]: "3",
+        t["experience_options"][3]: "4",
+        t["experience_options"][4]: "5"
+    }
+
+    # Sample country/job portal setup
     PORTALS_BY_COUNTRY = {
         "India": [
             ("LinkedIn", lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
@@ -120,50 +79,6 @@ with tab1:
             ("Indeed", lambda k, l, e, d: f"https://www.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
             ("Monster", lambda k, l, e, d: f"https://www.monster.com/jobs/search/?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}")
         ],
-        "UK": [
-            ("LinkedIn", lambda k, l, e, d: f"https://uk.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
-            ("Reed", lambda k, l, e, d: f"https://www.reed.co.uk/jobs/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
-            ("TotalJobs", lambda k, l, e, d: f"https://www.totaljobs.com/jobs/{k.lower().replace(' ', '-')}/in-{l.lower().replace(' ', '-')}"),
-            ("CV-Library", lambda k, l, e, d: f"https://www.cv-library.co.uk/search-jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}")
-        ],
-        "UAE": [
-            ("LinkedIn", lambda k, l, e, d: f"https://ae.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
-            ("Bayt", lambda k, l, e, d: f"https://www.bayt.com/en/uae/jobs/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
-            ("NaukriGulf", lambda k, l, e, d: f"https://www.naukrigulf.com/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
-            ("GulfTalent", lambda k, l, e, d: f"https://www.gulftalent.com/uae/jobs/title/{k.lower().replace(' ', '-')}")
-        ],
-        "Germany": [
-            ("LinkedIn", lambda k, l, e, d: f"https://de.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
-            ("StepStone", lambda k, l, e, d: f"https://www.stepstone.de/jobs/{k.lower().replace(' ', '-')}/in-{l.lower().replace(' ', '-')}.html"),
-            ("XING", lambda k, l, e, d: f"https://www.xing.com/jobs/search?q={urllib.parse.quote(k)}"),
-            ("Monster DE", lambda k, l, e, d: f"https://www.monster.de/jobs/suche/?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}")
-        ],
-        "Australia": [
-            ("LinkedIn", lambda k, l, e, d: f"https://au.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
-            ("Seek", lambda k, l, e, d: f"https://www.seek.com.au/{k.lower().replace(' ', '-')}-jobs/in-{l.lower().replace(' ', '-')}"),
-            ("Adzuna", lambda k, l, e, d: f"https://www.adzuna.com.au/search?q={urllib.parse.quote(k)}&loc={urllib.parse.quote(l)}"),
-            ("CareerOne", lambda k, l, e, d: f"https://www.careerone.com.au/jobs?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}")
-        ],
-        "New Zealand": [
-            ("Seek NZ", lambda k, l, e, d: f"https://www.seek.co.nz/{k.lower().replace(' ', '-')}-jobs/in-{l.lower().replace(' ', '-')}"),
-            ("TradeMe Jobs", lambda k, l, e, d: f"https://www.trademe.co.nz/a/jobs/search?search_string={urllib.parse.quote(k)}"),
-            ("MyJobSpace", lambda k, l, e, d: f"https://www.myjobspace.co.nz/jobs?q={urllib.parse.quote(k)}")
-        ],
-        "Russia": [
-            ("hh.ru", lambda k, l, e, d: f"https://hh.ru/search/vacancy?text={urllib.parse.quote(k)}&area=113"),
-            ("SuperJob", lambda k, l, e, d: f"https://www.superjob.ru/vacancy/search/?keywords={urllib.parse.quote(k)}"),
-            ("Rabota.ru", lambda k, l, e, d: f"https://www.rabota.ru/vacancy?query={urllib.parse.quote(k)}")
-        ],
-        "China": [
-            ("51Job", lambda k, l, e, d: f"https://search.51job.com/list/000000,000000,0000,00,9,99,{urllib.parse.quote(k)},2,1.html"),
-            ("Zhaopin", lambda k, l, e, d: f"https://sou.zhaopin.com/?jl=530&kw={urllib.parse.quote(k)}"),
-            ("Liepin", lambda k, l, e, d: f"https://www.liepin.com/zhaopin/?key={urllib.parse.quote(k)}")
-        ],
-        "Japan": [
-            ("Daijob", lambda k, l, e, d: f"https://www.daijob.com/en/jobs/search?keyword={urllib.parse.quote(k)}"),
-            ("Jobs in Japan", lambda k, l, e, d: f"https://jobsinjapan.com/jobs/?search={urllib.parse.quote(k)}"),
-            ("GaijinPot", lambda k, l, e, d: f"https://jobs.gaijinpot.com/index/index/search?keywords={urllib.parse.quote(k)}")
-        ]
     }
 
     with st.form("job_form"):
@@ -175,55 +90,33 @@ with tab1:
             if manual_mode:
                 country = st.selectbox(t["country"], list(PORTALS_BY_COUNTRY.keys()))
             else:
-                import geocoder
-                user_location = geocoder.ip('me')
-                detected_country = user_location.country if user_location else "India"
-                country = detected_country if detected_country in PORTALS_BY_COUNTRY else "India"
-                st.markdown(f"**🌍 Detected Country:** {country}")
+                g = geocoder.ip('me')
+                country = g.country if g and g.country in PORTALS_BY_COUNTRY else "India"
+                st.markdown(f"🌍 Detected Country: **{country}**")
         with col2:
             experience = st.selectbox(t["experience"], t["experience_options"])
             date_posted = st.selectbox(t["date_posted"], t["date_posted_options"])
         submitted = st.form_submit_button(t["find_jobs"])
 
     if submitted:
-        time_map = {
-            t["date_posted_options"][0]: "",
-            t["date_posted_options"][1]: "r2592000",
-            t["date_posted_options"][2]: "r604800",
-            t["date_posted_options"][3]: "r86400"
-        }
-        exp_map = {
-            t["experience_options"][0]: "",
-            t["experience_options"][1]: "2",
-            t["experience_options"][2]: "3",
-            t["experience_options"][3]: "4",
-            t["experience_options"][4]: "5"
-        }
         d_filter = time_map[date_posted]
         e_filter = exp_map[experience]
-
         st.subheader(f"🔗 Job Search Links in {country}")
-        for name, url_func in PORTALS_BY_COUNTRY.get(country, PORTALS_BY_COUNTRY["India"]):
+        for name, url_func in PORTALS_BY_COUNTRY[country]:
             url = url_func(keyword, location, e_filter, d_filter)
             st.markdown(
-                f'<a href="{url}" target="_blank" style="display:inline-block; padding:10px 20px; background:#4CAF50; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">'
-                f'Search on {name}</a>',
+                f'<a href="{url}" target="_blank" style="display:inline-block; padding:10px 20px; background:#4CAF50; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">Search on {name}</a>',
                 unsafe_allow_html=True
             )
-
-        # Google Jobs fallback
         google_jobs_url = f"https://www.google.com/search?q={urllib.parse.quote(keyword + ' jobs in ' + location)}"
         st.markdown(
-            f'<a href="{google_jobs_url}" target="_blank" style="display:inline-block; padding:10px 20px; background:#4285F4; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">'
-            f'Search on Google Jobs</a>',
+            f'<a href="{google_jobs_url}" target="_blank" style="display:inline-block; padding:10px 20px; background:#4285F4; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">Search on Google Jobs</a>',
             unsafe_allow_html=True
         )
 
 # ----------------- TAB 2: INTERVIEW PREPARATION -----------------
 with tab2:
     st.header(f"🎯 {t['interview_prep']}")
-
-    # Lambda URL generators
     GOOGLE_SEARCH = lambda query, extra="": f"https://www.google.com/search?q={urllib.parse.quote_plus(query)}{extra}"
     YOUTUBE_SEARCH = lambda query: GOOGLE_SEARCH(query, "+site:youtube.com")
     FORUM_SEARCH = lambda query: GOOGLE_SEARCH(query, "+forum")
@@ -236,21 +129,14 @@ with tab2:
             exp_level = st.selectbox(t["experience"], t["experience_options"])
         with col2:
             prep_type = st.selectbox("Preparation Type", [
-                "Technical Questions", 
-                "Behavioral Questions",
-                "Case Studies",
-                "Salary Negotiation",
-                "Resume Tips"
+                "Technical Questions", "Behavioral Questions",
+                "Case Studies", "Salary Negotiation", "Resume Tips"
             ])
             company = st.text_input("Target Company (optional)", placeholder="Google, TCS, etc.")
         submitted = st.form_submit_button(f"🔗 {t['generate_link']}")
 
     if submitted:
         base_query = f"{role} {prep_type} {exp_level} {company} {country}"
-        encoded_query = urllib.parse.quote_plus(base_query)
-
-        st.subheader("🔍 Best Preparation Resources")
-
         RESOURCE_MATRIX = {
             "Technical Questions": {
                 "India": "https://www.indiabix.com",
@@ -261,47 +147,39 @@ with tab2:
                 "Global": "https://www.themuse.com/advice/behavioral-interview-questions"
             }
         }
-
         main_resource = RESOURCE_MATRIX.get(prep_type, {}).get("India" if country == "India" else "Global")
         if main_resource:
             st.markdown(f"""
             <div style="padding:15px; background:#e8f5e9; border-radius:10px; margin-bottom:20px;">
                 <h4>🎯 Recommended Resource</h4>
-                <a href="{main_resource}" target="_blank" style="color:#2e7d32; font-weight:bold;">
-                    Best {prep_type} Guide for {country} →
-                </a>
+                <a href="{main_resource}" target="_blank" style="color:#2e7d32;">Best {prep_type} Guide for {country}</a>
             </div>
             """, unsafe_allow_html=True)
 
         st.markdown(f"""
         <div style="padding:15px; background:#fff3e0; border-radius:10px;">
-            <h4>🔎 More Resources via Smart Search</h4>
-            <a href="{GOOGLE_SEARCH(base_query, '+filetype:pdf')}" target="_blank">📄 Find PDF Guides</a><br>
-            <a href="{YOUTUBE_SEARCH(base_query)}" target="_blank">🎥 Video Tutorials</a><br>
-            <a href="{FORUM_SEARCH(base_query)}" target="_blank">💬 Discussion Forums</a>
+            <h4>🔎 More Resources</h4>
+            <a href="{GOOGLE_SEARCH(base_query, '+filetype:pdf')}" target="_blank">📄 PDF Guides</a><br>
+            <a href="{YOUTUBE_SEARCH(base_query)}" target="_blank">🎥 YouTube Videos</a><br>
+            <a href="{FORUM_SEARCH(base_query)}" target="_blank">💬 Forums</a>
         </div>
         """, unsafe_allow_html=True)
 
-        st.subheader("✅ Personalized Checklist")
         checklist_items = {
             "Technical Questions": ["Review core concepts", "Practice coding problems", "Study system design"],
             "Behavioral Questions": ["Prepare STAR stories", "Research company values", "Practice timing"]
         }.get(prep_type, [])
-
         for item in checklist_items:
             st.checkbox(item, key=f"check_{item}")
-           st.checkbox(item, key=f"check_{item}")
-           
+
 # ----------------- TAB 3: FREE COURSES -----------------
 with tab3:
     st.header(f"🎓 {t['free_courses']}")
-
-    # Platform URL generators using lambda
     COURSE_LINKS = {
         "Google": lambda q: f"https://grow.google/certificates/?q={urllib.parse.quote_plus(q)}",
         "IBM": lambda q: f"https://skillsbuild.org/learn?search={urllib.parse.quote_plus(q)}",
         "AWS": lambda q: f"https://explore.skillbuilder.aws/learn?searchTerm={urllib.parse.quote_plus(q)}",
-        "Microsoft (via LinkedIn)": lambda q: "https://www.linkedin.com/learning/",
+        "Microsoft (LinkedIn)": lambda q: "https://www.linkedin.com/learning/",
         "Meta": lambda q: f"https://www.facebook.com/business/learn/courses?search={urllib.parse.quote_plus(q)}"
     }
 
@@ -313,7 +191,10 @@ with tab3:
         st.subheader("🧠 Tech Giants")
         for name, url_func in COURSE_LINKS.items():
             course_url = url_func(search)
-            st.markdown(f"<a href='{course_url}' target='_blank' style='display:block; background:#3b82f6; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📘 {name}</a>", unsafe_allow_html=True)
+            st.markdown(
+                f"<a href='{course_url}' target='_blank' style='display:block; background:#3b82f6; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📘 {name}</a>",
+                unsafe_allow_html=True
+            )
 
 # ----------------- FOOTER -----------------
 st.markdown("""
