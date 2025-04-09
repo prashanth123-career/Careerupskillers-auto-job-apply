@@ -175,6 +175,13 @@ st.set_page_config(page_title="CareerUpskillers | AI Job Hub", page_icon="🌟",
 # Language selection
 lang = st.sidebar.selectbox("Select Language", list(LANGUAGES.keys()), index=0)
 t = TRANSLATIONS.get(LANGUAGES[lang], TRANSLATIONS["en"])  # Default to English if not found
+# Show links to our other apps
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 🛠️ Explore Our AI Tools")
+st.sidebar.markdown("🔹 [🧠 AI Email Summarizer](https://careerupskillersemail-summarizer-eflb3octoua7tbdwqdbygd.streamlit.app/)")
+st.sidebar.markdown("🔹 [💡 AI Career Advisor](https://careerupskillers-ai-advisor-d8vugggkkncjpxirbrcbx6.streamlit.app/)")
+st.sidebar.markdown("---")
+
 
 # Hide Streamlit default elements
 st.markdown("""
