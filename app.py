@@ -181,6 +181,30 @@ st.sidebar.markdown("### 🛠️ Explore Our AI Tools")
 st.sidebar.markdown("🔹 [🧠 AI Email Summarizer](https://careerupskillersemail-summarizer-eflb3octoua7tbdwqdbygd.streamlit.app/)")
 st.sidebar.markdown("🔹 [💡 AI Career Advisor](https://careerupskillers-ai-advisor-d8vugggkkncjpxirbrcbx6.streamlit.app/)")
 st.sidebar.markdown("---")
+st.sidebar.markdown("### 🧠 Launch Your Own AI Career App for ₹499")
+st.sidebar.markdown("""
+🚀 Build your own AI-powered career app just like this one – No coding needed!
+
+🔗 **[Pay ₹499 & Get Instant Download](https://careerupskillers-ai-advisor-d8vugggkkncjpxirbrcbx6.streamlit.app/)**
+
+💼 What's Included:
+- Full Job Finder & Chatbot App Code
+- Proposal Generator, Fake News Detector
+- Freelance Strategy & Client Outreach Templates
+- AI Career Roadmap & State-wise Lead Database
+
+📥 **Get the AI Starter Kit instantly after payment**
+""", unsafe_allow_html=True)
+
+# Hide Streamlit default elements
+st.markdown("""
+    <style>
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header {visibility: hidden;}
+    </style>
+""", unsafe_allow_html=True)
+
 
 
 # Hide Streamlit default elements
