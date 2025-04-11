@@ -347,6 +347,44 @@ with tab1:
             f'Search on Google Jobs</a>',
             unsafe_allow_html=True
         )
+st.markdown("""
+<div style='background-color:#fffde7; border:2px solid #fdd835; border-radius:10px; padding:20px; margin-top:30px;'>
+
+<h3 style='color:#f57f17;'>🚨 2025 Layoffs Are Real. Don't Wait!</h3>
+<p style='font-size:16px; color:#555;'>
+Big tech companies are cutting jobs aggressively across the globe:
+</p>
+
+<ul style='font-size:15px; color:#444;'>
+  <li>🛑 <b>Microsoft</b> is laying off 1,900+ staff in 2025 – <a href='https://timesofindia.indiatimes.com/world/us/microsoft-amazon-the-washington-post-and-other-us-companies-laying-off-in-2025/articleshow/117155852.cms' target='_blank'>Read More</a></li>
+  <li>🛑 <b>Amazon, Intel & Morgan Stanley</b> are reducing headcount – <a href='https://www.ndtvprofit.com/business/layoffs-2025-amazon-intel-morgan-stanley-among-companies-cutting-jobs-this-year' target='_blank'>Read More</a></li>
+  <li>🛑 <b>HPE, SAP, Google</b> and others are affected – <a href='https://indianexpress.com/article/technology/tech-layoffs-march-2025-it-layoffs-9919985/' target='_blank'>Read More</a></li>
+</ul>
+
+<p style='margin-top:10px; font-size:16px;'>
+🎥 <b>Watch the layoff trend videos:</b><br>
+<a href='https://youtu.be/WZW0xbzUHj8?si=TsObXAUIumP3n53s' target='_blank'>🔹 Layoffs Explained</a> |
+<a href='https://youtu.be/vM8Chmkd22o?si=wIGD24ZegI8rj6Zg' target='_blank'>🔹 Tech Job Cuts</a> |
+<a href='https://youtu.be/uq_ba4Prjps?si=KW2odA2izyFDsNw6' target='_blank'>🔹 Real Layoff Stories</a> |
+<a href='https://youtu.be/3ZmtSdAjxCM?si=h7W4AaezK_6xaBQd' target='_blank'>🔹 Layoffs 2025 Insights</a>
+</p>
+
+<hr style='margin:15px 0;'>
+
+<h4 style='color:#1b5e20;'>💬 Real Success Story:</h4>
+<p style='font-size:15px; color:#333; font-style:italic;'>
+"I lost my job in Nov 2024. I was depressed and clueless. But after joining CareerUpskillers and buying the ₹499 AI Kit, I started freelancing with AI tools. Now I earn ₹90K–₹1.7L/month from global clients!"<br>
+– <b>Rahul Verma, Ex-Employee at HPE</b>
+</p>
+
+<p style='font-size:16px; color:#000; font-weight:bold;'>
+🔥 Grab your <span style='color:#d32f2f;'>₹499 AI Premium Kit</span> – Automate tasks, build your AI career, and earn globally!
+</p>
+
+<a href='https://pages.razorpay.com/pl_Q9haRTHXpyB9SS/view' target='_blank' style='display:inline-block; padding:10px 20px; background:#1976d2; color:#fff; font-weight:bold; border-radius:6px; text-decoration:none; font-size:16px;'>🚀 Buy Now – Limited Time Offer</a>
+
+</div>
+""", unsafe_allow_html=True)
 
 # ----------------- TAB 2: INTERVIEW PREPARATION -----------------
 with tab2:
@@ -431,6 +469,41 @@ with tab2:
         
         for item in checklist_items:
             st.checkbox(item, key=f"check_{item}")
+            st.markdown("""
+<div style='background-color:#fffde7; border:2px solid #fdd835; border-radius:10px; padding:20px; margin-top:30px;'>
+
+<h3 style='color:#f57f17;'>😨 Tired of Rejections? Interviews Got You Nervous?</h3>
+
+<p style='font-size:16px; color:#555;'>
+🔸 Most candidates fail interviews not because they lack skills – but because they lack <b>smart preparation</b>.<br>
+🔸 If you're still Googling "top 10 interview questions", you're already behind.
+</p>
+
+<h4 style='color:#1b5e20;'>🎯 What's Inside the ₹499 AI Interview Kit?</h4>
+<ul style='font-size:15px; color:#333;'>
+  <li>📄 150+ Real Company Interview Questions (TCS, Accenture, Google, Amazon...)</li>
+  <li>🎥 Curated YouTube Playlists by Role (Data Analyst, Developer, Marketing...)</li>
+  <li>🧠 Behavioral, Resume & Salary Negotiation Training</li>
+  <li>🚀 Daily AI-generated Mock Questions & Custom Prep Links</li>
+</ul>
+
+<hr style='margin:15px 0;'>
+
+<h4 style='color:#1b5e20;'>💬 Real User Testimonial:</h4>
+<p style='font-size:15px; color:#333; font-style:italic;'>
+"I got rejected in 5 interviews in Jan 2025. But once I used the ₹499 AI Interview Kit from CareerUpskillers, I got an offer from Infosys in 18 days! This changed my life!"<br>
+– <b>Meenakshi R., Hyderabad</b>
+</p>
+
+<p style='font-size:16px; color:#000; font-weight:bold;'>
+🎁 Don’t let interviews scare you. <span style='color:#d32f2f;'>Master them with AI!</span>
+</p>
+
+<a href='https://pages.razorpay.com/pl_Q9haRTHXpyB9SS/view' target='_blank' style='display:inline-block; padding:10px 20px; background:#1976d2; color:#fff; font-weight:bold; border-radius:6px; text-decoration:none; font-size:16px;'>🎯 Buy ₹499 Interview Kit</a>
+
+</div>
+""", unsafe_allow_html=True)
+
 # ----------------- TAB 3: FREE COURSES -----------------
 with tab3:
     st.header(f"🎓 {t['free_courses']}")
@@ -476,6 +549,39 @@ with tab3:
         ]
         for name, url in platforms:
             st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#f97316; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>🛠️ {name}</a>", unsafe_allow_html=True)
+st.markdown("""
+<div style='background-color:#e8f5e9; border:2px solid #43a047; border-radius:10px; padding:20px; margin-top:30px;'>
+
+<h3 style='color:#2e7d32;'>🎓 Learning for Free? Here's How to Start Earning</h3>
+
+<p style='font-size:16px; color:#444;'>
+👏 You're taking a great first step with free courses. But if you're serious about building <b>an AI-powered career</b>, it's time to get real-world tools that <b>pay the bills</b>.
+</p>
+
+<h4 style='color:#1b5e20;'>🔥 Limited-Time Bonus – ₹499 AI Career Kit:</h4>
+<ul style='font-size:15px; color:#333;'>
+  <li>💼 10+ Freelance-Ready AI Projects (Chatbot, Face Recognition, Resume Parser...)</li>
+  <li>📊 ₹90,000 – ₹1.7L Salary Insights for Each Role</li>
+  <li>🧠 Personalized Career Roadmap + Job Links</li>
+  <li>🎯 Interview + Resume Masterclass (with PDF checklists)</li>
+</ul>
+
+<hr style='margin:15px 0;'>
+
+<h4 style='color:#1b5e20;'>🗣️ Real Story from Our Students:</h4>
+<p style='font-size:15px; color:#333; font-style:italic;'>
+"In Nov 2024, I got laid off. After 30 days with the CareerUpskillers AI Kit, I landed a freelance project worth ₹65,000. From watching free videos to earning – this kit bridged the gap." <br>
+– <b>Arjun V., B.Tech (ECE), Chennai</b>
+</p>
+
+<p style='font-size:16px; color:#000; font-weight:bold;'>
+🚀 You’ve started learning. Now it’s time to start earning.
+</p>
+
+<a href='https://pages.razorpay.com/pl_Q9haRTHXpyB9SS/view' target='_blank' style='display:inline-block; padding:10px 20px; background:#1976d2; color:#fff; font-weight:bold; border-radius:6px; text-decoration:none; font-size:16px;'>💼 Buy ₹499 AI Career Kit</a>
+
+</div>
+""", unsafe_allow_html=True)
 
             # ----------------- TAB 4: FREELANCE & REMOTE JOBS -----------------
 with tab4:
@@ -534,6 +640,39 @@ with tab4:
         # Google fallback
         st.markdown("---")
         st.markdown(f"<a href='https://www.google.com/search?q={q}+{job_type}+jobs+{region}' target='_blank' style='display:block; background:#dc2626; color:white; padding:10px; border-radius:5px;'>🔍 Search on Google Jobs</a>", unsafe_allow_html=True)
+st.markdown("""
+<div style='background-color:#fff8e1; border:2px solid #f9a825; border-radius:10px; padding:20px; margin-top:30px;'>
+
+<h3 style='color:#ef6c00;'>🚀 Can't Find the Right Job? Create Your Own Opportunities</h3>
+
+<p style='font-size:16px; color:#444;'>
+Whether you're job hunting, switching careers, or stuck in endless applications, here's a fact:
+<b>AI freelancers are earning ₹50K – ₹1.5L/month by building tools from home.</b>
+</p>
+
+<h4 style='color:#bf360c;'>🎁 Introducing the ₹499 AI Career Kit (90% Off)</h4>
+<ul style='font-size:15px; color:#333;'>
+  <li>✅ 10+ Freelance-Ready AI Projects (Chatbot, Resume Parser, Fake News Detector, etc.)</li>
+  <li>📈 Tools to automate your job search, interview prep & applications</li>
+  <li>🧾 AI-generated proposals & cover letters</li>
+  <li>💸 Ideal for Upwork, Fiverr, LinkedIn & Internshala freelancing</li>
+</ul>
+
+<hr style='margin:15px 0;'>
+
+<p style='font-size:15px; color:#333; font-style:italic;'>
+"After applying for 70+ jobs with no response, I switched to freelancing with this kit. Now earning ₹1.2L/month working from home."  
+<br>– <b>Sana Rahman, MBA, Hyderabad</b>
+</p>
+
+<p style='font-size:16px; color:#000; font-weight:bold;'>
+Don't wait for a job – start your AI freelancing journey today.
+</p>
+
+<a href='https://pages.razorpay.com/pl_Q9haRTHXpyB9SS/view' target='_blank' style='display:inline-block; padding:10px 20px; background:#1976d2; color:#fff; font-weight:bold; border-radius:6px; text-decoration:none; font-size:16px;'>💼 Get the ₹499 AI Career Kit</a>
+
+</div>
+""", unsafe_allow_html=True)
 
 # ----------------- FOOTER -----------------
 st.markdown("""
