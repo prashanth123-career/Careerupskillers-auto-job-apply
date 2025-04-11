@@ -185,7 +185,7 @@ st.sidebar.markdown("### 🧠 Launch Your Own AI Career App for ₹499")
 st.sidebar.markdown("""
 🚀 Build your own AI-powered career app just like this one – No coding needed!
 
-🔗 **[Pay ₹499 & Get Instant Download](https://careerupskillers-ai-advisor-d8vugggkkncjpxirbrcbx6.streamlit.app/)**
+🔗 **[Pay ₹499 & Get Instant Download](https://pages.razorpay.com/pl_Q9haRTHXpyB9SS/view)**
 
 💼 What's Included:
 - Full Job Finder & Chatbot App Code
