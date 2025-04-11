@@ -175,6 +175,7 @@ st.set_page_config(page_title="CareerUpskillers | AI Job Hub", page_icon="🌟",
 # Language selection
 lang = st.sidebar.selectbox("Select Language", list(LANGUAGES.keys()), index=0)
 t = TRANSLATIONS.get(LANGUAGES[lang], TRANSLATIONS["en"])  # Default to English if not found
+
 # Show links to our other apps
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 🛠️ Explore Our AI Tools")
@@ -182,7 +183,7 @@ st.sidebar.markdown("🔹 [🧠 AI Email Summarizer](https://careerupskillersema
 st.sidebar.markdown("🔹 [💡 AI Career Advisor](https://careerupskillers-ai-advisor-d8vugggkkncjpxirbrcbx6.streamlit.app/)")
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 🧠 Launch Your Own AI Career App for ₹499")
-st.sidebar.markdown(\"\"\"
+st.sidebar.markdown("""
 🚀 Build your own AI-powered career app just like this one – No coding needed!
 
 🔗 **[Pay ₹499 & Get Instant Download](https://careerupskillers-ai-advisor-d8vugggkkncjpxirbrcbx6.streamlit.app/)**
@@ -194,99 +195,7 @@ st.sidebar.markdown(\"\"\"
 - AI Career Roadmap & State-wise Lead Database
 
 📥 **Get the AI Starter Kit instantly after payment**
-\"\"\", unsafe_allow_html=True)
-
-st.markdown(\"\"\"
-<div style='text-align:center; padding:10px 0;'>
-    <h1 style='color:#1f2937;'>🚀 {}</h1>
-    <h4 style='color:#374151;'>{}</h4>
-    <p style='font-size:16px;'>{}</p>
-</div>
-\"\"\".format(t["title"], t["tagline"], t["description"]), unsafe_allow_html=True)
-
-tab1, tab2, tab3, tab4 = st.tabs([
-    f"🌐 {t['job_finder']}", 
-    f"🎯 {t['interview_prep']}", 
-    f"🎓 {t['free_courses']}", 
-    f"💼 Freelance & Remote Jobs"
-])
-
-# Tab 1: Job Finder
-with tab1:
-    st.markdown("### 🧠 Launch Your Own AI Career App for ₹499")
-    st.markdown(\"\"\"
-🚀 Build your own AI-powered career app just like this one – No coding needed!
-
-🔗 **[Pay ₹499 & Get Instant Download](https://careerupskillers-ai-advisor-d8vugggkkncjpxirbrcbx6.streamlit.app/)**
-
-💼 What's Included:
-- Full Job Finder & Chatbot App Code
-- Proposal Generator, Fake News Detector
-- Freelance Strategy & Client Outreach Templates
-- AI Career Roadmap & State-wise Lead Database
-
-📥 **Get the AI Starter Kit instantly after payment**
-\"\"\", unsafe_allow_html=True)
-
-# Tab 2: Interview Preparation
-with tab2:
-    st.markdown("### 🧠 Launch Your Own AI Career App for ₹499")
-    st.markdown(\"\"\"
-🚀 Build your own AI-powered career app just like this one – No coding needed!
-
-🔗 **[Pay ₹499 & Get Instant Download](https://careerupskillers-ai-advisor-d8vugggkkncjpxirbrcbx6.streamlit.app/)**
-
-💼 What's Included:
-- Full Job Finder & Chatbot App Code
-- Proposal Generator, Fake News Detector
-- Freelance Strategy & Client Outreach Templates
-- AI Career Roadmap & State-wise Lead Database
-
-📥 **Get the AI Starter Kit instantly after payment**
-\"\"\", unsafe_allow_html=True)
-
-# Tab 3: Free Courses
-with tab3:
-    st.markdown("### 🧠 Launch Your Own AI Career App for ₹499")
-    st.markdown(\"\"\"
-🚀 Build your own AI-powered career app just like this one – No coding needed!
-
-🔗 **[Pay ₹499 & Get Instant Download](https://careerupskillers-ai-advisor-d8vugggkkncjpxirbrcbx6.streamlit.app/)**
-
-💼 What's Included:
-- Full Job Finder & Chatbot App Code
-- Proposal Generator, Fake News Detector
-- Freelance Strategy & Client Outreach Templates
-- AI Career Roadmap & State-wise Lead Database
-
-📥 **Get the AI Starter Kit instantly after payment**
-\"\"\", unsafe_allow_html=True)
-
-# Tab 4: Freelance & Remote Jobs
-with tab4:
-    st.markdown("### 🧠 Launch Your Own AI Career App for ₹499")
-    st.markdown(\"\"\"
-🚀 Build your own AI-powered career app just like this one – No coding needed!
-
-🔗 **[Pay ₹499 & Get Instant Download](https://careerupskillers-ai-advisor-d8vugggkkncjpxirbrcbx6.streamlit.app/)**
-
-💼 What's Included:
-- Full Job Finder & Chatbot App Code
-- Proposal Generator, Fake News Detector
-- Freelance Strategy & Client Outreach Templates
-- AI Career Roadmap & State-wise Lead Database
-
-📥 **Get the AI Starter Kit instantly after payment**
-\"\"\", unsafe_allow_html=True)
-"""
-
-file_path = "/mnt/data/ai_job_hub_with_499_offer.py"
-with open(file_path, "w") as f:
-    f.write(updated_script)
-
-file_path
-
-
+""", unsafe_allow_html=True)
 
 # Hide Streamlit default elements
 st.markdown("""
@@ -512,6 +421,7 @@ with tab2:
         
         for item in checklist_items:
             st.checkbox(item, key=f"check_{item}")
+
 # ----------------- TAB 3: FREE COURSES -----------------
 with tab3:
     st.header(f"🎓 {t['free_courses']}")
@@ -558,7 +468,7 @@ with tab3:
         for name, url in platforms:
             st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#f97316; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>🛠️ {name}</a>", unsafe_allow_html=True)
 
-            # ----------------- TAB 4: FREELANCE & REMOTE JOBS -----------------
+# ----------------- TAB 4: FREELANCE & REMOTE JOBS -----------------
 with tab4:
     st.header("💼 Freelance & Remote Jobs")
 
@@ -596,7 +506,7 @@ with tab4:
                 "UAE": "&location=United+Arab+Emirates"
             }
 
-            region_filter = region_map.get(region, "")
+region_filter = region_map.get(region, "")
             platforms += [
                 ("Remote OK", f"https://remoteok.com/remote-{q}-jobs"),
                 ("We Work Remotely", f"https://weworkremotely.com/remote-jobs/search?term={q}"),
