@@ -179,7 +179,9 @@ t = TRANSLATIONS.get(LANGUAGES[lang], TRANSLATIONS["en"])  # Default to English 
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 🛠️ Explore Our AI Tools")
 st.sidebar.markdown("🔹 [🧠 AI Email Summarizer](https://careerupskillersemail-summarizer-eflb3octoua7tbdwqdbygd.streamlit.app/)")
-st.sidebar.markdown("🔹 [💡 AI Career Advisor](https://careerupskillers-ai-advisor-d8vugggkkncjpxirbrcbx6.streamlit.app/)")
+st.sidebar.markdown("🔹 [🚀 AI Career Advisor](https://careerupskillers-ai-advisor-d8vugggkkncjpxirbrcbx6.streamlit.app/)")
+st.sidebar.markdown("🔹 [📊 AI AutoML & Data Visualization](https://careerupskillersdatalabpro-arfr7sam9pvhahj8fx2vak.streamlit.app/)")
+st.sidebar.markdown("🔹 [🛡️ AI CyberSecurity Suite](https://careerupskillerscyberdefence-nceptjghsdpqyiddiimryl.streamlit.app/)")
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 🧠 Launch Your Own AI Career App for ₹499")
 st.sidebar.markdown("""
