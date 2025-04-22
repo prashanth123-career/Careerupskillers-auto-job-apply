@@ -473,9 +473,52 @@ with tab2:
     </div>
     """, unsafe_allow_html=True)
 
-# ----------------- TAB 3: FREE COURSES -----------------
+# ----------------- TAB 3: FREE COURSES (Updated) -----------------
 with tab3:
     st.header(f"🎓 {t['free_courses']}")
+
+    # Mapping of keywords to course categories for better search relevance
+    COURSE_CATEGORY_MAP = {
+        "ai": "Artificial Intelligence",
+        "machine learning": "Machine Learning",
+        "data science": "Data Science",
+        "python": "Programming",
+        "sql": "Data Analysis",
+        "business": "Business",
+        "marketing": "Marketing",
+        "design": "Design",
+        "web development": "Web Development",
+        "cloud": "Cloud Computing",
+        "cybersecurity": "Cybersecurity",
+        "blockchain": "Blockchain",
+        "finance": "Finance",
+        "accounting": "Accounting",
+        "project management": "Project Management",
+    }
+
+    # Curated fallback courses for popular skills
+    CURATED_COURSES = {
+        "Artificial Intelligence": [
+            ("AI For Everyone (Coursera)", "https://www.coursera.org/learn/ai-for-everyone"),
+            ("Intro to AI (edX)", "https://www.edx.org/learn/artificial-intelligence"),
+            ("AI Basics (Google)", "https://www.cloudskillsboost.google/quests/238")
+        ],
+        "Machine Learning": [
+            ("Machine Learning Crash Course (Google)", "https://developers.google.com/machine-learning/crash-course"),
+            ("Intro to ML (Kaggle)", "https://www.kaggle.com/learn/intro-to-machine-learning"),
+            ("ML Foundations (Coursera)", "https://www.coursera.org/learn/machine-learning")
+        ],
+        "Data Science": [
+            ("Data Science for Beginners (Microsoft)", "https://learn.microsoft.com/en-us/training/paths/data-science/"),
+            ("Intro to Data Science (edX)", "https://www.edx.org/learn/data-science"),
+            ("Data Science Basics (Coursera)", "https://www.coursera.org/learn/data-science-basics")
+        ],
+        "Programming": [
+            ("Python for Everybody (Coursera)", "https://www.coursera.org/specializations/python"),
+            ("Learn to Code (Codecademy)", "https://www.codecademy.com/learn/learn-python-3"),
+            ("CS50 Intro to Programming (Harvard)", "https://pll.harvard.edu/course/cs50-introduction-computer-science")
+        ],
+    }
 
     with st.form("course_form"):
         search = st.text_input(t["search_course"], "AI for Business")
@@ -485,18 +528,31 @@ with tab3:
         if not search.strip():
             st.error("Please enter a course, skill, or job title.")
         else:
-            query = urllib.parse.quote_plus(search)
+            # Normalize the search term and map to a category
+            search_lower = search.lower().strip()
+            category = None
+            for keyword, mapped_category in COURSE_CATEGORY_MAP.items():
+                if keyword in search_lower:
+                    category = mapped_category
+                    break
+            if not category:
+                category = search  # Fallback to the original search term if no mapping found
 
+            query = urllib.parse.quote_plus(category)
+            st.info(f"🔍 Searching for courses related to: **{category}**")
+
+            # Search Free Courses with improved queries
             st.subheader("🎓 Free Courses")
             free_courses = [
-                ("Coursera Free", f"https://www.coursera.org/search?query={query}&price=1"),
-                ("edX Free Courses", f"https://www.edx.org/search?q={query}&price=Free"),
-                ("Harvard Online", f"https://pll.harvard.edu/catalog?search_api_fulltext={query}&f%5B0%5D=course_feature_free%3A1"),
-                ("YouTube Tutorials", f"https://www.youtube.com/results?search_query=free+{query}+course")
+                ("Coursera Free", f"https://www.coursera.org/search?query={query}&sortBy=RELEVANCE&price=FREE"),
+                ("edX Free Courses", f"https://www.edx.org/search?q={query}&cost=Free&sort=relevance"),
+                ("Harvard Online", f"https://pll.harvard.edu/catalog?keywords={query}&f%5B0%5D=course_feature_free%3A1"),
+                ("YouTube Tutorials", f"https://www.youtube.com/results?search_query=free+{query}+course+for+beginners")
             ]
             for name, url in free_courses:
                 st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#6366f1; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📘 {name}</a>", unsafe_allow_html=True)
 
+            # Search Free Courses with Certification
             st.subheader("📜 Free Courses with Certification")
             certified_courses = [
                 ("Google Career Certificates", f"https://grow.google/certificates/?q={query}"),
@@ -508,6 +564,7 @@ with tab3:
             for name, url in certified_courses:
                 st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#10b981; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📜 {name}</a>", unsafe_allow_html=True)
 
+            # Search Hands-on Platforms
             st.subheader("🛠️ Free Platforms for Hands-on Experience")
             platforms = [
                 ("GitHub Learning Lab", "https://lab.github.com/"),
@@ -518,6 +575,12 @@ with tab3:
             ]
             for name, url in platforms:
                 st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#f97316; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>🛠️ {name}</a>", unsafe_allow_html=True)
+
+            # Fallback: Show curated courses if the category matches
+            if category in CURATED_COURSES:
+                st.subheader("✨ Curated Recommendations")
+                for name, url in CURATED_COURSES[category]:
+                    st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#ff6f61; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📚 {name}</a>", unsafe_allow_html=True)
 
     st.markdown("""
     <div style='background-color:#e8f5e9; border:2px solid #43a047; border-radius:10px; padding:20px; margin-top:30px;'>
