@@ -1,5 +1,62 @@
 import streamlit as st
 import urllib.parse
+import google.generativeai as genai
+from PyPDF2 import PdfReader
+
+# Configure Gemini API using Streamlit secrets
+genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+
+# Initialize Gemini model
+def get_gemini_model():
+    return genai.GenerativeModel('gemini-pro')
+
+# Extract text from PDF resume
+def pdf_to_text(pdf_file):
+    reader = PdfReader(pdf_file)
+    text = ''
+    for page in reader.pages:
+        text += str(page.extract_text())
+    return text
+
+# Construct prompt for resume match score
+def construct_score_prompt(resume, job_description):
+    prompt = f'''
+    Act as an HR Manager with 20 years of experience. Compare the resume provided below with the job description given below.
+    Provide a score from 0 to 10 on how well the resume matches the job based on:
+    1. Key skills that match.
+    2. Missing skills or qualifications.
+    The score should be a number between 0 and 10, where 0 means little to no match and 10 means a perfect match.
+    Return the response in the format: "Score: X/10\nMatching Skills: ...\nMissing Skills: ..."
+    
+    Resume: {resume}
+    Job Description: {job_description}
+    '''
+    return prompt
+
+# Construct prompt for resume improvement suggestions
+def construct_improvement_prompt(resume, job_description):
+    prompt = f'''
+    Act as a career coach with 15 years of experience. Analyze the resume and job description below.
+    Suggest specific changes to improve the resume to better match the job description.
+    Focus on:
+    1. Keywords to add.
+    2. Skills to emphasize.
+    3. Any sections to rephrase for better impact.
+    Return the response as a list of actionable suggestions.
+    
+    Resume: {resume}
+    Job Description: {job_description}
+    '''
+    return prompt
+
+# Get response from Gemini model
+def get_result(prompt):
+    try:
+        model = get_gemini_model()
+        response = model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        return f"Error: Could not process the request with Gemini LLM. Details: {str(e)}"
 
 # ----------------- LANGUAGE SUPPORT -----------------
 LANGUAGES = {
@@ -32,6 +89,9 @@ TRANSLATIONS = {
         "search_course": "Search Course / Skill / Job Title",
         "experience_options": ["Any", "Entry", "Mid", "Senior", "Executive"],
         "date_posted_options": ["Any time", "Past month", "Past week", "Past 24 hours"],
+        "resume_analysis": "Resume Analysis",
+        "upload_resume": "Upload Your Resume (PDF)",
+        "analyze_resume": "Analyze Resume",
     },
     "hi": {
         "title": "कैरियर अपस्किलर्स | एआई जॉब हब",
@@ -51,6 +111,9 @@ TRANSLATIONS = {
         "search_course": "पाठ्यक्रम / कौशल / नौकरी शीर्षक खोजें",
         "experience_options": ["कोई भी", "प्रारंभिक", "मध्य", "वरिष्ठ", "कार्यकारी"],
         "date_posted_options": ["कभी भी", "पिछला महीना", "पिछला सप्ताह", "पिछले 24 घंटे"],
+        "resume_analysis": "रिज्यूमे विश्लेषण",
+        "upload_resume": "अपना रिज्यूमे अपलोड करें (PDF)",
+        "analyze_resume": "रिज्यूमे का विश्लेषण करें",
     },
     "ta": {
         "title": "கரியர் அப்ஸ்கிலர்ஸ் | ஏஐ வேலை மையம்",
@@ -70,6 +133,9 @@ TRANSLATIONS = {
         "search_course": "படிப்பு / திறன் / வேலை தலைப்பு தேடு",
         "experience_options": ["எதுவும்", "ஆரம்பம்", "நடுத்தரம்", "மூத்தவர்", "நிர்வாகி"],
         "date_posted_options": ["எப்போது வேண்டுமானாலும்", "கடந்த மாதம்", "கடந்த வாரம்", "கடந்த 24 மணி நேரம்"],
+        "resume_analysis": "ரெஸ்யூமே பகுப்பாய்வு",
+        "upload_resume": "உங்கள் ரெஸ்யூமேவை பதிவேற்றவும் (PDF)",
+        "analyze_resume": "ரெஸ்யூமேவை பகுப்பாய்வு செய்யவும்",
     },
     "te": {
         "title": "కెరీర్ అప్‌స్కిల్లర్స్ | ఏఐ ఉద్యోగ హబ్",
@@ -89,6 +155,9 @@ TRANSLATIONS = {
         "search_course": "కోర్సు / నైపుణ్యం / ఉద్యోగ శీర్షికను శోధించండి",
         "experience_options": ["ఏదైనా", "ఎంట్రీ", "మధ్యస్థం", "సీనియర్", "ఎగ్జిక్యూటివ్"],
         "date_posted_options": ["ఏ సమయంలోనైనా", "గత నెల", "గత వారం", "గత 24 గంటలు"],
+        "resume_analysis": "రెజ్యూమ్ విశ్లేషణ",
+        "upload_resume": "మీ రెజ్యూమ్‌ను అప్‌లోడ్ చేయండి (PDF)",
+        "analyze_resume": "రెజ్యూమ్ విశ్లేషించండి",
     },
     "ml": {
         "title": "കരിയർ അപ്‌സ്‌കില്ലേഴ്‌സ് | എഐ ജോബ് ഹബ്",
@@ -108,6 +177,9 @@ TRANSLATIONS = {
         "search_course": "കോഴ്സ് / കഴിവ് / ജോബ് ടൈറ്റിൽ തിരയുക",
         "experience_options": ["ഏതെങ്കിലും", "എൻട്രി", "മധ്യ", "സീനിയർ", "എക്‌സിക്യൂട്ടീവ്"],
         "date_posted_options": ["ഏത് സമയത്തും", "കഴിഞ്ഞ മാസം", "കഴിഞ്ഞ ആഴ്ച", "കഴിഞ്ഞ 24 മണിക്കൂർ"],
+        "resume_analysis": "റെസ്യൂം വിശകലനം",
+        "upload_resume": "നിന്റെ റെസ്യൂം അപ്‌ലോഡ് ചെയ്യുക (PDF)",
+        "analyze_resume": "റെസ്യൂം വിശകലനം ചെയ്യുക",
     },
     "fr": {
         "title": "CareerUpskillers | Centre d'emploi IA",
@@ -127,6 +199,9 @@ TRANSLATIONS = {
         "search_course": "Rechercher un cours / une compétence / un poste",
         "experience_options": ["Tout", "Débutant", "Intermédiaire", "Confirmé", "Cadre"],
         "date_posted_options": ["N'importe quand", "Le mois dernier", "La semaine dernière", "Les dernières 24 heures"],
+        "resume_analysis": "Analyse de CV",
+        "upload_resume": "Téléchargez votre CV (PDF)",
+        "analyze_resume": "Analyser le CV",
     },
     "de": {
         "title": "CareerUpskillers | KI-Job-Hub",
@@ -146,6 +221,9 @@ TRANSLATIONS = {
         "search_course": "Kurs / Fähigkeit / Jobtitel suchen",
         "experience_options": ["Beliebig", "Einsteiger", "Mittel", "Senior", "Führungskraft"],
         "date_posted_options": ["Jederzeit", "Letzter Monat", "Letzte Woche", "Letzte 24 Stunden"],
+        "resume_analysis": "Lebenslauf-Analyse",
+        "upload_resume": "Laden Sie Ihren Lebenslauf hoch (PDF)",
+        "analyze_resume": "Lebenslauf analysieren",
     },
     "ar": {
         "title": "CareerUpskillers | مركز الوظائف بالذكاء الاصطناعي",
@@ -165,6 +243,9 @@ TRANSLATIONS = {
         "search_course": "ابحث عن دورة / مهارة / وظيفة",
         "experience_options": ["أي", "مبتدئ", "متوسط", "كبير", "تنفيذي"],
         "date_posted_options": ["في أي وقت", "الشهر الماضي", "الأسبوع الماضي", "آخر 24 ساعة"],
+        "resume_analysis": "تحليل السيرة الذاتية",
+        "upload_resume": "قم بتحميل سيرتك الذاتية (PDF)",
+        "analyze_resume": "تحليل السيرة الذاتية",
     },
 }
 
@@ -361,99 +442,141 @@ with tab1:
     </div>
     """, unsafe_allow_html=True)
 
-# ----------------- TAB 2: INTERVIEW PREPARATION -----------------
+# ----------------- TAB 2: INTERVIEW PREPARATION (Updated with Resume Analysis) -----------------
 with tab2:
     st.header(f"🎯 {t['interview_prep']}")
     
-    with st.form("interview_form"):
-        col1, col2 = st.columns([1, 2])
-        with col1:
-            role = st.text_input(t["job_title"], "Data Analyst", key="int_role")
-            country = st.selectbox(t["country"], list(PORTALS_BY_COUNTRY.keys()), key="int_country")
-            exp_level = st.selectbox(t["experience"], t["experience_options"])
-        
-        with col2:
-            prep_type = st.selectbox("Preparation Type", [
-                "Technical Questions", 
-                "Behavioral Questions",
-                "Case Studies",
-                "Salary Negotiation",
-                "Resume Tips"
-            ])
-            company = st.text_input("Target Company (optional)", placeholder="Google, TCS, etc.")
-        
-        submitted = st.form_submit_button(f"🔗 {t['generate_link']}")
+    # Sub-tabs for Interview Prep and Resume Analysis
+    prep_tab, resume_tab = st.tabs(["Interview Prep Resources", t["resume_analysis"]])
+    
+    # Interview Prep Resources (Original Functionality)
+    with prep_tab:
+        with st.form("interview_form"):
+            col1, col2 = st.columns([1, 2])
+            with col1:
+                role = st.text_input(t["job_title"], "Data Analyst", key="int_role")
+                country = st.selectbox(t["country"], list(PORTALS_BY_COUNTRY.keys()), key="int_country")
+                exp_level = st.selectbox(t["experience"], t["experience_options"])
+            
+            with col2:
+                prep_type = st.selectbox("Preparation Type", [
+                    "Technical Questions", 
+                    "Behavioral Questions",
+                    "Case Studies",
+                    "Salary Negotiation",
+                    "Resume Tips"
+                ])
+                company = st.text_input("Target Company (optional)", placeholder="Google, TCS, etc.")
+            
+            submitted = st.form_submit_button(f"🔗 {t['generate_link']}")
 
-    if submitted:
-        if not role.strip():
-            st.error("Please enter a job title.")
-        else:
-            base_query = f"{role} {prep_type} {exp_level} {company} {country}"
-            encoded_query = urllib.parse.quote_plus(base_query)
-            
-            st.subheader("🔍 Best Preparation Resources")
-            
-            RESOURCE_MATRIX = {
-                "Technical Questions": {
-                    "India": "https://www.indiabix.com",
-                    "Global": "https://leetcode.com"
-                },
-                "Behavioral Questions": {
-                    "India": "https://www.ambitionbox.com/interviews",
-                    "Global": "https://www.themuse.com/advice/behavioral-interview-questions"
-                },
-                "Case Studies": {
-                    "India": "https://www.mbauniverse.com",
-                    "Global": "https://www.caseinterview.com"
-                },
-                "Salary Negotiation": {
-                    "India": "https://www.payscale.com",
-                    "Global": "https://www.glassdoor.com"
-                },
-                "Resume Tips": {
-                    "India": "https://www.naukri.com",
-                    "Global": "https://www.resume.com"
+        if submitted:
+            if not role.strip():
+                st.error("Please enter a job title.")
+            else:
+                base_query = f"{role} {prep_type} {exp_level} {company} {country}"
+                encoded_query = urllib.parse.quote_plus(base_query)
+                
+                st.subheader("🔍 Best Preparation Resources")
+                
+                RESOURCE_MATRIX = {
+                    "Technical Questions": {
+                        "India": "https://www.indiabix.com",
+                        "Global": "https://leetcode.com"
+                    },
+                    "Behavioral Questions": {
+                        "India": "https://www.ambitionbox.com/interviews",
+                        "Global": "https://www.themuse.com/advice/behavioral-interview-questions"
+                    },
+                    "Case Studies": {
+                        "India": "https://www.mbauniverse.com",
+                        "Global": "https://www.caseinterview.com"
+                    },
+                    "Salary Negotiation": {
+                        "India": "https://www.payscale.com",
+                        "Global": "https://www.glassdoor.com"
+                    },
+                    "Resume Tips": {
+                        "India": "https://www.naukri.com",
+                        "Global": "https://www.resume.com"
+                    }
                 }
-            }
-            
-            main_resource = RESOURCE_MATRIX.get(prep_type, {}).get(country if country in ["India", "Global"] else "Global")
-            if main_resource:
+                
+                main_resource = RESOURCE_MATRIX.get(prep_type, {}).get(country if country in ["India", "Global"] else "Global")
+                if main_resource:
+                    st.markdown(f"""
+                    <div style="padding:15px; background:#e8f5e9; border-radius:10px; margin-bottom:20px;">
+                        <h4>🎯 Recommended Resource</h4>
+                        <a href="{main_resource}" target="_blank" style="color:#2e7d32; font-weight:bold;">
+                            Best {prep_type} Guide for {country} → 
+                        </a>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
                 st.markdown(f"""
-                <div style="padding:15px; background:#e8f5e9; border-radius:10px; margin-bottom:20px;">
-                    <h4>🎯 Recommended Resource</h4>
-                    <a href="{main_resource}" target="_blank" style="color:#2e7d32; font-weight:bold;">
-                        Best {prep_type} Guide for {country} → 
+                <div style="padding:15px; background:#fff3e0; border-radius:10px;">
+                    <h4>🔎 More Resources via Smart Search</h4>
+                    <a href="https://www.google.com/search?q={encoded_query}+filetype:pdf" target="_blank">
+                        📄 Find PDF Guides
+                    </a><br>
+                    <a href="https://www.google.com/search?q={encoded_query}+site:youtube.com" target="_blank">
+                        🎥 Video Tutorials
+                    </a><br>
+                    <a href="https://www.google.com/search?q={encoded_query}+forum" target="_blank">
+                        💬 Discussion Forums
                     </a>
                 </div>
                 """, unsafe_allow_html=True)
-            
-            st.markdown(f"""
-            <div style="padding:15px; background:#fff3e0; border-radius:10px;">
-                <h4>🔎 More Resources via Smart Search</h4>
-                <a href="https://www.google.com/search?q={encoded_query}+filetype:pdf" target="_blank">
-                    📄 Find PDF Guides
-                </a><br>
-                <a href="https://www.google.com/search?q={encoded_query}+site:youtube.com" target="_blank">
-                    🎥 Video Tutorials
-                </a><br>
-                <a href="https://www.google.com/search?q={encoded_query}+forum" target="_blank">
-                    💬 Discussion Forums
-                </a>
-            </div>
-            """, unsafe_allow_html=True)
 
-            checklist_items = {
-                "Technical Questions": ["Review core concepts", "Practice coding problems", "Study system design"],
-                "Behavioral Questions": ["Prepare STAR stories", "Research company values", "Practice timing"],
-                "Case Studies": ["Practice problem-solving", "Review case frameworks", "Mock interviews"],
-                "Salary Negotiation": ["Research market salary", "Prepare counter-offers", "Practice negotiation"],
-                "Resume Tips": ["Update skills section", "Tailor to job", "Proofread"]
-            }.get(prep_type, [])
-            
-            st.subheader("✅ Personalized Checklist")
-            for item in checklist_items:
-                st.checkbox(item, key=f"check_{item}")
+                checklist_items = {
+                    "Technical Questions": ["Review core concepts", "Practice coding problems", "Study system design"],
+                    "Behavioral Questions": ["Prepare STAR stories", "Research company values", "Practice timing"],
+                    "Case Studies": ["Practice problem-solving", "Review case frameworks", "Mock interviews"],
+                    "Salary Negotiation": ["Research market salary", "Prepare counter-offers", "Practice negotiation"],
+                    "Resume Tips": ["Update skills section", "Tailor to job", "Proofread"]
+                }.get(prep_type, [])
+                
+                st.subheader("✅ Personalized Checklist")
+                for item in checklist_items:
+                    st.checkbox(item, key=f"check_{item}")
 
+    # Resume Analysis (New Functionality using Gemini LLM)
+    with resume_tab:
+        st.subheader(t["resume_analysis"])
+        with st.form("resume_form"):
+            col1, col2 = st.columns([1, 1])
+            with col1:
+                job_description = st.text_area("Enter the Job Description", height=200, key="resume_job_desc")
+            with col2:
+                uploaded_file = st.file_uploader(t["upload_resume"], type=['pdf'], key="resume_upload")
+            
+            analyze_submitted = st.form_submit_button(t["analyze_resume"])
+
+        if analyze_submitted:
+            if not job_description:
+                st.error("Please enter a job description.")
+            elif not uploaded_file:
+                st.error("Please upload your resume.")
+            else:
+                try:
+                    # Extract resume text
+                    resume_text = pdf_to_text(uploaded_file)
+                    
+                    # Get match score
+                    score_prompt = construct_score_prompt(resume_text, job_description)
+                    score_result = get_result(score_prompt)
+                    st.subheader("Resume Match Score")
+                    st.markdown(score_result)
+                    
+                    # Get improvement suggestions
+                    improvement_prompt = construct_improvement_prompt(resume_text, job_description)
+                    improvement_result = get_result(improvement_prompt)
+                    st.subheader("Suggestions to Improve Your Resume")
+                    st.markdown(improvement_result)
+                except Exception as e:
+                    st.error(f"An error occurred: {str(e)}")
+
+    # Promotional content (unchanged)
     st.markdown("""
     <div style='background-color:#fffde7; border:2px solid #fdd835; border-radius:10px; padding:20px; margin-top:30px;'>
         <h3 style='color:#f57f17;'>😨 Tired of Rejections? Interviews Got You Nervous?</h3>
@@ -473,7 +596,7 @@ with tab2:
     </div>
     """, unsafe_allow_html=True)
 
-# ----------------- TAB 3: FREE COURSES (Updated) -----------------
+# ----------------- TAB 3: FREE COURSES -----------------
 with tab3:
     st.header(f"🎓 {t['free_courses']}")
 
@@ -601,7 +724,7 @@ with tab3:
     </div>
     """, unsafe_allow_html=True)
 
-# ----------------- TAB 4: FREELANCE & REMOTE JOBS -----------------
+# ----------------- TAB 4: FREELANCE & REMOTE JOBS (Updated with More Platforms) -----------------
 with tab4:
     st.header("💼 Freelance & Remote Jobs")
 
@@ -629,6 +752,15 @@ with tab4:
                     ("PeoplePerHour", f"https://www.peopleperhour.com/freelance-jobs?q={q}"),
                     ("Toptal", "https://www.toptal.com/freelance-jobs"),
                     ("Guru", f"https://www.guru.com/d/jobs/skill/{q}/"),
+                    ("Workana", f"https://www.workana.com/jobs?language=en&query={q}"),
+                    ("Truelancer", f"https://www.truelancer.com/freelance-jobs?searchTerm={q}"),
+                    ("Freelance India", f"https://www.freelanceindia.com/jobs/search?keywords={q}"),
+                    ("99designs", f"https://99designs.com/search?query={q}"),
+                    ("SimplyHired Freelance", f"https://www.simplyhired.com/search?q={q}+freelance"),
+                    ("FlexJobs Freelance", f"https://www.flexjobs.com/jobs/freelance-{q}"),
+                    ("Behance Jobs", f"https://www.behance.net/joblist?search={q}"),
+                    ("Dribbble Jobs", f"https://dribbble.com/jobs?query={q}"),
+                    ("ProBlogger", f"https://problogger.com/jobs/?search={q}")
                 ]
 
             if job_type in ["Remote", "Both"]:
@@ -653,7 +785,11 @@ with tab4:
                     ("AngelList Talent", f"https://angel.co/jobs?remote=true&keyword={q}{region_filter}"),
                     ("Jobspresso", f"https://jobspresso.co/?s={q}"),
                     ("Remotive", f"https://remotive.io/remote-jobs/search/{q}"),
-                    ("Outsourcely", f"https://www.outsourcely.com/remote-jobs/search?q={q}")
+                    ("Outsourcely", f"https://www.outsourcely.com/remote-jobs/search?q={q}"),
+                    ("Working Nomads", f"https://www.workingnomads.com/jobs?term={q}"),
+                    ("SkipTheDrive", f"https://www.skipthedrive.com/search-jobs/?keywords={q}"),
+                    ("Virtual Vocations", f"https://www.virtualvocations.com/jobs?q={q}"),
+                    ("Pangian", f"https://pangian.com/job-board/?s={q}")
                 ]
 
             for name, url in platforms:
@@ -664,6 +800,37 @@ with tab4:
 
             st.markdown("---")
             st.markdown(f"<a href='https://www.google.com/search?q={q}+{job_type}+jobs+{region}' target='_blank' style='display:block; background:#dc2626; color:white; padding:10px; border-radius:5px;'>🔍 Search on Google Jobs</a>", unsafe_allow_html=True)
+
+    # Additional Section: Beginner-Friendly Freelance Platforms
+    st.subheader("🌟 Beginner-Friendly Freelance Platforms")
+    st.write("Struggling to find a job? These platforms are great for starters to build experience and earn money:")
+    beginner_platforms = [
+        ("Fiverr", "Start with small gigs at $5. Ideal for skills like writing, graphic design, or voiceovers.", "https://www.fiverr.com"),
+        ("Upwork", "Begin with small projects to build your profile. Great for tech, writing, and admin tasks.", "https://www.upwork.com"),
+        ("Freelancer", "Bid on beginner-friendly projects like data entry, content writing, or design.", "https://www.freelancer.com"),
+        ("Truelancer", "Perfect for beginners, especially in India, with opportunities in tech and creative fields.", "https://www.truelancer.com"),
+        ("PeoplePerHour", "Offers small tasks for beginners in writing, design, and marketing.", "https://www.peopleperhour.com"),
+        ("Workana", "Popular in Latin America but open globally, good for tech and design beginners.", "https://www.workana.com"),
+        ("99designs", "Great for beginner graphic designers. Join contests to showcase your skills.", "https://99designs.com"),
+        ("ProBlogger", "Ideal for beginner writers to find blogging and content writing gigs.", "https://problogger.com/jobs/"),
+        ("Behance Jobs", "Showcase your creative portfolio and find design or art-related gigs.", "https://www.behance.net/joblist"),
+        ("Dribbble Jobs", "Another platform for designers to find freelance work, great for beginners with a portfolio.", "https://dribbble.com/jobs"),
+        ("Freelance India", "A local platform for Indian beginners to find tech, design, and writing jobs.", "https://www.freelanceindia.com"),
+        ("Voices", "For beginners with voice talent, find voice-over gigs for commercials or audiobooks.", "https://www.voices.com"),
+        ("Textbroker", "A good starting point for freelance writers, with assignments based on your writing level.", "https://www.textbroker.com"),
+        ("iWriter", "Another platform for beginner writers to find content writing jobs.", "https://www.iwriter.com"),
+        ("Rev", "Earn money by transcribing audio or captioning videos, perfect for beginners with no experience.", "https://www.rev.com/freelancers")
+    ]
+
+    for platform in beginner_platforms:
+        name, desc, url = platform
+        st.markdown(
+            f"<div style='padding:10px; border:1px solid #ddd; border-radius:5px; margin-bottom:5px;'>"
+            f"<strong>{name}</strong>: {desc}<br>"
+            f"<a href='{url}' target='_blank' style='color:#1976d2;'>Visit {name}</a>"
+            f"</div>",
+            unsafe_allow_html=True
+        )
 
     st.markdown("""
     <div style='background-color:#fff8e1; border:2px solid #f9a825; border-radius:10px; padding:20px; margin-top:30px;'>
