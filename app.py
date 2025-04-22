@@ -11,7 +11,6 @@ LANGUAGES = {
     "French": "fr",
     "German": "de",
     "Arabic": "ar",
-    # Add more languages as needed
 }
 
 TRANSLATIONS = {
@@ -175,7 +174,6 @@ st.set_page_config(page_title="CareerUpskillers | AI Job Hub", page_icon="🌟",
 # Language selection
 lang = st.sidebar.selectbox("Select Language", list(LANGUAGES.keys()), index=0)
 t = TRANSLATIONS.get(LANGUAGES[lang], TRANSLATIONS["en"])  # Default to English if not found
-# Show links to our other apps
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 🛠️ Explore Our AI Tools")
 st.sidebar.markdown("🔹 [🧠 AI Email Summarizer](https://careerupskillersemail-summarizer-eflb3octoua7tbdwqdbygd.streamlit.app/)")
@@ -197,17 +195,6 @@ st.sidebar.markdown("""
 
 📥 **Get the AI Starter Kit instantly after payment**
 """, unsafe_allow_html=True)
-
-# Hide Streamlit default elements
-st.markdown("""
-    <style>
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        header {visibility: hidden;}
-    </style>
-""", unsafe_allow_html=True)
-
-
 
 # Hide Streamlit default elements
 st.markdown("""
@@ -306,98 +293,83 @@ with tab1:
             if manual_mode:
                 country = st.selectbox(t["country"], list(PORTALS_BY_COUNTRY.keys()))
             else:
-                import geocoder
-                user_location = geocoder.ip('me')
-                detected_country = user_location.country if user_location else "India"
-                country = detected_country if detected_country in PORTALS_BY_COUNTRY else "India"
-                st.markdown(f"**🌍 Detected Country:** {country}")
+                try:
+                    import geocoder
+                    user_location = geocoder.ip('me')
+                    detected_country = user_location.country if user_location else "India"
+                    country = detected_country if detected_country in PORTALS_BY_COUNTRY else "India"
+                    st.markdown(f"**🌍 Detected Country:** {country}")
+                except Exception as e:
+                    country = "India"
+                    st.warning(f"Could not detect location: {str(e)}. Defaulting to India.")
         with col2:
             experience = st.selectbox(t["experience"], t["experience_options"])
             date_posted = st.selectbox(t["date_posted"], t["date_posted_options"])
         submitted = st.form_submit_button(t["find_jobs"])
 
     if submitted:
-        time_map = {
-            t["date_posted_options"][0]: "",
-            t["date_posted_options"][1]: "r2592000",
-            t["date_posted_options"][2]: "r604800",
-            t["date_posted_options"][3]: "r86400"
-        }
-        exp_map = {
-            t["experience_options"][0]: "",
-            t["experience_options"][1]: "2",
-            t["experience_options"][2]: "3",
-            t["experience_options"][3]: "4",
-            t["experience_options"][4]: "5"
-        }
-        d_filter = time_map[date_posted]
-        e_filter = exp_map[experience]
+        if not keyword.strip() or not location.strip():
+            st.error("Please enter a job title and location.")
+        else:
+            time_map = {
+                t["date_posted_options"][0]: "",
+                t["date_posted_options"][1]: "r2592000",
+                t["date_posted_options"][2]: "r604800",
+                t["date_posted_options"][3]: "r86400"
+            }
+            exp_map = {
+                t["experience_options"][0]: "",
+                t["experience_options"][1]: "2",
+                t["experience_options"][2]: "3",
+                t["experience_options"][3]: "4",
+                t["experience_options"][4]: "5"
+            }
+            d_filter = time_map[date_posted]
+            e_filter = exp_map[experience]
 
-        st.subheader(f"🔗 Job Search Links in {country}")
-        for name, url_func in PORTALS_BY_COUNTRY.get(country, PORTALS_BY_COUNTRY["India"]):
-            url = url_func(keyword, location, e_filter, d_filter)
+            st.subheader(f"🔗 Job Search Links in {country}")
+            for name, url_func in PORTALS_BY_COUNTRY.get(country, PORTALS_BY_COUNTRY["India"]):
+                url = url_func(keyword, location, e_filter, d_filter)
+                st.markdown(
+                    f'<a href="{url}" target="_blank" style="display:inline-block; padding:10px 20px; background:#4CAF50; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">'
+                    f'Search on {name}</a>',
+                    unsafe_allow_html=True
+                )
+
+            google_jobs_url = f"https://www.google.com/search?q={urllib.parse.quote(keyword + ' jobs in ' + location)}"
             st.markdown(
-                f'<a href="{url}" target="_blank" style="display:inline-block; padding:10px 20px; background:#4CAF50; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">'
-                f'Search on {name}</a>',
+                f'<a href="{google_jobs_url}" target="_blank" style="display:inline-block; padding:10px 20px; background:#4285F4; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">'
+                f'Search on Google Jobs</a>',
                 unsafe_allow_html=True
             )
 
-        # Google Jobs fallback
-        google_jobs_url = f"https://www.google.com/search?q={urllib.parse.quote(keyword + ' jobs in ' + location)}"
-        st.markdown(
-            f'<a href="{google_jobs_url}" target="_blank" style="display:inline-block; padding:10px 20px; background:#4285F4; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">'
-            f'Search on Google Jobs</a>',
-            unsafe_allow_html=True
-        )
-st.markdown("""
-<div style='background-color:#fffde7; border:2px solid #fdd835; border-radius:10px; padding:20px; margin-top:30px;'>
-
-<h3 style='color:#f57f17;'>🚨 2025 Layoffs Are Real. Don't Wait!</h3>
-<p style='font-size:16px; color:#555;'>
-Big tech companies are cutting jobs aggressively across the globe:
-</p>
-
-<ul style='font-size:15px; color:#444;'>
-  <li>🛑 <b>Microsoft</b> is laying off 1,900+ staff in 2025 – <a href='https://timesofindia.indiatimes.com/world/us/microsoft-amazon-the-washington-post-and-other-us-companies-laying-off-in-2025/articleshow/117155852.cms' target='_blank'>Read More</a></li>
-  <li>🛑 <b>Amazon, Intel & Morgan Stanley</b> are reducing headcount – <a href='https://www.ndtvprofit.com/business/layoffs-2025-amazon-intel-morgan-stanley-among-companies-cutting-jobs-this-year' target='_blank'>Read More</a></li>
-  <li>🛑 <b>HPE, SAP, Google</b> and others are affected – <a href='https://indianexpress.com/article/technology/tech-layoffs-march-2025-it-layoffs-9919985/' target='_blank'>Read More</a></li>
-</ul>
-
-<p style='margin-top:10px; font-size:16px;'>
-🎥 <b>Watch the layoff trend videos:</b><br>
-<a href='https://youtu.be/WZW0xbzUHj8?si=TsObXAUIumP3n53s' target='_blank'>🔹 Layoffs Explained</a> |
-<a href='https://youtu.be/vM8Chmkd22o?si=wIGD24ZegI8rj6Zg' target='_blank'>🔹 Tech Job Cuts</a> |
-<a href='https://youtu.be/uq_ba4Prjps?si=KW2odA2izyFDsNw6' target='_blank'>🔹 Real Layoff Stories</a> |
-<a href='https://youtu.be/3ZmtSdAjxCM?si=h7W4AaezK_6xaBQd' target='_blank'>🔹 Layoffs 2025 Insights</a>
-</p>
-
-<hr style='margin:15px 0;'>
-
-<h4 style='color:#1b5e20;'>💬 Real Success Story:</h4>
-<p style='font-size:15px; color:#333; font-style:italic;'>
-"I lost my job in Nov 2024. I was depressed and clueless. But after joining CareerUpskillers and buying the ₹499 AI Kit, I started freelancing with AI tools. Now I earn ₹90K–₹1.7L/month from global clients!"<br>
-– <b>Rahul Verma, Ex-Employee at HPE</b>
-</p>
-
-<p style='font-size:16px; color:#000; font-weight:bold;'>
-🔥 Grab your <span style='color:#d32f2f;'>₹499 AI Premium Kit</span> – Automate tasks, build your AI career, and earn globally!
-</p>
-
-<a href='https://pages.razorpay.com/pl_Q9haRTHXpyB9SS/view' target='_blank' style='display:inline-block; padding:10px 20px; background:#1976d2; color:#fff; font-weight:bold; border-radius:6px; text-decoration:none; font-size:16px;'>🚀 Buy Now – Limited Time Offer</a>
-
-</div>
-""", unsafe_allow_html=True)
+    st.markdown("""
+    <div style='background-color:#fffde7; border:2px solid #fdd835; border-radius:10px; padding:20px; margin-top:30px;'>
+        <h3 style='color:#f57f17;'>🚨 2025 Layoffs Are Real. Don't Wait!</h3>
+        <p style='font-size:16px; color:#555;'>Big tech companies are cutting jobs aggressively across the globe:</p>
+        <ul style='font-size:15px; color:#444;'>
+            <li>🛑 <b>Microsoft</b> is laying off 1,900+ staff in 2025 – <a href='https://timesofindia.indiatimes.com/world/us/microsoft-amazon-the-washington-post-and-other-us-companies-laying-off-in-2025/articleshow/117155852.cms' target='_blank'>Read More</a></li>
+            <li>🛑 <b>Amazon, Intel & Morgan Stanley</b> are reducing headcount – <a href='https://www.ndtvprofit.com/business/layoffs-2025-amazon-intel-morgan-stanley-among-companies-cutting-jobs-this-year' target='_blank'>Read More</a></li>
+            <li>🛑 <b>HPE, SAP, Google</b> and others are affected – <a href='https://indianexpress.com/article/technology/tech-layoffs-march-2025-it-layoffs-9919985/' target='_blank'>Read More</a></li>
+        </ul>
+        <p style='margin-top:10px; font-size:16px;'>🎥 <b>Watch the layoff trend videos:</b><br><a href='https://youtu.be/WZW0xbzUHj8?si=TsObXAUIumP3n53s' target='_blank'>🔹 Layoffs Explained</a> | <a href='https://youtu.be/vM8Chmkd22o?si=wIGD24ZegI8rj6Zg' target='_blank'>🔹 Tech Job Cuts</a> | <a href='https://youtu.be/uq_ba4Prjps?si=KW2odA2izyFDsNw6' target='_blank'>🔹 Real Layoff Stories</a> | <a href='https://youtu.be/3ZmtSdAjxCM?si=h7W4AaezK_6xaBQd' target='_blank'>🔹 Layoffs 2025 Insights</a></p>
+        <hr style='margin:15px 0;'>
+        <h4 style='color:#1b5e20;'>💬 Real Success Story:</h4>
+        <p style='font-size:15px; color:#333; font-style:italic;'>"I lost my job in Nov 2024. I was depressed and clueless. But after joining CareerUpskillers and buying the ₹499 AI Kit, I started freelancing with AI tools. Now I earn ₹90K–₹1.7L/month from global clients!"<br>– <b>Rahul Verma, Ex-Employee at HPE</b></p>
+        <p style='font-size:16px; color:#000; font-weight:bold;'>🔥 Grab your <span style='color:#d32f2f;'>₹499 AI Premium Kit</span> – Automate tasks, build your AI career, and earn globally!</p>
+        <a href='https://pages.razorpay.com/pl_Q9haRTHXpyB9SS/view' target='_blank' style='display:inline-block; padding:10px 20px; background:#1976d2; color:#fff; font-weight:bold; border-radius:6px; text-decoration:none; font-size:16px;'>🚀 Buy Now – Limited Time Offer</a>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ----------------- TAB 2: INTERVIEW PREPARATION -----------------
 with tab2:
     st.header(f"🎯 {t['interview_prep']}")
     
-    # Expanded preparation matrix
     with st.form("interview_form"):
         col1, col2 = st.columns([1, 2])
         with col1:
             role = st.text_input(t["job_title"], "Data Analyst", key="int_role")
-            country = st.selectbox(t["country"], ["India", "USA", "UK", "Canada"], key="int_country")
+            country = st.selectbox(t["country"], list(PORTALS_BY_COUNTRY.keys()), key="int_country")
             exp_level = st.selectbox(t["experience"], t["experience_options"])
         
         with col2:
@@ -408,103 +380,98 @@ with tab2:
                 "Salary Negotiation",
                 "Resume Tips"
             ])
-            
             company = st.text_input("Target Company (optional)", placeholder="Google, TCS, etc.")
         
         submitted = st.form_submit_button(f"🔗 {t['generate_link']}")
 
     if submitted:
-        # Create smart Google search queries
-        base_query = f"{role} {prep_type} {exp_level} {company} {country}"
-        encoded_query = urllib.parse.quote_plus(base_query)
-        
-        st.subheader("🔍 Best Preparation Resources")
-        
-        # Curated resource matrix
-        RESOURCE_MATRIX = {
-            "Technical Questions": {
-                "India": "https://www.indiabix.com",
-                "Global": "https://leetcode.com"
-            },
-            "Behavioral Questions": {
-                "India": "https://www.ambitionbox.com/interviews",
-                "Global": "https://www.themuse.com/advice/behavioral-interview-questions"
-            },
-            # Add more categories
-        }
-        
-        # Show curated resources first
-        main_resource = RESOURCE_MATRIX.get(prep_type, {}).get("India" if country == "India" else "Global")
-        if main_resource:
+        if not role.strip():
+            st.error("Please enter a job title.")
+        else:
+            base_query = f"{role} {prep_type} {exp_level} {company} {country}"
+            encoded_query = urllib.parse.quote_plus(base_query)
+            
+            st.subheader("🔍 Best Preparation Resources")
+            
+            RESOURCE_MATRIX = {
+                "Technical Questions": {
+                    "India": "https://www.indiabix.com",
+                    "Global": "https://leetcode.com"
+                },
+                "Behavioral Questions": {
+                    "India": "https://www.ambitionbox.com/interviews",
+                    "Global": "https://www.themuse.com/advice/behavioral-interview-questions"
+                },
+                "Case Studies": {
+                    "India": "https://www.mbauniverse.com",
+                    "Global": "https://www.caseinterview.com"
+                },
+                "Salary Negotiation": {
+                    "India": "https://www.payscale.com",
+                    "Global": "https://www.glassdoor.com"
+                },
+                "Resume Tips": {
+                    "India": "https://www.naukri.com",
+                    "Global": "https://www.resume.com"
+                }
+            }
+            
+            main_resource = RESOURCE_MATRIX.get(prep_type, {}).get(country if country in ["India", "Global"] else "Global")
+            if main_resource:
+                st.markdown(f"""
+                <div style="padding:15px; background:#e8f5e9; border-radius:10px; margin-bottom:20px;">
+                    <h4>🎯 Recommended Resource</h4>
+                    <a href="{main_resource}" target="_blank" style="color:#2e7d32; font-weight:bold;">
+                        Best {prep_type} Guide for {country} → 
+                    </a>
+                </div>
+                """, unsafe_allow_html=True)
+            
             st.markdown(f"""
-            <div style="padding:15px; background:#e8f5e9; border-radius:10px; margin-bottom:20px;">
-                <h4>🎯 Recommended Resource</h4>
-                <a href="{main_resource}" target="_blank" style="color:#2e7d32; font-weight:bold;">
-                    Best {prep_type} Guide for {country} → 
+            <div style="padding:15px; background:#fff3e0; border-radius:10px;">
+                <h4>🔎 More Resources via Smart Search</h4>
+                <a href="https://www.google.com/search?q={encoded_query}+filetype:pdf" target="_blank">
+                    📄 Find PDF Guides
+                </a><br>
+                <a href="https://www.google.com/search?q={encoded_query}+site:youtube.com" target="_blank">
+                    🎥 Video Tutorials
+                </a><br>
+                <a href="https://www.google.com/search?q={encoded_query}+forum" target="_blank">
+                    💬 Discussion Forums
                 </a>
             </div>
             """, unsafe_allow_html=True)
-        
-        # Smart Google fallback
-        st.markdown(f"""
-        <div style="padding:15px; background:#fff3e0; border-radius:10px;">
-            <h4>🔎 More Resources via Smart Search</h4>
-            <a href="https://www.google.com/search?q={encoded_query}+filetype:pdf" target="_blank">
-                📄 Find PDF Guides
-            </a><br>
-            <a href="https://www.google.com/search?q={encoded_query}+site:youtube.com" target="_blank">
-                🎥 Video Tutorials
-            </a><br>
-            <a href="https://www.google.com/search?q={encoded_query}+forum" target="_blank">
-                💬 Discussion Forums
-            </a>
-        </div>
-        """, unsafe_allow_html=True)
 
-        # Preparation checklist
-        st.subheader("✅ Personalized Checklist")
-        checklist_items = {
-            "Technical Questions": ["Review core concepts", "Practice coding problems", "Study system design"],
-            "Behavioral Questions": ["Prepare STAR stories", "Research company values", "Practice timing"],
-            # Add more categories
-        }.get(prep_type, [])
-        
-        for item in checklist_items:
-            st.checkbox(item, key=f"check_{item}")
-            st.markdown("""
-<div style='background-color:#fffde7; border:2px solid #fdd835; border-radius:10px; padding:20px; margin-top:30px;'>
+            checklist_items = {
+                "Technical Questions": ["Review core concepts", "Practice coding problems", "Study system design"],
+                "Behavioral Questions": ["Prepare STAR stories", "Research company values", "Practice timing"],
+                "Case Studies": ["Practice problem-solving", "Review case frameworks", "Mock interviews"],
+                "Salary Negotiation": ["Research market salary", "Prepare counter-offers", "Practice negotiation"],
+                "Resume Tips": ["Update skills section", "Tailor to job", "Proofread"]
+            }.get(prep_type, [])
+            
+            st.subheader("✅ Personalized Checklist")
+            for item in checklist_items:
+                st.checkbox(item, key=f"check_{item}")
 
-<h3 style='color:#f57f17;'>😨 Tired of Rejections? Interviews Got You Nervous?</h3>
-
-<p style='font-size:16px; color:#555;'>
-🔸 Most candidates fail interviews not because they lack skills – but because they lack <b>smart preparation</b>.<br>
-🔸 If you're still Googling "top 10 interview questions", you're already behind.
-</p>
-
-<h4 style='color:#1b5e20;'>🎯 What's Inside the ₹499 AI Interview Kit?</h4>
-<ul style='font-size:15px; color:#333;'>
-  <li>📄 150+ Real Company Interview Questions (TCS, Accenture, Google, Amazon...)</li>
-  <li>🎥 Curated YouTube Playlists by Role (Data Analyst, Developer, Marketing...)</li>
-  <li>🧠 Behavioral, Resume & Salary Negotiation Training</li>
-  <li>🚀 Daily AI-generated Mock Questions & Custom Prep Links</li>
-</ul>
-
-<hr style='margin:15px 0;'>
-
-<h4 style='color:#1b5e20;'>💬 Real User Testimonial:</h4>
-<p style='font-size:15px; color:#333; font-style:italic;'>
-"I got rejected in 5 interviews in Jan 2025. But once I used the ₹499 AI Interview Kit from CareerUpskillers, I got an offer from Infosys in 18 days! This changed my life!"<br>
-– <b>Meenakshi R., Hyderabad</b>
-</p>
-
-<p style='font-size:16px; color:#000; font-weight:bold;'>
-🎁 Don’t let interviews scare you. <span style='color:#d32f2f;'>Master them with AI!</span>
-</p>
-
-<a href='https://pages.razorpay.com/pl_Q9haRTHXpyB9SS/view' target='_blank' style='display:inline-block; padding:10px 20px; background:#1976d2; color:#fff; font-weight:bold; border-radius:6px; text-decoration:none; font-size:16px;'>🎯 Buy ₹499 Interview Kit</a>
-
-</div>
-""", unsafe_allow_html=True)
+    st.markdown("""
+    <div style='background-color:#fffde7; border:2px solid #fdd835; border-radius:10px; padding:20px; margin-top:30px;'>
+        <h3 style='color:#f57f17;'>😨 Tired of Rejections? Interviews Got You Nervous?</h3>
+        <p style='font-size:16px; color:#555;'>🔸 Most candidates fail interviews not because they lack skills – but because they lack <b>smart preparation</b>.<br>🔸 If you're still Googling "top 10 interview questions", you're already behind.</p>
+        <h4 style='color:#1b5e20;'>🎯 What's Inside the ₹499 AI Interview Kit?</h4>
+        <ul style='font-size:15px; color:#333;'>
+            <li>📄 150+ Real Company Interview Questions (TCS, Accenture, Google, Amazon...)</li>
+            <li>🎥 Curated YouTube Playlists by Role (Data Analyst, Developer, Marketing...)</li>
+            <li>🧠 Behavioral, Resume & Salary Negotiation Training</li>
+            <li>🚀 Daily AI-generated Mock Questions & Custom Prep Links</li>
+        </ul>
+        <hr style='margin:15px 0;'>
+        <h4 style='color:#1b5e20;'>💬 Real User Testimonial:</h4>
+        <p style='font-size:15px; color:#333; font-style:italic;'>"I got rejected in 5 interviews in Jan 2025. But once I used the ₹499 AI Interview Kit from CareerUpskillers, I got an offer from Infosys in 18 days! This changed my life!"<br>– <b>Meenakshi R., Hyderabad</b></p>
+        <p style='font-size:16px; color:#000; font-weight:bold;'>🎁 Don’t let interviews scare you. <span style='color:#d32f2f;'>Master them with AI!</span></p>
+        <a href='https://pages.razorpay.com/pl_Q9haRTHXpyB9SS/view' target='_blank' style='display:inline-block; padding:10px 20px; background:#1976d2; color:#fff; font-weight:bold; border-radius:6px; text-decoration:none; font-size:16px;'>🎯 Buy ₹499 Interview Kit</a>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ----------------- TAB 3: FREE COURSES -----------------
 with tab3:
@@ -515,166 +482,143 @@ with tab3:
         course_submit = st.form_submit_button(f"🎯 {t['find_courses']}")
 
     if course_submit:
-        query = urllib.parse.quote_plus(search)
+        if not search.strip():
+            st.error("Please enter a course, skill, or job title.")
+        else:
+            query = urllib.parse.quote_plus(search)
 
-        # ----------- Section 1: Free Courses -----------
-        st.subheader("🎓 Free Courses")
-        free_courses = [
-            ("Coursera Free", f"https://www.coursera.org/search?query={query}&price=1"),
-            ("edX Free Courses", f"https://www.edx.org/search?q={query}&price=Free"),
-            ("Harvard Online", f"https://pll.harvard.edu/catalog?search_api_fulltext={query}&f%5B0%5D=course_feature_free%3A1"),
-            ("YouTube Tutorials", f"https://www.youtube.com/results?search_query=free+{query}+course")
-        ]
-        for name, url in free_courses:
-            st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#6366f1; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📘 {name}</a>", unsafe_allow_html=True)
+            st.subheader("🎓 Free Courses")
+            free_courses = [
+                ("Coursera Free", f"https://www.coursera.org/search?query={query}&price=1"),
+                ("edX Free Courses", f"https://www.edx.org/search?q={query}&price=Free"),
+                ("Harvard Online", f"https://pll.harvard.edu/catalog?search_api_fulltext={query}&f%5B0%5D=course_feature_free%3A1"),
+                ("YouTube Tutorials", f"https://www.youtube.com/results?search_query=free+{query}+course")
+            ]
+            for name, url in free_courses:
+                st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#6366f1; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📘 {name}</a>", unsafe_allow_html=True)
 
-        # ----------- Section 2: Free Courses with Certification -----------
-        st.subheader("📜 Free Courses with Certification")
-        certified_courses = [
-            ("Google Career Certificates", f"https://grow.google/certificates/?q={query}"),
-            ("IBM SkillsBuild", f"https://skillsbuild.org/learn?search={query}"),
-            ("Meta Blueprint", f"https://www.facebook.com/business/learn/courses?search={query}"),
-            ("AWS Skill Builder", f"https://explore.skillbuilder.aws/learn?searchTerm={query}"),
-            ("Google Cloud Skills Boost", f"https://www.cloudskillsboost.google/catalog?search={query}")
-        ]
-        for name, url in certified_courses:
-            st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#10b981; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📜 {name}</a>", unsafe_allow_html=True)
+            st.subheader("📜 Free Courses with Certification")
+            certified_courses = [
+                ("Google Career Certificates", f"https://grow.google/certificates/?q={query}"),
+                ("IBM SkillsBuild", f"https://skillsbuild.org/learn?search={query}"),
+                ("Meta Blueprint", f"https://www.facebook.com/business/learn/courses?search={query}"),
+                ("AWS Skill Builder", f"https://explore.skillbuilder.aws/learn?searchTerm={query}"),
+                ("Google Cloud Skills Boost", f"https://www.cloudskillsboost.google/catalog?search={query}")
+            ]
+            for name, url in certified_courses:
+                st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#10b981; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📜 {name}</a>", unsafe_allow_html=True)
 
-        # ----------- Section 3: Free Hands-on Platforms -----------
-        st.subheader("🛠️ Free Platforms for Hands-on Experience")
-        platforms = [
-            ("GitHub Learning Lab", "https://lab.github.com/"),
-            ("Microsoft Learn", f"https://learn.microsoft.com/en-us/training/browse/?terms={query}"),
-            ("Kaggle Courses", f"https://www.kaggle.com/learn/search?q={query}"),
-            ("Codecademy Free", f"https://www.codecademy.com/catalog/all?query={query}&level=free"),
-            ("DataCamp Free", f"https://www.datacamp.com/search?q={query}")
-        ]
-        for name, url in platforms:
-            st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#f97316; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>🛠️ {name}</a>", unsafe_allow_html=True)
-st.markdown("""
-<div style='background-color:#e8f5e9; border:2px solid #43a047; border-radius:10px; padding:20px; margin-top:30px;'>
+            st.subheader("🛠️ Free Platforms for Hands-on Experience")
+            platforms = [
+                ("GitHub Learning Lab", "https://lab.github.com/"),
+                ("Microsoft Learn", f"https://learn.microsoft.com/en-us/training/browse/?terms={query}"),
+                ("Kaggle Courses", f"https://www.kaggle.com/learn/search?q={query}"),
+                ("Codecademy Free", f"https://www.codecademy.com/catalog/all?query={query}&level=free"),
+                ("DataCamp Free", f"https://www.datacamp.com/search?q={query}")
+            ]
+            for name, url in platforms:
+                st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#f97316; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>🛠️ {name}</a>", unsafe_allow_html=True)
 
-<h3 style='color:#2e7d32;'>🎓 Learning for Free? Here's How to Start Earning</h3>
+    st.markdown("""
+    <div style='background-color:#e8f5e9; border:2px solid #43a047; border-radius:10px; padding:20px; margin-top:30px;'>
+        <h3 style='color:#2e7d32;'>🎓 Learning for Free? Here's How to Start Earning</h3>
+        <p style='font-size:16px; color:#444;'>👏 You're taking a great first step with free courses. But if you're serious about building <b>an AI-powered career</b>, it's time to get real-world tools that <b>pay the bills</b>.</p>
+        <h4 style='color:#1b5e20;'>🔥 Limited-Time Bonus – ₹499 AI Career Kit:</h4>
+        <ul style='font-size:15px; color:#333;'>
+            <li>💼 10+ Freelance-Ready AI Projects (Chatbot, Face Recognition, Resume Parser...)</li>
+            <li>📊 ₹90,000 – ₹1.7L Salary Insights for Each Role</li>
+            <li>🧠 Personalized Career Roadmap + Job Links</li>
+            <li>🎯 Interview + Resume Masterclass (with PDF checklists)</li>
+        </ul>
+        <hr style='margin:15px 0;'>
+        <h4 style='color:#1b5e20;'>🗣️ Real Story from Our Students:</h4>
+        <p style='font-size:15px; color:#333; font-style:italic;'>"In Nov 2024, I got laid off. After 30 days with the CareerUpskillers AI Kit, I landed a freelance project worth ₹65,000. From watching free videos to earning – this kit bridged the gap."<br>– <b>Arjun V., B.Tech (ECE), Chennai</b></p>
+        <p style='font-size:16px; color:#000; font-weight:bold;'>🚀 You’ve started learning. Now it’s time to start earning.</p>
+        <a href='https://pages.razorpay.com/pl_Q9haRTHXpyB9SS/view' target='_blank' style='display:inline-block; padding:10px 20px; background:#1976d2; color:#fff; font-weight:bold; border-radius:6px; text-decoration:none; font-size:16px;'>💼 Buy ₹499 AI Career Kit</a>
+    </div>
+    """, unsafe_allow_html=True)
 
-<p style='font-size:16px; color:#444;'>
-👏 You're taking a great first step with free courses. But if you're serious about building <b>an AI-powered career</b>, it's time to get real-world tools that <b>pay the bills</b>.
-</p>
-
-<h4 style='color:#1b5e20;'>🔥 Limited-Time Bonus – ₹499 AI Career Kit:</h4>
-<ul style='font-size:15px; color:#333;'>
-  <li>💼 10+ Freelance-Ready AI Projects (Chatbot, Face Recognition, Resume Parser...)</li>
-  <li>📊 ₹90,000 – ₹1.7L Salary Insights for Each Role</li>
-  <li>🧠 Personalized Career Roadmap + Job Links</li>
-  <li>🎯 Interview + Resume Masterclass (with PDF checklists)</li>
-</ul>
-
-<hr style='margin:15px 0;'>
-
-<h4 style='color:#1b5e20;'>🗣️ Real Story from Our Students:</h4>
-<p style='font-size:15px; color:#333; font-style:italic;'>
-"In Nov 2024, I got laid off. After 30 days with the CareerUpskillers AI Kit, I landed a freelance project worth ₹65,000. From watching free videos to earning – this kit bridged the gap." <br>
-– <b>Arjun V., B.Tech (ECE), Chennai</b>
-</p>
-
-<p style='font-size:16px; color:#000; font-weight:bold;'>
-🚀 You’ve started learning. Now it’s time to start earning.
-</p>
-
-<a href='https://pages.razorpay.com/pl_Q9haRTHXpyB9SS/view' target='_blank' style='display:inline-block; padding:10px 20px; background:#1976d2; color:#fff; font-weight:bold; border-radius:6px; text-decoration:none; font-size:16px;'>💼 Buy ₹499 AI Career Kit</a>
-
-</div>
-""", unsafe_allow_html=True)
-
-            # ----------------- TAB 4: FREELANCE & REMOTE JOBS -----------------
+# ----------------- TAB 4: FREELANCE & REMOTE JOBS -----------------
 with tab4:
     st.header("💼 Freelance & Remote Jobs")
 
     with st.form("freelance_form"):
         keyword = st.text_input("🛠️ Skill / Job Title", "Python Developer")
         job_type = st.selectbox("💼 Job Type", ["Freelance", "Remote", "Both"])
-        region = st.selectbox("🌍 Region", ["Global", "India", "USA", "UK", "Canada", "Germany", "UAE"])
+        region = st.selectbox("🌍 Region", ["Global", "India", "USA", "UK", "Canada", "Germany", "UAE", "Australia", "New Zealand", "Russia", "China", "Japan"])
         submit = st.form_submit_button("🔎 Find Jobs")
 
     if submit:
-        q = urllib.parse.quote_plus(keyword)
+        if not keyword.strip():
+            st.error("Please enter a skill or job title.")
+        else:
+            q = urllib.parse.quote_plus(keyword)
 
-        st.subheader("🚀 Job Boards with Smart Links")
+            st.subheader("🚀 Job Boards with Smart Links")
 
-        platforms = []
+            platforms = []
 
-        if job_type in ["Freelance", "Both"]:
-            platforms += [
-                ("Upwork", f"https://www.upwork.com/search/jobs/?q={q}"),
-                ("Fiverr", f"https://www.fiverr.com/search/gigs?query={q}"),
-                ("Freelancer", f"https://www.freelancer.com/jobs/{q}"),
-                ("PeoplePerHour", f"https://www.peopleperhour.com/freelance-jobs?q={q}"),
-                ("Toptal", "https://www.toptal.com/freelance-jobs"),
-                ("Guru", f"https://www.guru.com/d/jobs/skill/{q}/"),
-            ]
+            if job_type in ["Freelance", "Both"]:
+                platforms += [
+                    ("Upwork", f"https://www.upwork.com/search/jobs/?q={q}"),
+                    ("Fiverr", f"https://www.fiverr.com/search/gigs?query={q}"),
+                    ("Freelancer", f"https://www.freelancer.com/jobs/{q}"),
+                    ("PeoplePerHour", f"https://www.peopleperhour.com/freelance-jobs?q={q}"),
+                    ("Toptal", "https://www.toptal.com/freelance-jobs"),
+                    ("Guru", f"https://www.guru.com/d/jobs/skill/{q}/"),
+                ]
 
-        if job_type in ["Remote", "Both"]:
-            region_map = {
-                "Global": "",
-                "India": "&location=India",
-                "USA": "&location=United+States",
-                "UK": "&location=United+Kingdom",
-                "Canada": "&location=Canada",
-                "Germany": "&location=Germany",
-                "UAE": "&location=United+Arab+Emirates"
-            }
+            if job_type in ["Remote", "Both"]:
+                region_map = {
+                    "Global": "",
+                    "India": "&location=India",
+                    "USA": "&location=United+States",
+                    "UK": "&location=United+Kingdom",
+                    "Canada": "&location=Canada",
+                    "Germany": "&location=Germany",
+                    "UAE": "&location=United+Arab+Emirates",
+                    "Australia": "&location=Australia",
+                    "New Zealand": "&location=New+Zealand",
+                    "Russia": "&location=Russia",
+                    "China": "&location=China",
+                    "Japan": "&location=Japan"
+                }
+                region_filter = region_map.get(region, "")
+                platforms += [
+                    ("Remote OK", f"https://remoteok.com/remote-{q}-jobs"),
+                    ("We Work Remotely", f"https://weworkremotely.com/remote-jobs/search?term={q}"),
+                    ("AngelList Talent", f"https://angel.co/jobs?remote=true&keyword={q}{region_filter}"),
+                    ("Jobspresso", f"https://jobspresso.co/?s={q}"),
+                    ("Remotive", f"https://remotive.io/remote-jobs/search/{q}"),
+                    ("Outsourcely", f"https://www.outsourcely.com/remote-jobs/search?q={q}")
+                ]
 
-            region_filter = region_map.get(region, "")
-            platforms += [
-                ("Remote OK", f"https://remoteok.com/remote-{q}-jobs"),
-                ("We Work Remotely", f"https://weworkremotely.com/remote-jobs/search?term={q}"),
-                ("AngelList Talent", f"https://angel.co/jobs?remote=true&keyword={q}{region_filter}"),
-                ("Jobspresso", f"https://jobspresso.co/?s={q}"),
-                ("Remotive", f"https://remotive.io/remote-jobs/search/{q}"),
-                ("Outsourcely", f"https://www.outsourcely.com/remote-jobs/search?q={q}")
-            ]
+            for name, url in platforms:
+                st.markdown(
+                    f"<a href='{url}' target='_blank' style='display:block; background:#0f766e; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>🌍 {name}</a>",
+                    unsafe_allow_html=True
+                )
 
-        for name, url in platforms:
-            st.markdown(
-                f"<a href='{url}' target='_blank' style='display:block; background:#0f766e; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>🌍 {name}</a>",
-                unsafe_allow_html=True
-            )
+            st.markdown("---")
+            st.markdown(f"<a href='https://www.google.com/search?q={q}+{job_type}+jobs+{region}' target='_blank' style='display:block; background:#dc2626; color:white; padding:10px; border-radius:5px;'>🔍 Search on Google Jobs</a>", unsafe_allow_html=True)
 
-        # Google fallback
-        st.markdown("---")
-        st.markdown(f"<a href='https://www.google.com/search?q={q}+{job_type}+jobs+{region}' target='_blank' style='display:block; background:#dc2626; color:white; padding:10px; border-radius:5px;'>🔍 Search on Google Jobs</a>", unsafe_allow_html=True)
-st.markdown("""
-<div style='background-color:#fff8e1; border:2px solid #f9a825; border-radius:10px; padding:20px; margin-top:30px;'>
-
-<h3 style='color:#ef6c00;'>🚀 Can't Find the Right Job? Create Your Own Opportunities</h3>
-
-<p style='font-size:16px; color:#444;'>
-Whether you're job hunting, switching careers, or stuck in endless applications, here's a fact:
-<b>AI freelancers are earning ₹50K – ₹1.5L/month by building tools from home.</b>
-</p>
-
-<h4 style='color:#bf360c;'>🎁 Introducing the ₹499 AI Career Kit (90% Off)</h4>
-<ul style='font-size:15px; color:#333;'>
-  <li>✅ 10+ Freelance-Ready AI Projects (Chatbot, Resume Parser, Fake News Detector, etc.)</li>
-  <li>📈 Tools to automate your job search, interview prep & applications</li>
-  <li>🧾 AI-generated proposals & cover letters</li>
-  <li>💸 Ideal for Upwork, Fiverr, LinkedIn & Internshala freelancing</li>
-</ul>
-
-<hr style='margin:15px 0;'>
-
-<p style='font-size:15px; color:#333; font-style:italic;'>
-"After applying for 70+ jobs with no response, I switched to freelancing with this kit. Now earning ₹1.2L/month working from home."  
-<br>– <b>Sana Rahman, MBA, Hyderabad</b>
-</p>
-
-<p style='font-size:16px; color:#000; font-weight:bold;'>
-Don't wait for a job – start your AI freelancing journey today.
-</p>
-
-<a href='https://pages.razorpay.com/pl_Q9haRTHXpyB9SS/view' target='_blank' style='display:inline-block; padding:10px 20px; background:#1976d2; color:#fff; font-weight:bold; border-radius:6px; text-decoration:none; font-size:16px;'>💼 Get the ₹499 AI Career Kit</a>
-
-</div>
-""", unsafe_allow_html=True)
+    st.markdown("""
+    <div style='background-color:#fff8e1; border:2px solid #f9a825; border-radius:10px; padding:20px; margin-top:30px;'>
+        <h3 style='color:#ef6c00;'>🚀 Can't Find the Right Job? Create Your Own Opportunities</h3>
+        <p style='font-size:16px; color:#444;'>Whether you're job hunting, switching careers, or stuck in endless applications, here's a fact: <b>AI freelancers are earning ₹50K – ₹1.5L/month by building tools from home.</b></p>
+        <h4 style='color:#bf360c;'>🎁 Introducing the ₹499 AI Career Kit (90% Off)</h4>
+        <ul style='font-size:15px; color:#333;'>
+            <li>✅ 10+ Freelance-Ready AI Projects (Chatbot, Resume Parser, Fake News Detector, etc.)</li>
+            <li>📈 Tools to automate your job search, interview prep & applications</li>
+            <li>🧾 AI-generated proposals & cover letters</li>
+            <li>💸 Ideal for Upwork, Fiverr, LinkedIn & Internshala freelancing</li>
+        </ul>
+        <hr style='margin:15px 0;'>
+        <p style='font-size:15px; color:#333; font-style:italic;'>"After applying for 70+ jobs with no response, I switched to freelancing with this kit. Now earning ₹1.2L/month working from home."<br>– <b>Sana Rahman, MBA, Hyderabad</b></p>
+        <p style='font-size:16px; color:#000; font-weight:bold;'>Don't wait for a job – start your AI freelancing journey today.</p>
+        <a href='https://pages.razorpay.com/pl_Q9haRTHXpyB9SS/view' target='_blank' style='display:inline-block; padding:10px 20px; background:#1976d2; color:#fff; font-weight:bold; border-radius:6px; text-decoration:none; font-size:16px;'>💼 Get the ₹499 AI Career Kit</a>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ----------------- FOOTER -----------------
 st.markdown("""
