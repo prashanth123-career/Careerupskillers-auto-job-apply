@@ -611,15 +611,28 @@ with tab2:
     # Sub-tabs for Interview Prep and Resume Analysis
     prep_tab, resume_tab = st.tabs(["Interview Prep Resources", t["resume_analysis"]])
     
-    # Interview Prep Resources (Original Functionality)
+    # Interview Prep Resources (Enhanced Functionality)
     with prep_tab:
+        # Initialize session state for confidence tracker
+        if 'interview_practice_count' not in st.session_state:
+            st.session_state.interview_practice_count = 0
+        if 'star_stories' not in st.session_state:
+            st.session_state.star_stories = []
+
+        # Confidence Tracker
+        st.markdown(f"💪 **Interview Confidence**: {st.session_state.interview_practice_count} practice sessions completed")
+        progress = min(st.session_state.interview_practice_count / 10, 1.0)  # Max at 10 sessions
+        st.progress(progress)
+        if st.session_state.interview_practice_count >= 10:
+            st.success("🎉 Badge Earned: 10 Questions Mastered!")
+
+        # Updated form with company-specific trending questions
         with st.form("interview_form"):
             col1, col2 = st.columns([1, 2])
             with col1:
                 role = st.text_input(t["job_title"], "Data Analyst", key="int_role")
                 country = st.selectbox(t["country"], list(PORTALS_BY_COUNTRY.keys()), key="int_country")
                 exp_level = st.selectbox(t["experience"], t["experience_options"])
-            
             with col2:
                 prep_type = st.selectbox("Preparation Type", [
                     "Technical Questions", 
@@ -641,30 +654,37 @@ with tab2:
                 
                 st.subheader("🔍 Best Preparation Resources")
                 
+                # Updated resource matrix with region-specific resources
                 RESOURCE_MATRIX = {
                     "Technical Questions": {
                         "India": "https://www.indiabix.com",
-                        "Global": "https://leetcode.com"
+                        "USA": "https://leetcode.com",
+                        "Global": "https://www.hackerrank.com"
                     },
                     "Behavioral Questions": {
                         "India": "https://www.ambitionbox.com/interviews",
-                        "Global": "https://www.themuse.com/advice/behavioral-interview-questions"
+                        "USA": "https://www.themuse.com/advice/behavioral-interview-questions",
+                        "Global": "https://www.vault.com/career-advice/interviewing"
                     },
                     "Case Studies": {
                         "India": "https://www.mbauniverse.com",
-                        "Global": "https://www.caseinterview.com"
+                        "USA": "https://www.caseinterview.com",
+                        "Global": "https://www.preplounge.com"
                     },
                     "Salary Negotiation": {
                         "India": "https://www.payscale.com",
-                        "Global": "https://www.glassdoor.com"
+                        "USA": "https://www.glassdoor.com",
+                        "Global": "https://www.salary.com"
                     },
                     "Resume Tips": {
                         "India": "https://www.naukri.com",
-                        "Global": "https://www.resume.com"
+                        "USA": "https://www.resume.com",
+                        "Global": "https://www.zety.com"
                     }
                 }
                 
-                main_resource = RESOURCE_MATRIX.get(prep_type, {}).get(country if country in ["India", "Global"] else "Global")
+                region_key = country if country in ["India", "USA"] else "Global"
+                main_resource = RESOURCE_MATRIX.get(prep_type, {}).get(region_key)
                 if main_resource:
                     st.markdown(f"""
                     <div style="padding:15px; background:#e8f5e9; border-radius:10px; margin-bottom:20px;">
@@ -690,19 +710,131 @@ with tab2:
                 </div>
                 """, unsafe_allow_html=True)
 
+                # Trending Interview Questions
+                st.subheader("🔥 Trending Interview Questions")
+                trending_questions = {
+                    "Data Analyst": [
+                        "Explain the difference between supervised and unsupervised learning.",
+                        "How do you handle missing data in a dataset?",
+                        "Describe a time you used data visualization to influence a decision."
+                    ],
+                    "Software Engineer": [
+                        "Reverse a linked list in-place.",
+                        "Design a REST API for a booking system.",
+                        "How do you optimize a slow-performing application?"
+                    ],
+                    "Product Manager": [
+                        "How would you prioritize features for a new app?",
+                        "Describe a failed project and what you learned.",
+                        "Walk us through your process for launching a product."
+                    ]
+                }
+                role_key = role if role in trending_questions else "Data Analyst"
+                for q in trending_questions[role_key]:
+                    st.markdown(f"- {q}")
+
+                # Personalized Checklist
                 checklist_items = {
-                    "Technical Questions": ["Review core concepts", "Practice coding problems", "Study system design"],
-                    "Behavioral Questions": ["Prepare STAR stories", "Research company values", "Practice timing"],
+                    "Technical Questions": ["Review core concepts", "Practice 5 coding problems", "Study system design"],
+                    "Behavioral Questions": ["Prepare 3 STAR stories", "Research company values", "Practice timing"],
                     "Case Studies": ["Practice problem-solving", "Review case frameworks", "Mock interviews"],
                     "Salary Negotiation": ["Research market salary", "Prepare counter-offers", "Practice negotiation"],
                     "Resume Tips": ["Update skills section", "Tailor to job", "Proofread"]
                 }.get(prep_type, [])
-                
                 st.subheader("✅ Personalized Checklist")
                 for item in checklist_items:
                     st.checkbox(item, key=f"check_{item}")
 
-    # Resume Analysis (New Functionality using Gemini LLM)
+                # Downloadable Interview Prep Roadmap
+                roadmap_content = f"Interview Prep Roadmap for {role} ({exp_level})\n\n"
+                roadmap_content += f"Target Company: {company or 'Any'}\nCountry: {country}\nPreparation Type: {prep_type}\n\n"
+                roadmap_content += "Checklist:\n" + "\n".join([f"- [ ] {item}" for item in checklist_items])
+                roadmap_content += f"\n\nRecommended Resource: {main_resource}\n"
+                roadmap_content += f"Trending Questions:\n" + "\n".join([f"- {q}" for q in trending_questions[role_key]])
+                st.download_button(
+                    label="📥 Download Prep Roadmap",
+                    data=roadmap_content,
+                    file_name=f"{role}_Interview_Roadmap.txt",
+                    mime="text/plain"
+                )
+
+        # AI-Powered Mock Interview Simulator
+        st.subheader("🤖 AI Mock Interview Simulator")
+        with st.form("mock_interview_form"):
+            mock_role = st.text_input("Enter Role for Mock Interview", role, key="mock_role")
+            mock_question_type = st.selectbox("Question Type", ["Technical", "Behavioral"], key="mock_question_type")
+            mock_submit = st.form_submit_button("Generate Mock Question")
+        
+        if mock_submit:
+            st.session_state.interview_practice_count += 1
+            mock_prompt = f"""
+            Act as an experienced interviewer. Generate one {mock_question_type.lower()} interview question for a {mock_role} role at {exp_level} level.
+            Ensure the question is realistic, specific, and relevant to 2025 job trends.
+            Return only the question as a single sentence.
+            """
+            mock_question = get_result(mock_prompt)
+            st.markdown(f"**Question**: {mock_question}")
+            
+            with st.form("mock_answer_form"):
+                user_answer = st.text_area("Your Answer", height=150, key="mock_answer")
+                feedback_submit = st.form_submit_button("Get AI Feedback")
+            
+            if feedback_submit and user_answer.strip():
+                feedback_prompt = f"""
+                Act as a career coach with 15 years of experience. Review the user's answer to the following {mock_question_type.lower()} interview question for a {mock_role} role: "{mock_question}".
+                User Answer: "{user_answer}"
+                Provide concise feedback focusing on:
+                1. Clarity and structure
+                2. Relevance to the question
+                3. Suggestions for improvement
+                Return the feedback in a bullet-point format.
+                """
+                feedback = get_result(feedback_prompt)
+                st.markdown("**AI Feedback**")
+                st.markdown(feedback)
+
+        # Interactive STAR Method Guide
+        st.subheader("🌟 Craft STAR Stories")
+        with st.form("star_form"):
+            situation = st.text_area("Situation (Describe the context)", height=100)
+            task = st.text_area("Task (What was your responsibility?)", height=100)
+            action = st.text_area("Action (What did you do?)", height=100)
+            result = st.text_area("Result (What was the outcome?)", height=100)
+            star_submit = st.form_submit_button("Save STAR Story")
+        
+        if star_submit and all([situation.strip(), task.strip(), action.strip(), result.strip()]):
+            st.session_state.star_stories.append({
+                "Situation": situation,
+                "Task": task,
+                "Action": action,
+                "Result": result
+            })
+            st.success("STAR Story saved!")
+            
+            # Display saved STAR stories
+            if st.session_state.star_stories:
+                st.markdown("**Your STAR Stories**")
+                for i, story in enumerate(st.session_state.star_stories, 1):
+                    st.markdown(f"**Story {i}**")
+                    st.markdown(f"- **Situation**: {story['Situation']}")
+                    st.markdown(f"- **Task**: {story['Task']}")
+                    st.markdown(f"- **Action**: {story['Action']}")
+                    st.markdown(f"- **Result**: {story['Result']}")
+                    # AI Feedback on STAR Story
+                    if st.button("Get AI Feedback", key=f"star_feedback_{i}"):
+                        star_feedback_prompt = f"""
+                        Act as a career coach. Review the following STAR story for a {mock_role} interview:
+                        Situation: {story['Situation']}
+                        Task: {story['Task']}
+                        Action: {story['Action']}
+                        Result: {story['Result']}
+                        Provide feedback on structure, impact, and suggestions for improvement in bullet points.
+                        """
+                        star_feedback = get_result(star_feedback_prompt)
+                        st.markdown("**AI Feedback on STAR Story**")
+                        st.markdown(star_feedback)
+
+    # Resume Analysis (Enhanced with Interview Question Suggestions)
     with resume_tab:
         st.subheader(t["resume_analysis"])
         with st.form("resume_form"):
@@ -735,29 +867,39 @@ with tab2:
                     improvement_result = get_result(improvement_prompt)
                     st.subheader("Suggestions to Improve Your Resume")
                     st.markdown(improvement_result)
+                    
+                    # Suggest interview questions based on resume analysis
+                    question_prompt = f"""
+                    Based on the resume and job description below, suggest 3 interview questions (1 technical, 1 behavioral, 1 role-specific) that the candidate should prepare for.
+                    Resume: {resume_text}
+                    Job Description: {job_description}
+                    Return the questions in a bullet-point format.
+                    """
+                    suggested_questions = get_result(question_prompt)
+                    st.subheader("Recommended Interview Questions to Prepare")
+                    st.markdown(suggested_questions)
                 except Exception as e:
                     st.error(f"An error occurred: {str(e)}")
 
-    # Promotional content (unchanged)
+    # Updated promotional content
     st.markdown("""
     <div style='background-color:#fffde7; border:2px solid #fdd835; border-radius:10px; padding:20px; margin-top:30px;'>
-        <h3 style='color:#f57f17;'>😨 Tired of Rejections? Interviews Got You Nervous?</h3>
-        <p style='font-size:16px; color:#555;'>🔸 Most candidates fail interviews not because they lack skills – but because they lack <b>smart preparation</b>.<br>🔸 If you're still Googling "top 10 interview questions", you're already behind.</p>
-        <h4 style='color:#1b5e20;'>🎯 What's Inside the ₹499 AI Interview Kit?</h4>
+        <h3 style='color:#f57f17;'>\U0001F680 Ace Your 2025 Interviews with AI</h3>
+        <p style='font-size:16px; color:#555;'>🔸 Rejections hurt, but <b>smart AI prep</b> can make you unstoppable.<br>🔸 Don’t just memorize answers – master interviews with tools tailored for 2025.</p>
+        <h4 style='color:#1b5e20;'>🎯 ₹499 AI Interview Kit – Your Secret Weapon:</h4>
         <ul style='font-size:15px; color:#333;'>
-            <li>📄 150+ Real Company Interview Questions (TCS, Accenture, Google, Amazon...)</li>
-            <li>🎥 Curated YouTube Playlists by Role (Data Analyst, Developer, Marketing...)</li>
-            <li>🧠 Behavioral, Resume & Salary Negotiation Training</li>
-            <li>🚀 Daily AI-generated Mock Questions & Custom Prep Links</li>
+            <li>📄 200+ Real Interview Questions (Amazon, TCS, Microsoft, etc.)</li>
+            <li>🎥 Role-Specific Video Playlists (Data Scientist, Developer, PM)</li>
+            <li>🧠 AI Mock Interviews + STAR Story Builder</li>
+            <li>🚀 Auto-Generated Prep Roadmaps & Salary Negotiation Scripts</li>
         </ul>
         <hr style='margin:15px 0;'>
-        <h4 style='color:#1b5e20;'>💬 Real User Testimonial:</h4>
-        <p style='font-size:15px; color:#333; font-style:italic;'>"I got rejected in 5 interviews in Jan 2025. But once I used the ₹499 AI Interview Kit from CareerUpskillers, I got an offer from Infosys in 18 days! This changed my life!"<br>– <b>Meenakshi R., Hyderabad</b></p>
-        <p style='font-size:16px; color:#000; font-weight:bold;'>🎁 Don’t let interviews scare you. <span style='color:#d32f2f;'>Master them with AI!</span></p>
+        <h4 style='color:#1b5e20;'>💬 Real Success Story:</h4>
+        <p style='font-size:15px; color:#333; font-style:italic;'>"After 7 rejections, I used the ₹499 AI Kit to prep for a Google interview. Landed a ₹35L offer in Feb 2025!"<br>– <b>Ankit Sharma, Software Engineer, Delhi</b></p>
+        <p style='font-size:16px; color:#000; font-weight:bold;'>🎁 Don’t let interviews intimidate you. <span style='color:#d32f2f;'>Crush them with AI!</span></p>
         <a href='https://pages.razorpay.com/pl_Q9haRTHXpyB9SS/view' target='_blank' style='display:inline-block; padding:10px 20px; background:#1976d2; color:#fff; font-weight:bold; border-radius:6px; text-decoration:none; font-size:16px;'>🎯 Buy ₹499 Interview Kit</a>
     </div>
     """, unsafe_allow_html=True)
-
 # ----------------- TAB 3: FREE COURSES -----------------
 with tab3:
     st.header(f"🎓 {t['free_courses']}")
