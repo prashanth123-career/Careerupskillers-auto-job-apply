@@ -1264,6 +1264,79 @@ with tab4:
         <a href='https://pages.razorpay.com/pl_Q9haRTHXpyB9SS/view' target='_blank' style='display:inline-block; padding:10px 20px; background:#1976d2; color:#fff; font-weight:bold; border-radius:6px; text-decoration:none; font-size:16px;'>💼 Get the ₹499 AI Career Kit</a>
     </div>
     """, unsafe_allow_html=True)
+
+    # ----------------- TAB 4: international_jobs
+    with tab5:
+    st.header(f"🌍 {t.get('international_jobs', 'International Job Opportunities')}")
+    
+    # Enhanced Progress Tracker
+    st.subheader("📊 Your Visa Journey Progress")
+    col_prog1, col_prog2 = st.columns([3,1])
+    with col_prog1:
+        progress = min(len(st.session_state.visa_milestones) / 5, 1.0)
+        st.progress(progress)
+    with col_prog2:
+        if st.button("Reset Progress", key="reset_progress"):
+            st.session_state.visa_milestones = []
+            st.rerun()
+    
+    # Visual Milestone Path
+    milestones = [
+        ("🔍 Research", "Country selection"),
+        ("📝 Preparation", "Docs & tests"),
+        ("💼 Job Offer", "Employer secured"),
+        ("🖋️ Application", "Visa submitted"),
+        ("✅ Approval", "Ready to move")
+    ]
+    
+    cols = st.columns(5)
+    for idx, (icon, text) in enumerate(milestones):
+        with cols[idx]:
+            st.markdown(f"""
+            <div style='text-align:center; padding:10px; 
+            background-color:{"#e3f2fd" if idx < len(st.session_state.visa_milestones) else "#f5f5f5"};
+            border-radius:10px;'>
+                <div style='font-size:24px;'>{icon}</div>
+                <div>{text}</div>
+                {"✓" if idx < len(st.session_state.visa_milestones) else ""}
+            </div>
+            """, unsafe_allow_html=True)
+    
+    # Enhanced Eligibility Checker
+    with st.expander("🔍 Advanced Visa Eligibility Checker", expanded=True):
+        with st.form("enhanced_eligibility"):
+            country = st.selectbox("Target Country", 
+                                 ["Canada", "Australia", "Germany", "UK", "New Zealand", "UAE"],
+                                 key="enhanced_country")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                profession = st.text_input("Your Profession", "Software Developer")
+                education = st.selectbox("Education Level", 
+                                      ["High School", "Bachelor's", "Master's", "PhD"])
+            with col2:
+                experience = st.select_slider("Years of Experience", 
+                                            options=["0-1", "1-3", "3-5", "5-10", "10+"])
+                language = st.multiselect("Language Tests", 
+                                        ["IELTS", "TOEFL", "TEF", "Goethe-Zertifikat"])
+            
+            if st.form_submit_button("Check Eligibility Score"):
+                # Calculate score logic here
+                score = min(100, 20 + (len(language)*15) + (10 if education != "High School" else 0)
+                st.metric("Your Eligibility Score", f"{score}% match")
+                
+                # Visual score indicator
+                st.markdown(f"""
+                <style>
+                    .score-bar {{
+                        height: 20px;
+                        background: linear-gradient(90deg, #4CAF50 {score}%, #f5f5f5 {score}%);
+                        border-radius: 10px;
+                        margin: 10px 0;
+                    }}
+                </style>
+                <div class="score-bar"></div>
+                """, unsafe_allow_html=True)
 # ----------------- FOOTER -----------------
 st.markdown("""
 <hr style='margin-top:40px;'>
