@@ -1265,10 +1265,16 @@ with tab4:
     </div>
     """, unsafe_allow_html=True)
 
-    # ----------------- TAB 4: international_jobs
-    with tab5:
+    # ----------------- TAB 5: international_jobs
+with tab5:
     st.header(f"🌍 {t.get('international_jobs', 'International Job Opportunities')}")
     
+    # Initialize session state for visa application progress
+    if 'visa_progress' not in st.session_state:
+        st.session_state.visa_progress = {}
+    if 'visa_milestones' not in st.session_state:
+        st.session_state.visa_milestones = []
+
     # Enhanced Progress Tracker
     st.subheader("📊 Your Visa Journey Progress")
     col_prog1, col_prog2 = st.columns([3,1])
@@ -1322,7 +1328,7 @@ with tab4:
             
             if st.form_submit_button("Check Eligibility Score"):
                 # Calculate score logic here
-                score = min(100, 20 + (len(language)*15) + (10 if education != "High School" else 0)
+                score = min(100, 20 + (len(language)*15) + (10 if education != "High School" else 0))
                 st.metric("Your Eligibility Score", f"{score}% match")
                 
                 # Visual score indicator
@@ -1337,7 +1343,156 @@ with tab4:
                 </style>
                 <div class="score-bar"></div>
                 """, unsafe_allow_html=True)
-# ----------------- FOOTER -----------------
+
+    # Overview
+    st.subheader("🌐 Global Opportunities for Skilled Workers")
+    st.markdown("""
+    Countries like **Canada**, **Australia**, and **Germany** are actively seeking skilled professionals in 2025 to fill labor shortages in tech, healthcare, engineering, and trades. Streamlined visa programs make it easier for qualified workers to secure jobs and permanent residency. Follow these steps to get started:
+    1. **Secure a Job Offer**: Find a role matching your skills on official job portals.
+    2. **Apply for a Visa**: Use employer-sponsored or points-based visa programs.
+    3. **Meet Eligibility**: Ensure qualifications, experience, and language skills align with requirements.
+    """)
+
+    # Country-Specific Guides
+    st.subheader("📌 Country-Specific Opportunities")
+    with st.expander("🇨🇦 Canada", expanded=True):
+        st.markdown("""
+        **Job Opportunities**: High demand for tech (e.g., Software Developers, NOC 21232), healthcare (e.g., Nurses, NOC 31301), and trades (e.g., Electricians, NOC 72200). Average salary: CAD 50,000-60,000.
+        **Visa Programs**:
+        - **Express Entry (Federal Skilled Worker Program)**: Points-based system (67/100 needed) for permanent residency. Requires 1 year of skilled work experience, CLB 7 language skills, and education credentials.
+        - **Provincial Nominee Programs (PNPs)**: Province-specific pathways, adding 600 CRS points.
+        - **Canadian Experience Class (CEC)**: For those with 1 year of Canadian work experience.
+        **Eligibility**: Age, education, work experience, language (IELTS/TOEFL). No job offer required for FSWP.
+        **Process**: Submit Expression of Interest (EOI), receive Invitation to Apply (ITA), apply within 6 months.
+        **Tips**:
+        - Get credentials assessed (e.g., WES).
+        - Explore Job Bank (jobbank.gc.ca) for opportunities.
+        - Take IELTS for English or TEF for French.
+        **Resources**:
+        - [Canada Job Bank](https://www.jobbank.gc.ca)
+        - [Express Entry](https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry.html)
+        """)
+        st.download_button(
+            label="📥 Canada Visa Checklist",
+            data="Canada Visa Application Checklist\n- Credential assessment (WES)\n- Language test (IELTS/TOEFL)\n- Job offer (optional)\n- EOI submission\n- ITA and permanent residency application",
+            file_name="Canada_Visa_Checklist.txt",
+            mime="text/plain"
+        )
+
+    with st.expander("🇦🇺 Australia"):
+        st.markdown("""
+        **Job Opportunities**: Demand in healthcare (e.g., Nurses, ANZSCO 2544), IT (e.g., Software Engineers, ANZSCO 2613), and engineering (e.g., Civil Engineers, ANZSCO 2332). Unemployment: 3.5%.
+        **Visa Programs**:
+        - **Skilled Independent Visa (Subclass 189)**: Points-based, no employer needed.
+        - **Employer-Sponsored Visa (Subclass 482)**: Requires job offer.
+        - **Global Talent Visa**: For exceptional professionals.
+        - **Working Holiday Visa (Subclass 417)**: For ages 18-35, temporary work.
+        **Eligibility**: Skills on Skilled Occupation List (SOL), 2-5 years experience, English (IELTS 6+).
+        **Process**: Submit EOI via SkillSelect, receive ITA, apply for visa. Core Skills Occupation List launches May 2025.
+        **Tips**:
+        - Check ANZSCO codes for your role.
+        - Get skills assessed (e.g., VETASSESS).
+        - Use SEEK (seek.com.au) for job search.
+        **Resources**:
+        - [SEEK Australia](https://www.seek.com.au)
+        - [Home Affairs](https://immi.homeaffairs.gov.au)
+        """)
+        st.download_button(
+            label="📥 Australia Visa Checklist",
+            data="Australia Visa Application Checklist\n- Skills assessment (VETASSESS)\n- English test (IELTS)\n- Job offer (for Subclass 482)\n- EOI via SkillSelect\n- ITA and visa application",
+            file_name="Australia_Visa_Checklist.txt",
+            mime="text/plain"
+        )
+
+    with st.expander("🇩🇪 Germany"):
+        st.markdown("""
+        **Job Opportunities**: Shortages in IT, healthcare (e.g., Doctors, Nurses), and engineering. 19,000+ visa-sponsored jobs. Salaries: €45,000-€80,000.
+        **Visa Programs**:
+        - **EU Blue Card**: For jobs paying €48,300/year (€43,992 for bottleneck professions like IT, healthcare).
+        - **Skilled Worker Visa**: Requires recognized degree or 2+ year vocational training, job offer.
+        - **Opportunity Card (Chancenkarte)**: 12-month job search visa, requires A1 German or B2 English.
+        **Eligibility**: Recognized qualifications, job offer (except Opportunity Card). Age 45+ needs €53,130/year or pension proof.
+        **Process**: Apply at German embassy (visa-free entry for Canada, Australia, etc.), then residence permit. Federal Employment Agency approval needed.
+        **Tips**:
+        - Get qualifications recognized (e.g., ZAB).
+        - Use Make It in Germany portal for jobs.
+        - Learn basic German (A1/A2) for better integration.
+        **Resources**:
+        - [Make It in Germany](https://www.make-it-in-germany.com)
+        - [Federal Foreign Office](https://www.auswaertiges-amt.de)
+        """)
+        st.download_button(
+            label="📥 Germany Visa Checklist",
+            data="Germany Visa Application Checklist\n- Qualification recognition (ZAB)\n- Language test (Goethe-Institut, IELTS)\n- Job offer (except Opportunity Card)\n- Visa application at embassy\n- Residence permit in Germany",
+            file_name="Germany_Visa_Checklist.txt",
+            mime="text/plain"
+        )
+
+    # Other Countries
+    with st.expander("🌎 Other Countries with Skill Shortages"):
+        st.markdown("""
+        Explore opportunities in countries like **New Zealand**, **Ireland**, and **Singapore**, which offer visa programs for skilled workers:
+        - **New Zealand**: Skilled Migrant Category Visa. Check [workingin.nz](https://www.workingin.nz).
+        - **Ireland**: Critical Skills Employment Permit. Visit [enterprise.gov.ie](https://www.enterprise.gov.ie).
+        - **Singapore**: Employment Pass. Explore [mom.gov.sg](https://www.mom.gov.sg).
+        """)
+
+    # AI-Powered Visa Guidance
+    st.subheader("🤖 Ask AI for Visa Guidance")
+    with st.form("visa_guidance_form"):
+        visa_query = st.text_area("Ask a Visa Question (e.g., 'What visa for a nurse in Canada?')", height=100)
+        visa_query_submit = st.form_submit_button("Get AI Advice")
+    if visa_query_submit and visa_query.strip():
+        visa_prompt = f"Act as an immigration expert. Provide a concise, accurate answer to the following visa-related question: {visa_query}"
+        visa_answer = get_result(visa_prompt)
+        st.markdown(f"**AI Answer**: {visa_answer}")
+
+    # Visa Application Milestones
+    st.subheader("✅ Track Your Visa Application")
+    with st.form("visa_milestone_form"):
+        milestone = st.selectbox("Add Milestone", [
+            "Job Offer Secured",
+            "Credentials Assessed",
+            "Language Test Passed",
+            "Visa Application Submitted",
+            "Residence Permit Received"
+        ])
+        milestone_submit = st.form_submit_button("Add Milestone")
+    if milestone_submit:
+        if milestone not in st.session_state.visa_milestones:
+            st.session_state.visa_milestones.append(milestone)
+            st.success(f"Milestone '{milestone}' added!")
+        st.markdown("**Your Milestones**")
+        for m in st.session_state.visa_milestones:
+            st.markdown(f"- {m}")
+
+    # Recent Updates
+    st.subheader("🆕 2025 Visa and Job Updates")
+    st.markdown("""
+    - **Australia**: Core Skills Occupation List launches May 2025, prioritizing tech and cybersecurity roles.
+    - **Germany**: Opportunity Card allows 12-month job search without a job offer, ideal for Indian professionals.
+    - **Canada**: Express Entry draws continue, with 825 PNP invitations in April 2025.[](https://immigration.ca/who-qualifies-for-canadian-permanent-residence-skilled-worker-immigration/)
+    """)
+
+    # Promotional Content
+    st.markdown("""
+    <div style='background-color:#e3f2fd; border:2px solid #1976d2; border-radius:10px; padding:20px; margin-top:30px;'>
+        <h3 style='color:#0d47a1;'>\U0001F30D Launch Your Global Career with AI</h3>
+        <p style='font-size:16px; color:#444;'>🌟 Ready to work abroad? <b>AI tools</b> can help you navigate visas and land high-paying jobs in Canada, Australia, or Germany.</p>
+        <h4 style='color:#1565c0;'>🎯 ₹499 Global Career Kit – Your Passport to Success:</h4>
+        <ul style='font-size:15px; color:#333;'>
+            <li>📋 Visa Application Checklists for 10+ Countries</li>
+            <li>💼 50+ Job Search Templates (Cover Letters, LinkedIn Outreach)</li>
+            <li>🧠 AI-Powered Visa Eligibility Assessments</li>
+            <li>🚀 In-Demand Skills Guide for 2025 (Tech, Healthcare, Engineering)</li>
+        </ul>
+        <hr style='margin:15px 0;'>
+        <h4 style='color:#1565c0;'>💬 Success Story:</h4>
+        <p style='font-size:15px; color:#333; font-style:italic;'>"I used the ₹499 Global Career Kit to apply for Canada's Express Entry. Got my ITA in 3 months and now earn CAD 70,000 as a data analyst!"<br>– <b>Rahul V., Data Analyst, Toronto</b></p>
+        <p style='font-size:16px; color:#000; font-weight:bold;'>🌍 Don't wait – start your global career today!</p>
+        <a href='https://pages.razorpay.com/pl_Q9haRTHXpyB9SS/view' target='_blank' style='display:inline-block; padding:10px 20px; background:#1976d2; color:#fff; font-weight:bold; border-radius:6px; text-decoration:none; font-size:16px;'>🌟 Buy ₹499 Global Career Kit</a>
+    </div>
+    """, unsafe_allow_html=True)# ----------------- FOOTER -----------------
 st.markdown("""
 <hr style='margin-top:40px;'>
 <div style='text-align:center; font-size:16px; color:gray;'>
