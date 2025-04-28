@@ -971,15 +971,16 @@ with tab3:
                         ("Contra", f"https://contra.com/discover/work?q={q}")
                     ]
 
-    for platform in beginner_platforms:
-        name, desc, url = platform
-        st.markdown(
-            f"<div style='padding:10px; border:1px solid #ddd; border-radius:5px; margin-bottom:5px;'>"
-            f"<strong>{name}</strong>: {desc}<br>"
-            f"<a href='{url}' target='_blank' style='color:#1976d2;'>Visit {name}</a>"
-            f"</div>",
-            unsafe_allow_html=True
-        )
+    beginner_platforms = [
+        ("Fiverr", "Start with $5 gigs (writing, design, voiceovers)", "https://www.fiverr.com"),
+        ("Upwork", "Freelance jobs for beginners", "https://www.upwork.com"),
+        ("PeoplePerHour", "Freelance gigs with easy start", "https://www.peopleperhour.com"),
+        ("Freelancer", "Global freelancing site for new users", "https://www.freelancer.com"),
+        ("Toptal", "For skilled freelancers (harder entry)", "https://www.toptal.com"),
+        ("Rev", "Get paid for transcription & captions", "https://www.rev.com/freelancers"),
+        ("UserTesting", "Earn money testing websites", "https://www.usertesting.com"),
+        ("Appen", "AI-related simple remote tasks", "https://appen.com/")
+    ]
 
     st.markdown("""
     <div style='background-color:#fff8e1; border:2px solid #f9a825; border-radius:10px; padding:20px; margin-top:30px;'>
