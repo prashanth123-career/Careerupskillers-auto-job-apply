@@ -6,9 +6,9 @@ from PyPDF2 import PdfReader
 # Configure Gemini API using Streamlit secrets
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
-# Initialize Gemini model
+# Initialize Gemini model (✅ updated)
 def get_gemini_model():
-    return genai.GenerativeModel('gemini-pro')
+    return genai.GenerativeModel('gemini-1.5-pro-latest')
 
 # Extract text from PDF resume
 def pdf_to_text(pdf_file):
@@ -54,7 +54,7 @@ def get_result(prompt):
     try:
         model = get_gemini_model()
         response = model.generate_content(prompt)
-        return response.text
+        return response.parts[0].text  # ✅ Corrected way to access generated text
     except Exception as e:
         return f"Error: Could not process the request with Gemini LLM. Details: {str(e)}"
 
@@ -812,28 +812,28 @@ with tab2:
             st.success("STAR Story saved!")
             
             # Display saved STAR stories
-            if st.session_state.star_stories:
-                st.markdown("**Your STAR Stories**")
-                for i, story in enumerate(st.session_state.star_stories, 1):
-                    st.markdown(f"**Story {i}**")
-                    st.markdown(f"- **Situation**: {story['Situation']}")
-                    st.markdown(f"- **Task**: {story['Task']}")
-                    st.markdown(f"- **Action**: {story['Action']}")
-                    st.markdown(f"- **Result**: {story['Result']}")
-                    # AI Feedback on STAR Story
-                    if st.button("Get AI Feedback", key=f"star_feedback_{i}"):
-                        star_feedback_prompt = f"""
-                        Act as a career coach. Review the following STAR story for a {mock_role} interview:
-                        Situation: {story['Situation']}
-                        Task: {story['Task']}
-                        Action: {story['Action']}
-                        Result: {story['Result']}
-                        Provide feedback on structure, impact, and suggestions for improvement in bullet points.
-                        """
-                        star_feedback = get_result(star_feedback_prompt)
-                        st.markdown("**AI Feedback on STAR Story**")
-                        st.markdown(star_feedback)
-
+# Display saved STAR stories
+if st.session_state.star_stories:
+    st.markdown("**Your STAR Stories**")
+    for i, story in enumerate(st.session_state.star_stories, 1):
+        with st.expander(f"Story {i}: {story['Situation'][:50]}..."):
+            st.markdown(f"- **Situation**: {story['Situation']}")
+            st.markdown(f"- **Task**: {story['Task']}")
+            st.markdown(f"- **Action**: {story['Action']}")
+            st.markdown(f"- **Result**: {story['Result']}")
+            if st.button(f"Get AI Feedback for Story {i}", key=f"star_feedback_{i}"):
+                star_feedback_prompt = f"""
+                Act as a career coach. Review the following STAR story:
+                Situation: {story['Situation']}
+                Task: {story['Task']}
+                Action: {story['Action']}
+                Result: {story['Result']}
+                Provide bullet-point feedback on structure, clarity, and improvement.
+                """
+                star_feedback = get_result(star_feedback_prompt)
+                st.markdown("**AI Feedback on STAR Story**")
+                st.markdown(star_feedback)
+                
     # Resume Analysis (Enhanced with Interview Question Suggestions)
     with resume_tab:
         st.subheader(t["resume_analysis"])
