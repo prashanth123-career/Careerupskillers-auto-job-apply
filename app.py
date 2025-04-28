@@ -1025,6 +1025,7 @@ with tab4:
         - [Glassdoor](https://www.glassdoor.com/Salaries/index.htm)
         - [Payscale](https://www.payscale.com/research/US/Job=Freelancer/Salary)
         - [Upwork Market Trends](https://www.upwork.com/research)
+        """)       
         """)    st.markdown("""
     <div style='background-color:#fff8e1; border:2px solid #f9a825; border-radius:10px; padding:20px; margin-top:30px;'>
         <h3 style='color:#ef6c00;'>🚀 Can't Find the Right Job? Create Your Own Opportunities</h3>
