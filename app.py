@@ -1025,10 +1025,10 @@ with tab4:
         - [Glassdoor](https://www.glassdoor.com/Salaries/index.htm)
         - [Payscale](https://www.payscale.com/research/US/Job=Freelancer/Salary)
         - [Upwork Market Trends](https://www.upwork.com/research)
-        """)       
-        """)    st.markdown("""
+        """)
+        st.markdown("""
     <div style='background-color:#fff8e1; border:2px solid #f9a825; border-radius:10px; padding:20px; margin-top:30px;'>
-        <h3 style='color:#ef6c00;'>🚀 Can't Find the Right Job? Create Your Own Opportunities</h3>
+        <h3 style='color:#ef6c00;'>\U0001F680 Can't Find the Right Job? Create Your Own Opportunities</h3>
         <p style='font-size:16px; color:#444;'>Whether you're job hunting, switching careers, or stuck in endless applications, here's a fact: <b>AI freelancers are earning ₹50K – ₹1.5L/month by building tools from home.</b></p>
         <h4 style='color:#bf360c;'>🎁 Introducing the ₹499 AI Career Kit (90% Off)</h4>
         <ul style='font-size:15px; color:#333;'>
@@ -1043,7 +1043,6 @@ with tab4:
         <a href='https://pages.razorpay.com/pl_Q9haRTHXpyB9SS/view' target='_blank' style='display:inline-block; padding:10px 20px; background:#1976d2; color:#fff; font-weight:bold; border-radius:6px; text-decoration:none; font-size:16px;'>💼 Get the ₹499 AI Career Kit</a>
     </div>
     """, unsafe_allow_html=True)
-
 # ----------------- FOOTER -----------------
 st.markdown("""
 <hr style='margin-top:40px;'>
