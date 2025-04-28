@@ -307,63 +307,127 @@ with tab1:
     st.header(f"🌐 {t['job_finder']}")
 
     PORTALS_BY_COUNTRY = {
-        "India": [
-            ("LinkedIn", lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
-            ("Naukri", lambda k, l, e, d: f"https://www.naukri.com/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-') if l != 'Remote' else 'india'}"),
-            ("Indeed", lambda k, l, e, d: f"https://www.indeed.co.in/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
-            ("Shine", lambda k, l, e, d: f"https://www.shine.com/job-search/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}")
-        ],
-        "USA": [
-            ("LinkedIn", lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
-            ("USAJobs", lambda k, l, e, d: f"https://www.usajobs.gov/Search/Results?k={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
-            ("Indeed", lambda k, l, e, d: f"https://www.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
-            ("Monster", lambda k, l, e, d: f"https://www.monster.com/jobs/search/?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}")
-        ],
-        "UK": [
-            ("LinkedIn", lambda k, l, e, d: f"https://uk.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
-            ("Reed", lambda k, l, e, d: f"https://www.reed.co.uk/jobs/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
-            ("TotalJobs", lambda k, l, e, d: f"https://www.totaljobs.com/jobs/{k.lower().replace(' ', '-')}/in-{l.lower().replace(' ', '-')}"),
-            ("CV-Library", lambda k, l, e, d: f"https://www.cv-library.co.uk/search-jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}")
-        ],
-        "UAE": [
-            ("LinkedIn", lambda k, l, e, d: f"https://ae.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
-            ("Bayt", lambda k, l, e, d: f"https://www.bayt.com/en/uae/jobs/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
-            ("NaukriGulf", lambda k, l, e, d: f"https://www.naukrigulf.com/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
-            ("GulfTalent", lambda k, l, e, d: f"https://www.gulftalent.com/uae/jobs/title/{k.lower().replace(' ', '-')}")
-        ],
-        "Germany": [
-            ("LinkedIn", lambda k, l, e, d: f"https://de.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
-            ("StepStone", lambda k, l, e, d: f"https://www.stepstone.de/jobs/{k.lower().replace(' ', '-')}/in-{l.lower().replace(' ', '-')}.html"),
-            ("XING", lambda k, l, e, d: f"https://www.xing.com/jobs/search?q={urllib.parse.quote(k)}"),
-            ("Monster DE", lambda k, l, e, d: f"https://www.monster.de/jobs/suche/?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}")
-        ],
-        "Australia": [
-            ("LinkedIn", lambda k, l, e, d: f"https://au.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
-            ("Seek", lambda k, l, e, d: f"https://www.seek.com.au/{k.lower().replace(' ', '-')}-jobs/in-{l.lower().replace(' ', '-')}"),
-            ("Adzuna", lambda k, l, e, d: f"https://www.adzuna.com.au/search?q={urllib.parse.quote(k)}&loc={urllib.parse.quote(l)}"),
-            ("CareerOne", lambda k, l, e, d: f"https://www.careerone.com.au/jobs?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}")
-        ],
-        "New Zealand": [
-            ("Seek NZ", lambda k, l, e, d: f"https://www.seek.co.nz/{k.lower().replace(' ', '-')}-jobs/in-{l.lower().replace(' ', '-')}"),
-            ("TradeMe Jobs", lambda k, l, e, d: f"https://www.trademe.co.nz/a/jobs/search?search_string={urllib.parse.quote(k)}"),
-            ("MyJobSpace", lambda k, l, e, d: f"https://www.myjobspace.co.nz/jobs?q={urllib.parse.quote(k)}")
-        ],
-        "Russia": [
-            ("hh.ru", lambda k, l, e, d: f"https://hh.ru/search/vacancy?text={urllib.parse.quote(k)}&area=113"),
-            ("SuperJob", lambda k, l, e, d: f"https://www.superjob.ru/vacancy/search/?keywords={urllib.parse.quote(k)}"),
-            ("Rabota.ru", lambda k, l, e, d: f"https://www.rabota.ru/vacancy?query={urllib.parse.quote(k)}")
-        ],
-        "China": [
-            ("51Job", lambda k, l, e, d: f"https://search.51job.com/list/000000,000000,0000,00,9,99,{urllib.parse.quote(k)},2,1.html"),
-            ("Zhaopin", lambda k, l, e, d: f"https://sou.zhaopin.com/?jl=530&kw={urllib.parse.quote(k)}"),
-            ("Liepin", lambda k, l, e, d: f"https://www.liepin.com/zhaopin/?key={urllib.parse.quote(k)}")
-        ],
-        "Japan": [
-            ("Daijob", lambda k, l, e, d: f"https://www.daijob.com/en/jobs/search?keyword={urllib.parse.quote(k)}"),
-            ("Jobs in Japan", lambda k, l, e, d: f"https://jobsinjapan.com/jobs/?search={urllib.parse.quote(k)}"),
-            ("GaijinPot", lambda k, l, e, d: f"https://jobs.gaijinpot.com/index/index/search?keywords={urllib.parse.quote(k)}")
-        ]
-    }
+    "India": [
+        ("LinkedIn", lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
+        ("Naukri", lambda k, l, e, d: f"https://www.naukri.com/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-') if l != 'Remote' else 'india'}"),
+        ("Indeed", lambda k, l, e, d: f"https://www.indeed.co.in/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
+        ("Shine", lambda k, l, e, d: f"https://www.shine.com/job-search/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
+        ("Apna", lambda k, l, e, d: f"https://www.apna.co/jobs/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
+        ("CutShort", lambda k, l, e, d: f"https://cutshort.io/jobs?search={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
+        ("Hirect", lambda k, l, e, d: f"https://hirect.in/"),
+        ("Instahyre", lambda k, l, e, d: f"https://www.instahyre.com/"),
+        ("Foundit (Monster)", lambda k, l, e, d: f"https://www.foundit.in/search/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}")
+    ],
+    "USA": [
+        ("LinkedIn", lambda k, l, e, d: f"https://www.linkedin.com/jobs/search/?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}&f_TPR={d}&f_E={e}"),
+        ("USAJobs", lambda k, l, e, d: f"https://www.usajobs.gov/Search/Results?k={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
+        ("Indeed", lambda k, l, e, d: f"https://www.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
+        ("Monster", lambda k, l, e, d: f"https://www.monster.com/jobs/search/?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}"),
+        ("ZipRecruiter", lambda k, l, e, d: f"https://www.ziprecruiter.com/jobs-search?search={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
+        ("Glassdoor", lambda k, l, e, d: f"https://www.glassdoor.com/Job/jobs.htm?sc.keyword={urllib.parse.quote(k)}&locT=C&locId={urllib.parse.quote(l)}"),
+        ("AngelList", lambda k, l, e, d: f"https://angel.co/jobs"),
+        ("Built In", lambda k, l, e, d: f"https://builtin.com/jobs"),
+        ("Dice", lambda k, l, e, d: f"https://www.dice.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}")
+    ],
+    "UK": [
+        ("LinkedIn", lambda k, l, e, d: f"https://uk.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
+        ("Reed", lambda k, l, e, d: f"https://www.reed.co.uk/jobs/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
+        ("TotalJobs", lambda k, l, e, d: f"https://www.totaljobs.com/jobs/{k.lower().replace(' ', '-')}/in-{l.lower().replace(' ', '-')}"),
+        ("CV-Library", lambda k, l, e, d: f"https://www.cv-library.co.uk/search-jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
+        ("Adzuna UK", lambda k, l, e, d: f"https://www.adzuna.co.uk/search?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}"),
+        ("CWJobs", lambda k, l, e, d: f"https://www.cwjobs.co.uk/jobs/{k.lower().replace(' ', '-')}/in-{l.lower().replace(' ', '-')}"),
+        ("Jobsite UK", lambda k, l, e, d: f"https://www.jobsite.co.uk/jobs/{k.lower().replace(' ', '-')}/in-{l.lower().replace(' ', '-')}")
+    ],
+    "UAE": [
+        ("LinkedIn", lambda k, l, e, d: f"https://ae.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
+        ("Bayt", lambda k, l, e, d: f"https://www.bayt.com/en/uae/jobs/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
+        ("NaukriGulf", lambda k, l, e, d: f"https://www.naukrigulf.com/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
+        ("GulfTalent", lambda k, l, e, d: f"https://www.gulftalent.com/uae/jobs/title/{k.lower().replace(' ', '-')}"),
+        ("Laimoon", lambda k, l, e, d: f"https://laimoon.com/jobs/{k.lower().replace(' ', '-')}/in-{l.lower().replace(' ', '-')}"),
+        ("Dubai Careers", lambda k, l, e, d: f"https://www.dubaicareers.ae/en/search?search={urllib.parse.quote(k)}")
+    ],
+    "Germany": [
+        ("LinkedIn", lambda k, l, e, d: f"https://de.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
+        ("StepStone", lambda k, l, e, d: f"https://www.stepstone.de/jobs/{k.lower().replace(' ', '-')}/in-{l.lower().replace(' ', '-')}.html"),
+        ("XING", lambda k, l, e, d: f"https://www.xing.com/jobs/search?q={urllib.parse.quote(k)}"),
+        ("Monster DE", lambda k, l, e, d: f"https://www.monster.de/jobs/suche/?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}"),
+        ("Arbeitsagentur", lambda k, l, e, d: f"https://www.arbeitsagentur.de/jobsuche/suche?was={urllib.parse.quote(k)}&wo={urllib.parse.quote(l)}"),
+        ("Indeed DE", lambda k, l, e, d: f"https://de.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
+        ("Kimeta", lambda k, l, e, d: f"https://www.kimeta.de/jobs/{k.lower().replace(' ', '-')}/in-{l.lower().replace(' ', '-')}")
+    ],
+    "Australia": [
+        ("LinkedIn", lambda k, l, e, d: f"https://au.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
+        ("Seek", lambda k, l, e, d: f"https://www.seek.com.au/{k.lower().replace(' ', '-')}-jobs/in-{l.lower().replace(' ', '-')}"),
+        ("Adzuna", lambda k, l, e, d: f"https://www.adzuna.com.au/search?q={urllib.parse.quote(k)}&loc={urllib.parse.quote(l)}"),
+        ("CareerOne", lambda k, l, e, d: f"https://www.careerone.com.au/jobs?q={urllib.parse.quote(k)}&where={urllib.parse.quote(l)}"),
+        ("Jora", lambda k, l, e, d: f"https://au.jora.com/j?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
+        ("Australian JobSearch", lambda k, l, e, d: f"https://jobsearch.gov.au/job/search?occupation={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}")
+    ],
+    "New Zealand": [
+        ("Seek NZ", lambda k, l, e, d: f"https://www.seek.co.nz/{k.lower().replace(' ', '-')}-jobs/in-{l.lower().replace(' ', '-')}"),
+        ("TradeMe Jobs", lambda k, l, e, d: f"https://www.trademe.co.nz/a/jobs/search?search_string={urllib.parse.quote(k)}"),
+        ("MyJobSpace", lambda k, l, e, d: f"https://www.myjobspace.co.nz/jobs?q={urllib.parse.quote(k)}"),
+        ("NZ Careers", lambda k, l, e, d: f"https://www.careers.govt.nz/jobs-database/?q={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
+        ("Student Job Search", lambda k, l, e, d: f"https://www.sjs.co.nz/student-jobs?search={urllib.parse.quote(k)}")
+    ],
+    "Russia": [
+        ("hh.ru", lambda k, l, e, d: f"https://hh.ru/search/vacancy?text={urllib.parse.quote(k)}&area=113"),
+        ("SuperJob", lambda k, l, e, d: f"https://www.superjob.ru/vacancy/search/?keywords={urllib.parse.quote(k)}"),
+        ("Rabota.ru", lambda k, l, e, d: f"https://www.rabota.ru/vacancy?query={urllib.parse.quote(k)}"),
+        ("Careerist.ru", lambda k, l, e, d: f"https://careerist.ru/vacancies/?q={urllib.parse.quote(k)}"),
+        ("TrudVsem", lambda k, l, e, d: f"https://trudvsem.ru/vacancy/search?text={urllib.parse.quote(k)}")
+    ],
+    "China": [
+        ("51Job", lambda k, l, e, d: f"https://search.51job.com/list/000000,000000,0000,00,9,99,{urllib.parse.quote(k)},2,1.html"),
+        ("Zhaopin", lambda k, l, e, d: f"https://sou.zhaopin.com/?jl=530&kw={urllib.parse.quote(k)}"),
+        ("Liepin", lambda k, l, e, d: f"https://www.liepin.com/zhaopin/?key={urllib.parse.quote(k)}"),
+        ("Boss Zhipin", lambda k, l, e, d: f"https://www.zhipin.com/web/geek/job?query={urllib.parse.quote(k)}"),
+        ("Lagou", lambda k, l, e, d: f"https://www.lagou.com/jobs/list_{urllib.parse.quote(k)}")
+    ],
+    "Japan": [
+        ("Daijob", lambda k, l, e, d: f"https://www.daijob.com/en/jobs/search?keyword={urllib.parse.quote(k)}"),
+        ("Jobs in Japan", lambda k, l, e, d: f"https://jobsinjapan.com/jobs/?search={urllib.parse.quote(k)}"),
+        ("GaijinPot", lambda k, l, e, d: f"https://jobs.gaijinpot.com/index/index/search?keywords={urllib.parse.quote(k)}"),
+        ("Wantedly", lambda k, l, e, d: f"https://www.wantedly.com/projects?q={urllib.parse.quote(k)}"),
+        ("CareerCross", lambda k, l, e, d: f"https://www.careercross.com/en/job-search?keywords={urllib.parse.quote(k)}"),
+        ("En Japan", lambda k, l, e, d: f"https://www.en-japan.com/search/?keyword={urllib.parse.quote(k)}")
+    ],
+    "Canada": [
+        ("LinkedIn", lambda k, l, e, d: f"https://ca.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
+        ("Indeed Canada", lambda k, l, e, d: f"https://ca.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
+        ("Job Bank", lambda k, l, e, d: f"https://www.jobbank.gc.ca/jobsearch/jobsearch?searchstring={urllib.parse.quote(k)}&locationstring={urllib.parse.quote(l)}"),
+        ("Workopolis", lambda k, l, e, d: f"https://www.workopolis.com/jobsearch/find-jobs?query={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
+        ("Eluta", lambda k, l, e, d: f"https://www.eluta.ca/search?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}")
+    ],
+    "Brazil": [
+        ("LinkedIn", lambda k, l, e, d: f"https://br.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
+        ("Indeed Brazil", lambda k, l, e, d: f"https://br.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
+        ("Catho", lambda k, l, e, d: f"https://www.catho.com.br/vagas/{k.lower().replace(' ', '-')}/"),
+        ("InfoJobs", lambda k, l, e, d: f"https://www.infojobs.com.br/empregos.aspx?Palabra={urllib.parse.quote(k)}"),
+        ("Vagas", lambda k, l, e, d: f"https://www.vagas.com.br/vagas-de-{k.lower().replace(' ', '-')}")
+    ],
+    "France": [
+        ("LinkedIn", lambda k, l, e, d: f"https://fr.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
+        ("Indeed France", lambda k, l, e, d: f"https://fr.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
+        ("APEC", lambda k, l, e, d: f"https://www.apec.fr/candidat/recherche-emploi.html/emploi?motsCles={urllib.parse.quote(k)}"),
+        ("Pôle Emploi", lambda k, l, e, d: f"https://candidat.pole-emploi.fr/offres/recherche?motsCles={urllib.parse.quote(k)}"),
+        ("Welcome to the Jungle", lambda k, l, e, d: f"https://www.welcometothejungle.com/fr/jobs?query={urllib.parse.quote(k)}")
+    ],
+    "Singapore": [
+        ("LinkedIn", lambda k, l, e, d: f"https://sg.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
+        ("Indeed Singapore", lambda k, l, e, d: f"https://sg.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
+        ("JobStreet", lambda k, l, e, d: f"https://www.jobstreet.com.sg/en/job-search/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}/"),
+        ("JobsDB", lambda k, l, e, d: f"https://sg.jobsdb.com/{k.lower().replace(' ', '-')}-jobs-in-{l.lower().replace(' ', '-')}"),
+        ("MyCareersFuture", lambda k, l, e, d: f"https://www.mycareersfuture.gov.sg/search?search={urllib.parse.quote(k)}")
+    ],
+    "South Africa": [
+        ("LinkedIn", lambda k, l, e, d: f"https://za.linkedin.com/jobs/search?keywords={urllib.parse.quote(k)}&location={urllib.parse.quote(l)}"),
+        ("Indeed South Africa", lambda k, l, e, d: f"https://za.indeed.com/jobs?q={urllib.parse.quote(k)}&l={urllib.parse.quote(l)}"),
+        ("CareerJunction", lambda k, l, e, d: f"https://www.careerjunction.co.za/jobs/keywords/{k.lower().replace(' ', '-')}"),
+        ("PNet", lambda k, l, e, d: f"https://www.pnet.co.za/jobs/{k.lower().replace(' ', '-')}"),
+        ("JobMail", lambda k, l, e, d: f"https://www.jobmail.co.za/jobs/{k.lower().replace(' ', '-')}")
+    ]
+}
 
     with st.form("job_form"):
         col1, col2 = st.columns(2)
