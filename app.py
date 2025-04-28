@@ -888,113 +888,144 @@ with tab3:
 
 # ----------------- TAB 4: FREELANCE & REMOTE JOBS (Updated with More Platforms) -----------------
 with tab4:
-    st.header("💼 Freelance & Remote Jobs")
+    st.header(f"💼 Freelance & Remote Jobs")
 
-    with st.form("freelance_form"):
-        keyword = st.text_input("🛠️ Skill / Job Title", "Python Developer")
-        job_type = st.selectbox("💼 Job Type", ["Freelance", "Remote", "Both"])
-        region = st.selectbox("🌍 Region", ["Global", "India", "USA", "UK", "Canada", "Germany", "UAE", "Australia", "New Zealand", "Russia", "China", "Japan"])
-        submit = st.form_submit_button("🔎 Find Jobs")
+    tab_a, tab_b, tab_c = st.tabs(["🔍 Search Jobs", "🚀 For Beginners", "💰 Pay Insights"])
 
-    if submit:
-        if not keyword.strip():
-            st.error("Please enter a skill or job title.")
-        else:
-            q = urllib.parse.quote_plus(keyword)
+    with tab_a:
+        with st.form("freelance_form"):
+            col1, col2 = st.columns(2)
+            with col1:
+                keyword = st.text_input("🛠️ Skill / Job Title", "Python Developer")
+                job_type = st.selectbox("💼 Job Type", ["Freelance", "Remote", "Hybrid", "AI Gigs", "Micro-Tasks"])
+            with col2:
+                region = st.selectbox("🌍 Region", ["Global", "USA", "UK", "India", "EU", "Latin America", "Asia-Pacific"])
+                subregion = None
+                if region == "UK":
+                    subregion = st.selectbox("🏴 UK Region", ["All UK", "England", "Scotland", "Wales", "Northern Ireland"])
+                experience = st.selectbox("📈 Experience Level", ["Any", "Entry", "Mid", "Senior"])
+            submit = st.form_submit_button("🔎 Find Jobs")
 
-            st.subheader("🚀 Job Boards with Smart Links")
+        if submit:
+            if not keyword.strip():
+                st.error("Please enter a skill or job title.")
+            else:
+                q = urllib.parse.quote_plus(keyword)
+                st.subheader("🚀 Job Boards with Smart Links")
 
-            platforms = []
+                platforms = []
+                exp_filter = {
+                    "Any": "",
+                    "Entry": "&experience=entry",
+                    "Mid": "&experience=mid",
+                    "Senior": "&experience=senior"
+                }.get(experience, "")
 
-            if job_type in ["Freelance", "Both"]:
+                # Region filter logic
+                if region == "Global":
+                    region_filter = ""
+                elif region == "UK" and subregion and subregion != "All UK":
+                    region_filter = f"&location={urllib.parse.quote(subregion)}"
+                else:
+                    region_filter = f"&location={urllib.parse.quote(region)}"
+
+                # Job type specific platforms
+                if job_type == "Freelance":
+                    platforms += [
+                        ("Upwork", f"https://www.upwork.com/nx/search/jobs/?q={q}{region_filter}{exp_filter}"),
+                        ("Freelancer", f"https://www.freelancer.com/jobs/{q.replace('+', '-')}/"),
+                        ("Toptal", f"https://www.toptal.com/talent/apply?skill={q}"),
+                        ("Guru", f"https://www.guru.com/d/jobs/q/{q}/"),
+                        ("PeoplePerHour", f"https://www.peopleperhour.com/freelance-jobs?keywords={q}")
+                    ]
+                elif job_type == "Remote":
+                    platforms += [
+                        ("We Work Remotely", f"https://weworkremotely.com/remote-jobs/search?term={q}"),
+                        ("Remote OK", f"https://remoteok.com/remote-jobs?search={q}"),
+                        ("FlexJobs", f"https://www.flexjobs.com/search?search={q}&location={region}"),
+                        ("JustRemote", f"https://justremote.co/remote-jobs?search={q}"),
+                        ("Remote.co", f"https://remote.co/remote-jobs/search/?search={q}")
+                    ]
+                elif job_type == "Hybrid":
+                    platforms += [
+                        ("LinkedIn", f"https://www.linkedin.com/jobs/search?keywords={q}{region_filter}&f_WT=1"),
+                        ("Indeed", f"https://www.indeed.com/jobs?q={q}&l={region}&wt=hybrid"),
+                        ("Monster", f"https://www.monster.com/jobs/search?q={q}&where={region}&wt=hybrid"),
+                        ("Glassdoor", f"https://www.glassdoor.com/Job/{q.replace('+', '-')}-jobs-SRCH_KO0,20.htm?workType=hybrid"),
+                        ("ZipRecruiter", f"https://www.ziprecruiter.com/jobs-search?search={q}&location={region}&workType=hybrid")
+                    ]
+                elif job_type == "AI Gigs":
+                    platforms += [
+                        ("OpenAI Jobs", f"https://openai.com/careers/search?query={q}"),
+                        ("Anthropic Jobs", f"https://www.anthropic.com/careers"),
+                        ("PromptBase", f"https://promptbase.com/marketplace?query={q}"),
+                        ("AI-Jobs.net", f"https://ai-jobs.net/?search={q}{region_filter}"),
+                        ("Hugging Face Jobs", f"https://huggingface.co/careers#open-positions")
+                    ]
+                elif job_type == "Micro-Tasks":
+                    platforms += [
+                        ("Amazon Mechanical Turk", f"https://www.mturk.com/worker"),
+                        ("Clickworker", f"https://www.clickworker.com/clickworker-job-offers/?query={q}"),
+                        ("Appen", f"https://connect.appen.com/qrp/public/jobs?keywords={q}"),
+                        ("Microworkers", f"https://www.microworkers.com/jobs?search={q}"),
+                        ("Fiverr", f"https://www.fiverr.com/search/gigs?query={q}")
+                    ]
+
+                # General platforms for all job types
                 platforms += [
-                    ("Upwork", f"https://www.upwork.com/search/jobs/?q={q}"),
-                    ("Fiverr", f"https://www.fiverr.com/search/gigs?query={q}"),
-                    ("Freelancer", f"https://www.freelancer.com/jobs/{q}"),
-                    ("PeoplePerHour", f"https://www.peopleperhour.com/freelance-jobs?q={q}"),
-                    ("Toptal", "https://www.toptal.com/freelance-jobs"),
-                    ("Guru", f"https://www.guru.com/d/jobs/skill/{q}/"),
-                    ("Workana", f"https://www.workana.com/jobs?language=en&query={q}"),
-                    ("Truelancer", f"https://www.truelancer.com/freelance-jobs?searchTerm={q}"),
-                    ("Freelance India", f"https://www.freelanceindia.com/jobs/search?keywords={q}"),
-                    ("99designs", f"https://99designs.com/search?query={q}"),
-                    ("SimplyHired Freelance", f"https://www.simplyhired.com/search?q={q}+freelance"),
-                    ("FlexJobs Freelance", f"https://www.flexjobs.com/jobs/freelance-{q}"),
-                    ("Behance Jobs", f"https://www.behance.net/joblist?search={q}"),
-                    ("Dribbble Jobs", f"https://dribbble.com/jobs?query={q}"),
-                    ("ProBlogger", f"https://problogger.com/jobs/?search={q}")
+                    ("LinkedIn", f"https://www.linkedin.com/jobs/search?keywords={q}{region_filter}{exp_filter}"),
+                    ("Indeed", f"https://www.indeed.com/jobs?q={q}&l={region}"),
+                    ("Google Jobs", f"https://www.google.com/search?q={q}+{job_type}+jobs+{region}")
                 ]
 
-            if job_type in ["Remote", "Both"]:
-                region_map = {
-                    "Global": "",
-                    "India": "&location=India",
-                    "USA": "&location=United+States",
-                    "UK": "&location=United+Kingdom",
-                    "Canada": "&location=Canada",
-                    "Germany": "&location=Germany",
-                    "UAE": "&location=United+Arab+Emirates",
-                    "Australia": "&location=Australia",
-                    "New Zealand": "&location=New+Zealand",
-                    "Russia": "&location=Russia",
-                    "China": "&location=China",
-                    "Japan": "&location=Japan"
-                }
-                region_filter = region_map.get(region, "")
-                platforms += [
-                    ("Remote OK", f"https://remoteok.com/remote-{q}-jobs"),
-                    ("We Work Remotely", f"https://weworkremotely.com/remote-jobs/search?term={q}"),
-                    ("AngelList Talent", f"https://angel.co/jobs?remote=true&keyword={q}{region_filter}"),
-                    ("Jobspresso", f"https://jobspresso.co/?s={q}"),
-                    ("Remotive", f"https://remotive.io/remote-jobs/search/{q}"),
-                    ("Outsourcely", f"https://www.outsourcely.com/remote-jobs/search?q={q}"),
-                    ("Working Nomads", f"https://www.workingnomads.com/jobs?term={q}"),
-                    ("SkipTheDrive", f"https://www.skipthedrive.com/search-jobs/?keywords={q}"),
-                    ("Virtual Vocations", f"https://www.virtualvocations.com/jobs?q={q}"),
-                    ("Pangian", f"https://pangian.com/job-board/?s={q}")
-                ]
+                for name, url in platforms:
+                    st.markdown(
+                        f'<a href="{url}" target="_blank" style="display:inline-block; padding:10px 20px; background:#4CAF50; color:white; border-radius:5px; text-decoration:none; margin-bottom:5px;">'
+                        f'Search on {name}</a>',
+                        unsafe_allow_html=True
+                    )
 
-            for name, url in platforms:
-                st.markdown(
-                    f"<a href='{url}' target='_blank' style='display:block; background:#0f766e; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>🌍 {name}</a>",
-                    unsafe_allow_html=True
-                )
+    with tab_b:
+        st.subheader("🚀 Getting Started with Freelancing")
+        st.markdown("""
+        **New to freelancing? Follow these steps to land your first gig:**
+        1. **Build a Profile**: Create a strong profile on platforms like Upwork or Fiverr. Highlight skills and include a portfolio.
+        2. **Start Small**: Apply for micro-tasks or small projects to build reviews and credibility.
+        3. **Learn to Pitch**: Write clear, tailored proposals. Mention how you’ll solve the client’s problem.
+        4. **Upskill**: Take free courses (check Tab 3) to boost your skills in high-demand areas like AI or web development.
+        5. **Network**: Join communities on LinkedIn or Discord to connect with clients and other freelancers.
+        """)
+        st.markdown("""
+        **Recommended Platforms for Beginners:**
+        - [Fiverr](https://www.fiverr.com) – Start with small gigs.
+        - [Upwork](https://www.upwork.com) – Entry-level projects.
+        - [Clickworker](https://www.clickworker.com) – Micro-tasks for quick cash.
+        - [PeoplePerHour](https://www.peopleperhour.com) – Simple freelance jobs.
+        """)
 
-            st.markdown("---")
-            st.markdown(f"<a href='https://www.google.com/search?q={q}+{job_type}+jobs+{region}' target='_blank' style='display:block; background:#dc2626; color:white; padding:10px; border-radius:5px;'>🔍 Search on Google Jobs</a>", unsafe_allow_html=True)
-
-    # Additional Section: Beginner-Friendly Freelance Platforms
-    st.subheader("🌟 Beginner-Friendly Freelance Platforms")
-    st.write("Struggling to find a job? These platforms are great for starters to build experience and earn money:")
-    beginner_platforms = [
-        ("Fiverr", "Start with small gigs at $5. Ideal for skills like writing, graphic design, or voiceovers.", "https://www.fiverr.com"),
-        ("Upwork", "Begin with small projects to build your profile. Great for tech, writing, and admin tasks.", "https://www.upwork.com"),
-        ("Freelancer", "Bid on beginner-friendly projects like data entry, content writing, or design.", "https://www.freelancer.com"),
-        ("Truelancer", "Perfect for beginners, especially in India, with opportunities in tech and creative fields.", "https://www.truelancer.com"),
-        ("PeoplePerHour", "Offers small tasks for beginners in writing, design, and marketing.", "https://www.peopleperhour.com"),
-        ("Workana", "Popular in Latin America but open globally, good for tech and design beginners.", "https://www.workana.com"),
-        ("99designs", "Great for beginner graphic designers. Join contests to showcase your skills.", "https://99designs.com"),
-        ("ProBlogger", "Ideal for beginner writers to find blogging and content writing gigs.", "https://problogger.com/jobs/"),
-        ("Behance Jobs", "Showcase your creative portfolio and find design or art-related gigs.", "https://www.behance.net/joblist"),
-        ("Dribbble Jobs", "Another platform for designers to find freelance work, great for beginners with a portfolio.", "https://dribbble.com/jobs"),
-        ("Freelance India", "A local platform for Indian beginners to find tech, design, and writing jobs.", "https://www.freelanceindia.com"),
-        ("Voices", "For beginners with voice talent, find voice-over gigs for commercials or audiobooks.", "https://www.voices.com"),
-        ("Textbroker", "A good starting point for freelance writers, with assignments based on your writing level.", "https://www.textbroker.com"),
-        ("iWriter", "Another platform for beginner writers to find content writing jobs.", "https://www.iwriter.com"),
-        ("Rev", "Earn money by transcribing audio or captioning videos, perfect for beginners with no experience.", "https://www.rev.com/freelancers")
-    ]
-
-    for platform in beginner_platforms:
-        name, desc, url = platform
-        st.markdown(
-            f"<div style='padding:10px; border:1px solid #ddd; border-radius:5px; margin-bottom:5px;'>"
-            f"<strong>{name}</strong>: {desc}<br>"
-            f"<a href='{url}' target='_blank' style='color:#1976d2;'>Visit {name}</a>"
-            f"</div>",
-            unsafe_allow_html=True
-        )
-
-    st.markdown("""
+    with tab_c:
+        st.subheader("💰 Freelance Pay Insights")
+        st.markdown("""
+        **Average Hourly Rates (2025, USD):**
+        - **Python Developer**: $30–$80 (Entry), $80–$150 (Senior)
+        - **AI/ML Engineer**: $50–$120 (Entry), $120–$250 (Senior)
+        - **Web Developer**: $25–$60 (Entry), $60–$120 (Senior)
+        - **Graphic Designer**: $20–$50 (Entry), $50–$100 (Senior)
+        - **Content Writer**: $15–$40 (Entry), $40–$90 (Senior)
+        - **Micro-Tasks**: $5–$20/hour (varies by task complexity)
+        
+        **Tips to Maximize Earnings:**
+        - Specialize in high-demand skills (e.g., AI, cloud computing).
+        - Work with global clients in regions like the USA or EU for higher pay.
+        - Upskill regularly to stay competitive.
+        - Use platforms like Payoneer for seamless international payments.
+        """)
+        st.markdown("""
+        **Resources for Pay Research:**
+        - [Glassdoor](https://www.glassdoor.com/Salaries/index.htm)
+        - [Payscale](https://www.payscale.com/research/US/Job=Freelancer/Salary)
+        - [Upwork Market Trends](https://www.upwork.com/research)
+        """)    st.markdown("""
     <div style='background-color:#fff8e1; border:2px solid #f9a825; border-radius:10px; padding:20px; margin-top:30px;'>
         <h3 style='color:#ef6c00;'>🚀 Can't Find the Right Job? Create Your Own Opportunities</h3>
         <p style='font-size:16px; color:#444;'>Whether you're job hunting, switching careers, or stuck in endless applications, here's a fact: <b>AI freelancers are earning ₹50K – ₹1.5L/month by building tools from home.</b></p>
