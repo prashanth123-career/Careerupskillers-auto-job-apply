@@ -295,13 +295,13 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-tab1, tab2, tab3, tab4 = st.tabs([
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
     f"🌐 {t['job_finder']}", 
     f"🎯 {t['interview_prep']}", 
     f"🎓 {t['free_courses']}", 
-    f"💼 Freelance & Remote Jobs"
+    f"💼 Freelance & Remote Jobs",
+    f"🌍 International Jobs"  # You can add this to your translations if needed
 ])
-
 # ----------------- TAB 1: JOB FINDER -----------------
 with tab1:
     st.header(f"🌐 {t['job_finder']}")
