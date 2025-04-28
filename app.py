@@ -762,7 +762,7 @@ with tab2:
 with tab3:
     st.header(f"🎓 {t['free_courses']}")
 
-    # Mapping of keywords to course categories for better search relevance
+    # Expanded mapping of keywords to course categories for 2025 trends
     COURSE_CATEGORY_MAP = {
         "ai": "Artificial Intelligence",
         "machine learning": "Machine Learning",
@@ -779,14 +779,19 @@ with tab3:
         "finance": "Finance",
         "accounting": "Accounting",
         "project management": "Project Management",
+        "generative ai": "Generative AI",
+        "quantum computing": "Quantum Computing",
+        "data engineering": "Data Engineering",
+        "devops": "DevOps",
+        "ui/ux": "UI/UX Design"
     }
 
-    # Curated fallback courses for popular skills
+    # Expanded curated courses with new categories and badges
     CURATED_COURSES = {
         "Artificial Intelligence": [
-            ("AI For Everyone (Coursera)", "https://www.coursera.org/learn/ai-for-everyone"),
+            ("AI For Everyone (Coursera) 🏆 Top Rated", "https://www.coursera.org/learn/ai-for-everyone"),
             ("Intro to AI (edX)", "https://www.edx.org/learn/artificial-intelligence"),
-            ("AI Basics (Google)", "https://www.cloudskillsboost.google/quests/238")
+            ("AI Basics (Google) ✨ New", "https://www.cloudskillsboost.google/quests/238")
         ],
         "Machine Learning": [
             ("Machine Learning Crash Course (Google)", "https://developers.google.com/machine-learning/crash-course"),
@@ -799,21 +804,64 @@ with tab3:
             ("Data Science Basics (Coursera)", "https://www.coursera.org/learn/data-science-basics")
         ],
         "Programming": [
-            ("Python for Everybody (Coursera)", "https://www.coursera.org/specializations/python"),
+            ("Python for Everybody (Coursera) 🏆 Top Rated", "https://www.coursera.org/specializations/python"),
             ("Learn to Code (Codecademy)", "https://www.codecademy.com/learn/learn-python-3"),
             ("CS50 Intro to Programming (Harvard)", "https://pll.harvard.edu/course/cs50-introduction-computer-science")
         ],
+        "Generative AI": [
+            ("Generative AI Basics (Google) ✨ New", "https://www.cloudskillsboost.google/quests/281"),
+            ("Intro to GenAI (Coursera)", "https://www.coursera.org/learn/generative-ai-for-everyone"),
+            ("Hugging Face Transformers (DeepLearning.AI)", "https://www.deeplearning.ai/short-courses/hugging-face-transformers/")
+        ],
+        "Cybersecurity": [
+            ("Cybersecurity Fundamentals (IBM)", "https://www.coursera.org/learn/cybersecurity-fundamentals"),
+            ("Intro to Cybersecurity (Cisco)", "https://www.netacad.com/courses/cybersecurity/introduction-cybersecurity"),
+            ("Google Cybersecurity Certificate", "https://www.coursera.org/professional-certificates/google-cybersecurity")
+        ]
     }
 
+    # Initialize session state for progress tracking and learning streak
+    if 'course_progress' not in st.session_state:
+        st.session_state.course_progress = {}
+    if 'learning_streak' not in st.session_state:
+        st.session_state.learning_streak = 0
+    if 'last_search_date' not in st.session_state:
+        st.session_state.last_search_date = None
+
+    # Update learning streak
+    from datetime import datetime, date
+    today = date.today()
+    if st.session_state.last_search_date != today:
+        st.session_state.learning_streak += 1
+        st.session_state.last_search_date = today
+    st.markdown(f"🔥 **Learning Streak**: {st.session_state.learning_streak} days")
+
+    # Popular Skills buttons for quick access
+    st.subheader("🔥 Explore Popular Skills")
+    popular_skills = ["Artificial Intelligence", "Programming", "Data Science", "Cybersecurity", "Generative AI"]
+    cols = st.columns(len(popular_skills))
+    for i, skill in enumerate(popular_skills):
+        with cols[i]:
+            if st.button(skill):
+                search = skill
+                course_submit = True
+            else:
+                course_submit = False
+
+    # Updated search form with skill level filter
     with st.form("course_form"):
-        search = st.text_input(t["search_course"], "AI for Business")
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            search = st.text_input(t["search_course"], "AI for Business")
+        with col2:
+            skill_level = st.selectbox("Skill Level", ["Beginner", "Intermediate", "Advanced"])
         course_submit = st.form_submit_button(f"🎯 {t['find_courses']}")
 
     if course_submit:
         if not search.strip():
             st.error("Please enter a course, skill, or job title.")
         else:
-            # Normalize the search term and map to a category
+            # Normalize search term and map to category
             search_lower = search.lower().strip()
             category = None
             for keyword, mapped_category in COURSE_CATEGORY_MAP.items():
@@ -821,71 +869,102 @@ with tab3:
                     category = mapped_category
                     break
             if not category:
-                category = search  # Fallback to the original search term if no mapping found
+                category = search  # Fallback to original search term
+                st.warning(f"No exact match found for '{search}'. Showing results for '{category}'.")
 
             query = urllib.parse.quote_plus(category)
-            st.info(f"🔍 Searching for courses related to: **{category}**")
+            st.info(f"🔍 Searching for courses related to: **{category}** (Level: {skill_level})")
 
-            # Search Free Courses with improved queries
-            st.subheader("🎓 Free Courses")
-            free_courses = [
-                ("Coursera Free", f"https://www.coursera.org/search?query={query}&sortBy=RELEVANCE&price=FREE"),
-                ("edX Free Courses", f"https://www.edx.org/search?q={query}&cost=Free&sort=relevance"),
-                ("Harvard Online", f"https://pll.harvard.edu/catalog?keywords={query}&f%5B0%5D=course_feature_free%3A1"),
-                ("YouTube Tutorials", f"https://www.youtube.com/results?search_query=free+{query}+course+for+beginners")
-            ]
-            for name, url in free_courses:
-                st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#6366f1; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📘 {name}</a>", unsafe_allow_html=True)
+            # Course search results in expanders
+            with st.expander("🎓 Free Courses", expanded=True):
+                free_courses = [
+                    ("Coursera Free", f"https://www.coursera.org/search?query={query}&sortBy=RELEVANCE&price=FREE&level={skill_level.lower()}"),
+                    ("edX Free Courses", f"https://www.edx.org/search?q={query}&cost=Free&sort=relevance&level={skill_level.lower()}"),
+                    ("Harvard Online", f"https://pll.harvard.edu/catalog?keywords={query}&f%5B0%5D=course_feature_free%3A1"),
+                    ("YouTube Tutorials", f"https://www.youtube.com/results?search_query=free+{query}+course+for+{skill_level.lower()}")
+                ]
+                # Add region-specific platforms based on language
+                if lang == "Hindi" or lang == "Tamil" or lang == "Telugu" or lang == "Malayalam":
+                    free_courses.append(("SWAYAM (India)", f"https://swayam.gov.in/explorer?searchText={query}"))
+                if lang == "French":
+                    free_courses.append(("FUN-MOOC (France)", f"https://www.fun-mooc.fr/en/courses/?q={query}"))
+                for name, url in free_courses:
+                    st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#6366f1; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📘 {name}</a>", unsafe_allow_html=True)
 
-            # Search Free Courses with Certification
-            st.subheader("📜 Free Courses with Certification")
-            certified_courses = [
-                ("Google Career Certificates", f"https://grow.google/certificates/?q={query}"),
-                ("IBM SkillsBuild", f"https://skillsbuild.org/learn?search={query}"),
-                ("Meta Blueprint", f"https://www.facebook.com/business/learn/courses?search={query}"),
-                ("AWS Skill Builder", f"https://explore.skillbuilder.aws/learn?searchTerm={query}"),
-                ("Google Cloud Skills Boost", f"https://www.cloudskillsboost.google/catalog?search={query}")
-            ]
-            for name, url in certified_courses:
-                st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#10b981; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📜 {name}</a>", unsafe_allow_html=True)
+            with st.expander("📜 Free Courses with Certification"):
+                certified_courses = [
+                    ("Google Career Certificates", f"https://grow.google/certificates/?q={query}"),
+                    ("IBM SkillsBuild", f"https://skillsbuild.org/learn?search={query}"),
+                    ("Meta Blueprint", f"https://www.facebook.com/business/learn/courses?search={query}"),
+                    ("AWS Skill Builder", f"https://explore.skillbuilder.aws/learn?searchTerm={query}"),
+                    ("Google Cloud Skills Boost", f"https://www.cloudskillsboost.google/catalog?search={query}")
+                ]
+                for name, url in certified_courses:
+                    st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#10b981; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📜 {name}</a>", unsafe_allow_html=True)
 
-            # Search Hands-on Platforms
-            st.subheader("🛠️ Free Platforms for Hands-on Experience")
-            platforms = [
-                ("GitHub Learning Lab", "https://lab.github.com/"),
-                ("Microsoft Learn", f"https://learn.microsoft.com/en-us/training/browse/?terms={query}"),
-                ("Kaggle Courses", f"https://www.kaggle.com/learn/search?q={query}"),
-                ("Codecademy Free", f"https://www.codecademy.com/catalog/all?query={query}&level=free"),
-                ("DataCamp Free", f"https://www.datacamp.com/search?q={query}")
-            ]
-            for name, url in platforms:
-                st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#f97316; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>🛠️ {name}</a>", unsafe_allow_html=True)
+            with st.expander("🛠️ Free Platforms for Hands-on Experience"):
+                platforms = [
+                    ("GitHub Learning Lab", "https://lab.github.com/"),
+                    ("Microsoft Learn", f"https://learn.microsoft.com/en-us/training/browse/?terms={query}"),
+                    ("Kaggle Courses", f"https://www.kaggle.com/learn/search?q={query}"),
+                    ("Codecademy Free", f"https://www.codecademy.com/catalog/all?query={query}&level=free"),
+                    ("DataCamp Free", f"https://www.datacamp.com/search?q={query}")
+                ]
+                for name, url in platforms:
+                    st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#f97316; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>🛠️ {name}</a>", unsafe_allow_html=True)
 
-            # Fallback: Show curated courses if the category matches
+            # Curated recommendations with progress tracking
             if category in CURATED_COURSES:
-                st.subheader("✨ Curated Recommendations")
-                for name, url in CURATED_COURSES[category]:
-                    st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#ff6f61; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📚 {name}</a>", unsafe_allow_html=True)
+                with st.expander("✨ Curated Recommendations", expanded=True):
+                    for name, url in CURATED_COURSES[category]:
+                        course_key = f"{category}_{name}"
+                        progress = st.session_state.course_progress.get(course_key, "Not Started")
+                        col1, col2 = st.columns([3, 1])
+                        with col1:
+                            st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#ff6f61; color:white; padding:10px; border-radius:5px; margin-bottom:5px;'>📚 {name}</a>", unsafe_allow_html=True)
+                        with col2:
+                            new_progress = st.selectbox("Progress", ["Not Started", "In Progress", "Completed"], index=["Not Started", "In Progress", "Completed"].index(progress), key=course_key)
+                            st.session_state.course_progress[course_key] = new_progress
 
+            # Downloadable Learning Plan
+            if category in CURATED_COURSES:
+                learning_plan = "\n".join([f"- [ ] {name} ({url}) - Status: {st.session_state.course_progress.get(f'{category}_{name}', 'Not Started')}" for name, url in CURATED_COURSES[category]])
+                st.download_button(
+                    label="📥 Download Learning Plan",
+                    data=f"Learning Plan for {category}\n\n{learning_plan}",
+                    file_name=f"{category}_Learning_Plan.txt",
+                    mime="text/plain"
+                )
+
+    # Recently Added Courses
+    st.subheader("🆕 Recently Added Courses")
+    recent_courses = [
+        ("Generative AI for Developers (AWS) ✨ New", "https://explore.skillbuilder.aws/learn/course/external/view/elearning/17476/generative-ai-for-developers"),
+        ("Python for Data Analysis (Microsoft)", "https://learn.microsoft.com/en-us/training/paths/data-analysis-python/"),
+        ("Cybersecurity Essentials (Cisco) 🏆 Top Rated", "https://www.netacad.com/courses/cybersecurity/cybersecurity-essentials")
+    ]
+    for name, url in recent_courses:
+        st.markdown(f"<a href='{url}' target='_blank' style='display:block; background:#ffeb3b; color:black; padding:10px; border-radius:5px; margin-bottom:5px;'>📚 {name}</a>", unsafe_allow_html=True)
+
+    # Updated promotional content
     st.markdown("""
     <div style='background-color:#e8f5e9; border:2px solid #43a047; border-radius:10px; padding:20px; margin-top:30px;'>
-        <h3 style='color:#2e7d32;'>🎓 Learning for Free? Here's How to Start Earning</h3>
-        <p style='font-size:16px; color:#444;'>👏 You're taking a great first step with free courses. But if you're serious about building <b>an AI-powered career</b>, it's time to get real-world tools that <b>pay the bills</b>.</p>
-        <h4 style='color:#1b5e20;'>🔥 Limited-Time Bonus – ₹499 AI Career Kit:</h4>
+        <h3 style='color:#2e7d32;'>\U0001F393 Turn Free Learning into a High-Paying Career</h3>
+        <p style='font-size:16px; color:#444;'>👏 You're mastering skills with free courses – now take the leap to <b>earn ₹50K–₹2L/month</b> with AI-powered freelancing or jobs.</p>
+        <h4 style='color:#1b5e20;'>🔥 ₹499 AI Career Kit – Your Shortcut to Success:</h4>
         <ul style='font-size:15px; color:#333;'>
-            <li>💼 10+ Freelance-Ready AI Projects (Chatbot, Face Recognition, Resume Parser...)</li>
-            <li>📊 ₹90,000 – ₹1.7L Salary Insights for Each Role</li>
-            <li>🧠 Personalized Career Roadmap + Job Links</li>
-            <li>🎯 Interview + Resume Masterclass (with PDF checklists)</li>
+            <li>💼 15+ Freelance-Ready AI Projects (Chatbots, Data Pipelines, AI Apps)</li>
+            <li>📊 Real-time Salary Data for 2025 (AI, DevOps, Cybersecurity)</li>
+            <li>🧠 Personalized Learning & Career Roadmap</li>
+            <li>🎯 Auto-generated Proposals + Job Application Tools</li>
         </ul>
         <hr style='margin:15px 0;'>
-        <h4 style='color:#1b5e20;'>🗣️ Real Story from Our Students:</h4>
-        <p style='font-size:15px; color:#333; font-style:italic;'>"In Nov 2024, I got laid off. After 30 days with the CareerUpskillers AI Kit, I landed a freelance project worth ₹65,000. From watching free videos to earning – this kit bridged the gap."<br>– <b>Arjun V., B.Tech (ECE), Chennai</b></p>
-        <p style='font-size:16px; color:#000; font-weight:bold;'>🚀 You’ve started learning. Now it’s time to start earning.</p>
+        <h4 style='color:#1b5e20;'>🗣️ Success Story:</h4>
+        <p style='font-size:15px; color:#333; font-style:italic;'>"I learned Python for free but struggled to get hired. The ₹499 AI Kit helped me build 3 freelance projects. Now I earn ₹1.8L/month on Upwork!"<br>– <b>Priya S., Data Engineer, Bangalore</b></p>
+        <p style='font-size:16px; color:#000; font-weight:bold;'>🚀 Don’t just learn – start earning with AI.</p>
         <a href='https://pages.razorpay.com/pl_Q9haRTHXpyB9SS/view' target='_blank' style='display:inline-block; padding:10px 20px; background:#1976d2; color:#fff; font-weight:bold; border-radius:6px; text-decoration:none; font-size:16px;'>💼 Buy ₹499 AI Career Kit</a>
     </div>
     """, unsafe_allow_html=True)
-
 # ----------------- TAB 4: FREELANCE & REMOTE JOBS (Updated with More Platforms) -----------------
 with tab4:
     st.header(f"💼 Freelance & Remote Jobs")
