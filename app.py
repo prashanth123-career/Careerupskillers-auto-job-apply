@@ -608,25 +608,24 @@ with tab1:
 with tab2:
     st.header(f"🎯 {t['interview_prep']}")
     
-    # Sub-tabs for Interview Prep and Resume Analysis
+    # Sub-tabs
     prep_tab, resume_tab = st.tabs(["Interview Prep Resources", t["resume_analysis"]])
-    
-    # Interview Prep Resources (Enhanced Functionality)
+
+    # ------------- Interview Prep Tab ----------------
     with prep_tab:
-        # Initialize session state for confidence tracker
+        # Initialize session states
         if 'interview_practice_count' not in st.session_state:
             st.session_state.interview_practice_count = 0
         if 'star_stories' not in st.session_state:
             st.session_state.star_stories = []
 
-        # Confidence Tracker
         st.markdown(f"💪 **Interview Confidence**: {st.session_state.interview_practice_count} practice sessions completed")
-        progress = min(st.session_state.interview_practice_count / 10, 1.0)  # Max at 10 sessions
+        progress = min(st.session_state.interview_practice_count / 10, 1.0)
         st.progress(progress)
         if st.session_state.interview_practice_count >= 10:
             st.success("🎉 Badge Earned: 10 Questions Mastered!")
 
-        # Updated form with company-specific trending questions
+        # Interview Prep Form
         with st.form("interview_form"):
             col1, col2 = st.columns([1, 2])
             with col1:
@@ -642,7 +641,6 @@ with tab2:
                     "Resume Tips"
                 ])
                 company = st.text_input("Target Company (optional)", placeholder="Google, TCS, etc.")
-            
             submitted = st.form_submit_button(f"🔗 {t['generate_link']}")
 
         if submitted:
@@ -651,10 +649,9 @@ with tab2:
             else:
                 base_query = f"{role} {prep_type} {exp_level} {company} {country}"
                 encoded_query = urllib.parse.quote_plus(base_query)
-                
+
                 st.subheader("🔍 Best Preparation Resources")
                 
-                # Updated resource matrix with region-specific resources
                 RESOURCE_MATRIX = {
                     "Technical Questions": {
                         "India": "https://www.indiabix.com",
@@ -690,11 +687,11 @@ with tab2:
                     <div style="padding:15px; background:#e8f5e9; border-radius:10px; margin-bottom:20px;">
                         <h4>🎯 Recommended Resource</h4>
                         <a href="{main_resource}" target="_blank" style="color:#2e7d32; font-weight:bold;">
-                            Best {prep_type} Guide for {country} → 
+                            Best {prep_type} Guide for {country} →
                         </a>
                     </div>
                     """, unsafe_allow_html=True)
-                
+
                 st.markdown(f"""
                 <div style="padding:15px; background:#fff3e0; border-radius:10px;">
                     <h4>🔎 More Resources via Smart Search</h4>
@@ -710,7 +707,6 @@ with tab2:
                 </div>
                 """, unsafe_allow_html=True)
 
-                # Trending Interview Questions
                 st.subheader("🔥 Trending Interview Questions")
                 trending_questions = {
                     "Data Analyst": [
@@ -733,7 +729,7 @@ with tab2:
                 for q in trending_questions[role_key]:
                     st.markdown(f"- {q}")
 
-                # Personalized Checklist
+                st.subheader("✅ Personalized Checklist")
                 checklist_items = {
                     "Technical Questions": ["Review core concepts", "Practice 5 coding problems", "Study system design"],
                     "Behavioral Questions": ["Prepare 3 STAR stories", "Research company values", "Practice timing"],
@@ -741,11 +737,10 @@ with tab2:
                     "Salary Negotiation": ["Research market salary", "Prepare counter-offers", "Practice negotiation"],
                     "Resume Tips": ["Update skills section", "Tailor to job", "Proofread"]
                 }.get(prep_type, [])
-                st.subheader("✅ Personalized Checklist")
+
                 for item in checklist_items:
                     st.checkbox(item, key=f"check_{item}")
 
-                # Downloadable Interview Prep Roadmap
                 roadmap_content = f"Interview Prep Roadmap for {role} ({exp_level})\n\n"
                 roadmap_content += f"Target Company: {company or 'Any'}\nCountry: {country}\nPreparation Type: {prep_type}\n\n"
                 roadmap_content += "Checklist:\n" + "\n".join([f"- [ ] {item}" for item in checklist_items])
@@ -758,7 +753,7 @@ with tab2:
                     mime="text/plain"
                 )
 
-        # AI-Powered Mock Interview Simulator
+        # AI Mock Interview Simulator
         st.subheader("🤖 AI Mock Interview Simulator")
         with st.form("mock_interview_form"):
             mock_role = st.text_input("Enter Role for Mock Interview", role, key="mock_role")
@@ -774,7 +769,7 @@ with tab2:
             """
             mock_question = get_result(mock_prompt)
             st.markdown(f"**Question**: {mock_question}")
-            
+
             with st.form("mock_answer_form"):
                 user_answer = st.text_area("Your Answer", height=150, key="mock_answer")
                 feedback_submit = st.form_submit_button("Get AI Feedback")
@@ -793,7 +788,7 @@ with tab2:
                 st.markdown("**AI Feedback**")
                 st.markdown(feedback)
 
-        # Interactive STAR Method Guide
+        # Craft STAR Stories
         st.subheader("🌟 Craft STAR Stories")
         with st.form("star_form"):
             situation = st.text_area("Situation (Describe the context)", height=100)
@@ -801,7 +796,7 @@ with tab2:
             action = st.text_area("Action (What did you do?)", height=100)
             result = st.text_area("Result (What was the outcome?)", height=100)
             star_submit = st.form_submit_button("Save STAR Story")
-        
+
         if star_submit and all([situation.strip(), task.strip(), action.strip(), result.strip()]):
             st.session_state.star_stories.append({
                 "Situation": situation,
@@ -810,31 +805,30 @@ with tab2:
                 "Result": result
             })
             st.success("STAR Story saved!")
-            
-            # Display saved STAR stories
-# Display saved STAR stories
-if st.session_state.star_stories:
-    st.markdown("**Your STAR Stories**")
-    for i, story in enumerate(st.session_state.star_stories, 1):
-        with st.expander(f"Story {i}: {story['Situation'][:50]}..."):
-            st.markdown(f"- **Situation**: {story['Situation']}")
-            st.markdown(f"- **Task**: {story['Task']}")
-            st.markdown(f"- **Action**: {story['Action']}")
-            st.markdown(f"- **Result**: {story['Result']}")
-            if st.button(f"Get AI Feedback for Story {i}", key=f"star_feedback_{i}"):
-                star_feedback_prompt = f"""
-                Act as a career coach. Review the following STAR story:
-                Situation: {story['Situation']}
-                Task: {story['Task']}
-                Action: {story['Action']}
-                Result: {story['Result']}
-                Provide bullet-point feedback on structure, clarity, and improvement.
-                """
-                star_feedback = get_result(star_feedback_prompt)
-                st.markdown("**AI Feedback on STAR Story**")
-                st.markdown(star_feedback)
-                
-    # Resume Analysis (Enhanced with Interview Question Suggestions)
+
+        # Display STAR Stories
+        if st.session_state.star_stories:
+            st.markdown("**Your STAR Stories**")
+            for i, story in enumerate(st.session_state.star_stories, 1):
+                with st.expander(f"Story {i}: {story['Situation'][:50]}..."):
+                    st.markdown(f"- **Situation**: {story['Situation']}")
+                    st.markdown(f"- **Task**: {story['Task']}")
+                    st.markdown(f"- **Action**: {story['Action']}")
+                    st.markdown(f"- **Result**: {story['Result']}")
+                    if st.button(f"Get AI Feedback for Story {i}", key=f"star_feedback_{i}"):
+                        star_feedback_prompt = f"""
+                        Act as a career coach. Review the following STAR story:
+                        Situation: {story['Situation']}
+                        Task: {story['Task']}
+                        Action: {story['Action']}
+                        Result: {story['Result']}
+                        Provide bullet-point feedback on structure, clarity, and improvement.
+                        """
+                        star_feedback = get_result(star_feedback_prompt)
+                        st.markdown("**AI Feedback on STAR Story**")
+                        st.markdown(star_feedback)
+
+    # ------------- Resume Analysis Tab ----------------
     with resume_tab:
         st.subheader(t["resume_analysis"])
         with st.form("resume_form"):
@@ -853,22 +847,18 @@ if st.session_state.star_stories:
                 st.error("Please upload your resume.")
             else:
                 try:
-                    # Extract resume text
                     resume_text = pdf_to_text(uploaded_file)
                     
-                    # Get match score
                     score_prompt = construct_score_prompt(resume_text, job_description)
                     score_result = get_result(score_prompt)
                     st.subheader("Resume Match Score")
                     st.markdown(score_result)
-                    
-                    # Get improvement suggestions
+
                     improvement_prompt = construct_improvement_prompt(resume_text, job_description)
                     improvement_result = get_result(improvement_prompt)
                     st.subheader("Suggestions to Improve Your Resume")
                     st.markdown(improvement_result)
-                    
-                    # Suggest interview questions based on resume analysis
+
                     question_prompt = f"""
                     Based on the resume and job description below, suggest 3 interview questions (1 technical, 1 behavioral, 1 role-specific) that the candidate should prepare for.
                     Resume: {resume_text}
@@ -880,6 +870,7 @@ if st.session_state.star_stories:
                     st.markdown(suggested_questions)
                 except Exception as e:
                     st.error(f"An error occurred: {str(e)}")
+
 
     # Updated promotional content
     st.markdown("""
