@@ -1,7 +1,7 @@
 # 1. Import Streamlit first (required to avoid StreamlitAPIException)
 import streamlit as st
 
-# 2. Set page config as the FIRST Streamlit command
+# 2. Set page config as the FIRST Streamlit command (only one call allowed)
 st.set_page_config(
     page_title="CareerUpskillers | AI Job Hub",
     page_icon="🌟",
@@ -73,7 +73,9 @@ def get_result(prompt):
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
-        return f"Error: Could not process request with Gemini LLM. Details: {str(e)}"# ----------------- LANGUAGE SUPPORT -----------------
+        return f"Error: Could not process request with Gemini LLM. Details: {str(e)}"
+        
+# ----------------- LANGUAGE SUPPORT -----------------
 LANGUAGES = {
     "English": "en",
     "Hindi": "hi",
@@ -263,9 +265,6 @@ TRANSLATIONS = {
         "analyze_resume": "تحليل السيرة الذاتية",
     },
 }
-
-# ----------------- SETUP -----------------
-st.set_page_config(page_title="CareerUpskillers | AI Job Hub", page_icon="🌟", layout="centered")
 
 # Language selection
 lang = st.sidebar.selectbox("Select Language", list(LANGUAGES.keys()), index=0)
