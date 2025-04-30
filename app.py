@@ -1,76 +1,79 @@
-# CORRECT STRUCTURE:
-
-# 1. Import streamlit first
+# 1. Import Streamlit first (required to avoid StreamlitAPIException)
 import streamlit as st
 
-# 2. Set page config IMMEDIATELY AFTER (first Streamlit command)
+# 2. Set page config as the FIRST Streamlit command
 st.set_page_config(
     page_title="CareerUpskillers | AI Job Hub",
-    page_icon="🌟", 
+    page_icon="🌟",
     layout="centered"
 )
 
-# 3. Then other imports
+# 3. Other imports
 import urllib.parse
 import google.generativeai as genai
 from PyPDF2 import PdfReader
+from datetime import datetime, date
 
-# 4. Rest of your code...
-# Configure Gemini API using Streamlit secrets
-genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-# Initialize Gemini model
+# 4. Configure Gemini API using Streamlit secrets
+try:
+    genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+except KeyError:
+    st.error("GOOGLE_API_KEY not found in Streamlit secrets. Please configure it in Streamlit Cloud settings.")
+    st.stop()
+
+# ----------------- HELPER FUNCTIONS -----------------
 def get_gemini_model():
+    """Initialize and return the Gemini model."""
     return genai.GenerativeModel('gemini-pro')
 
-# Extract text from PDF resume
 def pdf_to_text(pdf_file):
-    reader = PdfReader(pdf_file)
-    text = ''
-    for page in reader.pages:
-        text += str(page.extract_text())
-    return text
+    """Extract text from a PDF resume."""
+    try:
+        reader = PdfReader(pdf_file)
+        text = ''
+        for page in reader.pages:
+            text += str(page.extract_text() or '')
+        return text
+    except Exception as e:
+        st.error(f"Failed to process PDF: {str(e)}")
+        return None
 
-# Construct prompt for resume match score
 def construct_score_prompt(resume, job_description):
-    prompt = f'''
-    Act as an HR Manager with 20 years of experience. Compare the resume provided below with the job description given below.
-    Provide a score from 0 to 10 on how well the resume matches the job based on:
+    """Construct prompt for resume match score."""
+    return f'''
+    Act as an HR Manager with 20 years of experience. Compare the resume with the job description.
+    Provide a score from 0 to 10 based on:
     1. Key skills that match.
     2. Missing skills or qualifications.
-    The score should be a number between 0 and 10, where 0 means little to no match and 10 means a perfect match.
-    Return the response in the format: "Score: X/10\nMatching Skills: ...\nMissing Skills: ..."
+    Return: "Score: X/10\nMatching Skills: ...\nMissing Skills: ..."
     
     Resume: {resume}
     Job Description: {job_description}
     '''
-    return prompt
 
-# Construct prompt for resume improvement suggestions
 def construct_improvement_prompt(resume, job_description):
-    prompt = f'''
-    Act as a career coach with 15 years of experience. Analyze the resume and job description below.
+    """Construct prompt for resume improvement suggestions."""
+    return f'''
+    Act as a career coach with 15 years of experience. Analyze the resume and job description.
     Suggest specific changes to improve the resume to better match the job description.
     Focus on:
     1. Keywords to add.
     2. Skills to emphasize.
-    3. Any sections to rephrase for better impact.
-    Return the response as a list of actionable suggestions.
+    3. Sections to rephrase.
+    Return as a list of actionable suggestions.
     
     Resume: {resume}
     Job Description: {job_description}
     '''
-    return prompt
 
-# Get response from Gemini model
 def get_result(prompt):
+    """Get response from Gemini model."""
     try:
         model = get_gemini_model()
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
-        return f"Error: Could not process the request with Gemini LLM. Details: {str(e)}"
-
-# ----------------- LANGUAGE SUPPORT -----------------
+        return f"Error: Could not process request with Gemini LLM. Details: {str(e)}"# ----------------- LANGUAGE SUPPORT -----------------
 LANGUAGES = {
     "English": "en",
     "Hindi": "hi",
