@@ -4,8 +4,7 @@ import google.generativeai as genai
 from PyPDF2 import PdfReader
 
 # Configure Gemini API using Streamlit secrets
-genai.configure(api_key="AIzaSyAeEPJI37XgVfncJoLi0yObr4RL0noTkYI")  # ⚠️ Remove after testing!
-
+genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 # Initialize Gemini model
 def get_gemini_model():
     return genai.GenerativeModel('gemini-pro')
