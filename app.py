@@ -1,4 +1,14 @@
 import streamlit as st
+
+# Debug secrets
+st.write("All available secrets:", list(st.secrets.keys()))
+
+if "GOOGLE_API_KEY" not in st.secrets:
+    st.error("CRITICAL: GOOGLE_API_KEY missing from secrets!")
+    st.stop()  # Prevents the rest of the app from running
+
+# Rest of your code...
+import streamlit as st
 import urllib.parse
 import google.generativeai as genai
 from PyPDF2 import PdfReader
