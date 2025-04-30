@@ -24,7 +24,20 @@ except KeyError:
 # ----------------- HELPER FUNCTIONS -----------------
 def get_gemini_model():
     """Initialize and return the Gemini model."""
-    return genai.GenerativeModel('gemini-pro')
+    model_name = 'gemini-1.5-flash'  # Updated model name
+    try:
+        return genai.GenerativeModel(model_name)
+    except Exception as e:
+        # If the model is not found, list available models
+        st.error(f"Error: Could not load model {model_name}. Details: {str(e)}")
+        try:
+            models = genai.list_models()
+            available_models = [m.name for m in models if 'generateContent' in m.supported_generation_methods]
+            st.error(f"Available models: {', '.join(available_models)}")
+            st.error("Please update the model name in the code to one of the available models and redeploy.")
+        except Exception as list_error:
+            st.error(f"Could not list available models: {str(list_error)}")
+        st.stop()
 
 def pdf_to_text(pdf_file):
     """Extract text from a PDF resume."""
@@ -73,8 +86,7 @@ def get_result(prompt):
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
-        return f"Error: Could not process request with Gemini LLM. Details: {str(e)}"
-        
+        return f"Error: Could not process request with Gemini LLM. Details: {str(e)}"        
 # ----------------- LANGUAGE SUPPORT -----------------
 LANGUAGES = {
     "English": "en",
