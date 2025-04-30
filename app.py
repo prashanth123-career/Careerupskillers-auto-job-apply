@@ -1,12 +1,13 @@
 import streamlit as st
 
-# Debug secrets
-st.write("All available secrets:", list(st.secrets.keys()))
+# This must be THE FIRST Streamlit command and ONLY CALLED ONCE
+st.set_page_config(
+    page_title="CareerUpskillers | AI Job Hub", 
+    page_icon="🌟", 
+    layout="centered"
+)
 
-if "GOOGLE_API_KEY" not in st.secrets:
-    st.error("CRITICAL: GOOGLE_API_KEY missing from secrets!")
-    st.stop()  # Prevents the rest of the app from running
-import streamlit as st
+# Rest of your imports and code...import streamlit as st
 import urllib.parse
 import google.generativeai as genai
 from PyPDF2 import PdfReader
