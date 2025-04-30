@@ -1,17 +1,21 @@
+# CORRECT STRUCTURE:
+
+# 1. Import streamlit first
 import streamlit as st
 
-# This must be THE FIRST Streamlit command and ONLY CALLED ONCE
+# 2. Set page config IMMEDIATELY AFTER (first Streamlit command)
 st.set_page_config(
-    page_title="CareerUpskillers | AI Job Hub", 
+    page_title="CareerUpskillers | AI Job Hub",
     page_icon="🌟", 
     layout="centered"
 )
 
-# Rest of your imports and code...import streamlit as st
+# 3. Then other imports
 import urllib.parse
 import google.generativeai as genai
 from PyPDF2 import PdfReader
 
+# 4. Rest of your code...
 # Configure Gemini API using Streamlit secrets
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 # Initialize Gemini model
