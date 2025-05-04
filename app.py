@@ -23,6 +23,25 @@ try:
 except KeyError:
     st.error("GOOGLE_API_KEY not found in Streamlit secrets. Please configure it in Streamlit Cloud settings.")
     st.stop()
+    # 5. Configure pdfkit (requires wkhtmltopdf)
+import os
+
+# Update the path according to your deployment platform
+# For Linux:
+WKHTMLTOPDF_PATH = "/usr/bin/wkhtmltopdf"
+
+# For Windows (example):
+# WKHTMLTOPDF_PATH = "C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe"
+
+# For macOS via Homebrew:
+# WKHTMLTOPDF_PATH = "/opt/homebrew/bin/wkhtmltopdf"
+
+if os.path.exists(WKHTMLTOPDF_PATH):
+    PDFKIT_CONFIG = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_PATH)
+else:
+    st.error("⚠️ `wkhtmltopdf` not found. Please install it on your server or local machine.")
+    st.stop()
+
 
 # ----------------- HELPER FUNCTIONS -----------------
 def get_gemini_model():
