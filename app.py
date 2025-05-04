@@ -1291,17 +1291,80 @@ with tab4:
     </div>
     """, unsafe_allow_html=True)
 
-    # ----------------- TAB 5: international_jobs
-with tab5:
     st.header(f"🌍 {t.get('international_jobs', 'International Job Opportunities')}")
     
-    # Initialize session state for visa application progress
+    # Initialize session state
     if 'visa_progress' not in st.session_state:
         st.session_state.visa_progress = {}
     if 'visa_milestones' not in st.session_state:
         st.session_state.visa_milestones = []
 
-    # Enhanced Progress Tracker
+    # Visa-Sponsored Job Search Section
+    st.subheader("🔎 Search Visa-Sponsored Jobs")
+    with st.expander("🔍 Find Jobs Offering Visa Sponsorship", expanded=True):
+        col_search1, col_search2, col_search3 = st.columns([2,2,1])
+        with col_search1:
+            job_keyword = st.text_input("Job Title/Keywords", "software developer")
+        with col_search2:
+            sponsor_country = st.selectbox("Country", [
+                "Canada", "USA", "UK", "Australia", "Germany", 
+                "France", "Netherlands", "Sweden", "Japan", 
+                "Singapore", "UAE", "New Zealand", "Ireland"
+            ])
+        with col_search3:
+            st.text("")  # For alignment
+            search_clicked = st.button("Search Jobs")
+        
+        if search_clicked:
+            # Simulate job search results (in a real app, this would connect to an API)
+            fake_jobs = {
+                "Canada": [
+                    {"title": "Senior Software Engineer", "company": "Shopify", "location": "Ottawa", "visa": "✔️ Sponsorship available"},
+                    {"title": "Data Scientist", "company": "TD Bank", "location": "Toronto", "visa": "✔️ LMIA approved"}
+                ],
+                "USA": [
+                    {"title": "AI Researcher", "company": "Google", "location": "Mountain View", "visa": "✔️ H1B sponsorship"},
+                    {"title": "DevOps Engineer", "company": "Amazon", "location": "Seattle", "visa": "✔️ TN visa possible"}
+                ],
+                "UK": [
+                    {"title": "NHS Nurse", "company": "National Health Service", "location": "London", "visa": "✔️ Health & Care visa"},
+                    {"title": "FinTech Developer", "company": "Revolut", "location": "London", "visa": "✔️ Skilled Worker visa"}
+                ]
+            }
+            
+            st.success(f"Showing visa-sponsored jobs in {sponsor_country} for '{job_keyword}'")
+            
+            # Display results in a nice format
+            jobs_to_show = fake_jobs.get(sponsor_country, [
+                {"title": "Full Stack Developer", "company": "TechCorp", "location": "Berlin", "visa": "✔️ Blue Card sponsorship"},
+                {"title": "Mechanical Engineer", "company": "AutoGlobal", "location": "Munich", "visa": "✔️ Work visa available"}
+            ])
+            
+            for job in jobs_to_show:
+                with st.container():
+                    st.markdown(f"""
+                    **{job['title']}**  
+                    🏢 {job['company']} | 📍 {job['location']} | {job['visa']}  
+                    <hr style="margin:5px 0;border-color:#f0f0f0">
+                    """, unsafe_allow_html=True)
+                    col_btn1, col_btn2 = st.columns([1,5])
+                    with col_btn1:
+                        st.button("Apply", key=f"apply_{job['title']}")
+                    with col_btn2:
+                        st.button("Save Job", key=f"save_{job['title']}")
+            
+            st.markdown("""
+            <div style="background-color:#e3f2fd; padding:10px; border-radius:5px; margin-top:10px;">
+            💡 <strong>Tip:</strong> For real job listings, check these official portals:
+            <ul>
+                <li><a href="https://www.jobbank.gc.ca" target="_blank">Canada Job Bank</a></li>
+                <li><a href="https://www.indeed.com" target="_blank">Indeed (Global)</a></li>
+                <li><a href="https://www.linkedin.com/jobs" target="_blank">LinkedIn Jobs</a></li>
+            </ul>
+            </div>
+            """, unsafe_allow_html=True)
+
+    # Progress Tracker (unchanged from your original)
     st.subheader("📊 Your Visa Journey Progress")
     col_prog1, col_prog2 = st.columns([3,1])
     with col_prog1:
@@ -1312,7 +1375,7 @@ with tab5:
             st.session_state.visa_milestones = []
             st.rerun()
     
-    # Visual Milestone Path
+    # Visual Milestone Path (unchanged)
     milestones = [
         ("🔍 Research", "Country selection"),
         ("📝 Preparation", "Docs & tests"),
@@ -1333,137 +1396,127 @@ with tab5:
                 {"✓" if idx < len(st.session_state.visa_milestones) else ""}
             </div>
             """, unsafe_allow_html=True)
+
+    # Country-Specific Guides - Expanded with more countries
+    st.subheader("🌍 Country-Specific Visa Programs")
     
-    # Enhanced Eligibility Checker
-    with st.expander("🔍 Advanced Visa Eligibility Checker", expanded=True):
-        with st.form("enhanced_eligibility"):
-            country = st.selectbox("Target Country", 
-                                 ["Canada", "Australia", "Germany", "UK", "New Zealand", "UAE"],
-                                 key="enhanced_country")
+    # Use tabs for better organization of many countries
+    tab_ca, tab_us, tab_uk, tab_au, tab_de, tab_other = st.tabs([
+        "🇨🇦 Canada", "🇺🇸 USA", "🇬🇧 UK", "🇦🇺 Australia", "🇩🇪 Germany", "More Countries"
+    ])
+    
+    with tab_ca:
+        st.markdown("""
+        ### 🇨🇦 Canada Immigration Programs
+        **Top Visa-Sponsored Jobs (2025):**
+        - 👨‍💻 Software Developers (NOC 21232) - $85k avg
+        - 👩‍⚕️ Registered Nurses (NOC 31301) - $78k avg
+        - 🔧 Electricians (NOC 72200) - $65k avg
+        
+        **Visa Pathways:**
+        1. **Express Entry** (FSW, CEC, FST)
+           - CRS score calculator available
+           - Processing: 6-8 months
+        2. **Provincial Nominee Programs (PNP)**
+           - Alberta, BC, Ontario most active
+        3. **Work Permits**
+           - LMIA required for most
+        
+        **Resources:**
+        - [Job Bank](https://www.jobbank.gc.ca)
+        - [Express Entry](https://www.canada.ca/express-entry)
+        """)
+        st.download_button("📥 Canada Guide", data="Canada immigration guide...", file_name="canada_guide.txt")
+
+    with tab_us:
+        st.markdown("""
+        ### 🇺🇸 USA Work Visa Options
+        **Top Visa-Sponsored Jobs:**
+        - 💻 Computer Occupations (H1B most common)
+        - 🏥 Healthcare (RNs, Physicians)
+        - 🎓 University Faculty (J1 visas)
+        
+        **Visa Types:**
+        - H1B (Specialty Occupations)
+        - L1 (Intracompany Transfers)
+        - TN (NAFTA for Canadians/Mexicans)
+        - EB-3 (Skilled Workers)
+        
+        **2025 Updates:**
+        - H1B lottery system changes
+        - Premium processing fee increase
+        """)
+        st.download_button("📥 USA Visa Checklist", data="USA checklist...", file_name="usa_checklist.txt")
+
+    with tab_uk:
+        st.markdown("""
+        ### 🇬🇧 UK Skilled Worker Visa
+        **Shortage Occupations:**
+        - 👩‍⚕️ Healthcare (Nurses, Doctors)
+        - 👨‍🔬 STEM (Engineers, Data Scientists)
+        - 👨‍🏫 Education (Teachers)
+        
+        **Requirements:**
+        - Job offer from licensed sponsor
+        - Salary ≥ £26,200 or going rate
+        - English B1 level
+        
+        **Useful Links:**
+        - [Sponsor list](https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers)
+        """)
+
+    with tab_au:
+        st.markdown("""
+        ### 🇦🇺 Australia Visa Options
+        **Skilled Migration:**
+        - 189 (Independent)
+        - 190 (State Nominated)
+        - 491 (Regional)
+        
+        **2025 Priority:**
+        - Healthcare workers
+        - Tech (cybersecurity specialists)
+        - Trades (electricians, plumbers)
+        """)
+
+    with tab_de:
+        st.markdown("""
+        ### 🇩🇪 Germany Work Visas
+        **New for 2025:**
+        - Opportunity Card (Job Seeker Visa)
+        - Faster recognition of foreign qualifications
+        
+        **In Demand:**
+        - IT specialists
+        - Engineers
+        - Healthcare professionals
+        """)
+
+    with tab_other:
+        col_other1, col_other2 = st.columns(2)
+        with col_other1:
+            st.markdown("""
+            **🇳🇿 New Zealand**
+            - Skilled Migrant Category
+            - Green List occupations
             
-            col1, col2 = st.columns(2)
-            with col1:
-                profession = st.text_input("Your Profession", "Software Developer")
-                education = st.selectbox("Education Level", 
-                                      ["High School", "Bachelor's", "Master's", "PhD"])
-            with col2:
-                experience = st.select_slider("Years of Experience", 
-                                            options=["0-1", "1-3", "3-5", "5-10", "10+"])
-                language = st.multiselect("Language Tests", 
-                                        ["IELTS", "TOEFL", "TEF", "Goethe-Zertifikat"])
+            **🇸🇬 Singapore**
+            - Employment Pass
+            - Tech@SG program
+            """)
+        
+        with col_other2:
+            st.markdown("""
+            **🇫🇷 France**
+            - Talent Passport
+            - Tech Visa
             
-            if st.form_submit_button("Check Eligibility Score"):
-                # Calculate score logic here
-                score = min(100, 20 + (len(language)*15) + (10 if education != "High School" else 0))
-                st.metric("Your Eligibility Score", f"{score}% match")
-                
-                # Visual score indicator
-                st.markdown(f"""
-                <style>
-                    .score-bar {{
-                        height: 20px;
-                        background: linear-gradient(90deg, #4CAF50 {score}%, #f5f5f5 {score}%);
-                        border-radius: 10px;
-                        margin: 10px 0;
-                    }}
-                </style>
-                <div class="score-bar"></div>
-                """, unsafe_allow_html=True)
+            **🇳🇱 Netherlands**
+            - Highly Skilled Migrant
+            - Orientation Year visa
+            """)
 
-    # Overview
-    st.subheader("🌐 Global Opportunities for Skilled Workers")
-    st.markdown("""
-    Countries like **Canada**, **Australia**, and **Germany** are actively seeking skilled professionals in 2025 to fill labor shortages in tech, healthcare, engineering, and trades. Streamlined visa programs make it easier for qualified workers to secure jobs and permanent residency. Follow these steps to get started:
-    1. **Secure a Job Offer**: Find a role matching your skills on official job portals.
-    2. **Apply for a Visa**: Use employer-sponsored or points-based visa programs.
-    3. **Meet Eligibility**: Ensure qualifications, experience, and language skills align with requirements.
-    """)
-
-    # Country-Specific Guides
-    st.subheader("📌 Country-Specific Opportunities")
-    with st.expander("🇨🇦 Canada", expanded=True):
-        st.markdown("""
-        **Job Opportunities**: High demand for tech (e.g., Software Developers, NOC 21232), healthcare (e.g., Nurses, NOC 31301), and trades (e.g., Electricians, NOC 72200). Average salary: CAD 50,000-60,000.
-        **Visa Programs**:
-        - **Express Entry (Federal Skilled Worker Program)**: Points-based system (67/100 needed) for permanent residency. Requires 1 year of skilled work experience, CLB 7 language skills, and education credentials.
-        - **Provincial Nominee Programs (PNPs)**: Province-specific pathways, adding 600 CRS points.
-        - **Canadian Experience Class (CEC)**: For those with 1 year of Canadian work experience.
-        **Eligibility**: Age, education, work experience, language (IELTS/TOEFL). No job offer required for FSWP.
-        **Process**: Submit Expression of Interest (EOI), receive Invitation to Apply (ITA), apply within 6 months.
-        **Tips**:
-        - Get credentials assessed (e.g., WES).
-        - Explore Job Bank (jobbank.gc.ca) for opportunities.
-        - Take IELTS for English or TEF for French.
-        **Resources**:
-        - [Canada Job Bank](https://www.jobbank.gc.ca)
-        - [Express Entry](https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry.html)
-        """)
-        st.download_button(
-            label="📥 Canada Visa Checklist",
-            data="Canada Visa Application Checklist\n- Credential assessment (WES)\n- Language test (IELTS/TOEFL)\n- Job offer (optional)\n- EOI submission\n- ITA and permanent residency application",
-            file_name="Canada_Visa_Checklist.txt",
-            mime="text/plain"
-        )
-
-    with st.expander("🇦🇺 Australia"):
-        st.markdown("""
-        **Job Opportunities**: Demand in healthcare (e.g., Nurses, ANZSCO 2544), IT (e.g., Software Engineers, ANZSCO 2613), and engineering (e.g., Civil Engineers, ANZSCO 2332). Unemployment: 3.5%.
-        **Visa Programs**:
-        - **Skilled Independent Visa (Subclass 189)**: Points-based, no employer needed.
-        - **Employer-Sponsored Visa (Subclass 482)**: Requires job offer.
-        - **Global Talent Visa**: For exceptional professionals.
-        - **Working Holiday Visa (Subclass 417)**: For ages 18-35, temporary work.
-        **Eligibility**: Skills on Skilled Occupation List (SOL), 2-5 years experience, English (IELTS 6+).
-        **Process**: Submit EOI via SkillSelect, receive ITA, apply for visa. Core Skills Occupation List launches May 2025.
-        **Tips**:
-        - Check ANZSCO codes for your role.
-        - Get skills assessed (e.g., VETASSESS).
-        - Use SEEK (seek.com.au) for job search.
-        **Resources**:
-        - [SEEK Australia](https://www.seek.com.au)
-        - [Home Affairs](https://immi.homeaffairs.gov.au)
-        """)
-        st.download_button(
-            label="📥 Australia Visa Checklist",
-            data="Australia Visa Application Checklist\n- Skills assessment (VETASSESS)\n- English test (IELTS)\n- Job offer (for Subclass 482)\n- EOI via SkillSelect\n- ITA and visa application",
-            file_name="Australia_Visa_Checklist.txt",
-            mime="text/plain"
-        )
-
-    with st.expander("🇩🇪 Germany"):
-        st.markdown("""
-        **Job Opportunities**: Shortages in IT, healthcare (e.g., Doctors, Nurses), and engineering. 19,000+ visa-sponsored jobs. Salaries: €45,000-€80,000.
-        **Visa Programs**:
-        - **EU Blue Card**: For jobs paying €48,300/year (€43,992 for bottleneck professions like IT, healthcare).
-        - **Skilled Worker Visa**: Requires recognized degree or 2+ year vocational training, job offer.
-        - **Opportunity Card (Chancenkarte)**: 12-month job search visa, requires A1 German or B2 English.
-        **Eligibility**: Recognized qualifications, job offer (except Opportunity Card). Age 45+ needs €53,130/year or pension proof.
-        **Process**: Apply at German embassy (visa-free entry for Canada, Australia, etc.), then residence permit. Federal Employment Agency approval needed.
-        **Tips**:
-        - Get qualifications recognized (e.g., ZAB).
-        - Use Make It in Germany portal for jobs.
-        - Learn basic German (A1/A2) for better integration.
-        **Resources**:
-        - [Make It in Germany](https://www.make-it-in-germany.com)
-        - [Federal Foreign Office](https://www.auswaertiges-amt.de)
-        """)
-        st.download_button(
-            label="📥 Germany Visa Checklist",
-            data="Germany Visa Application Checklist\n- Qualification recognition (ZAB)\n- Language test (Goethe-Institut, IELTS)\n- Job offer (except Opportunity Card)\n- Visa application at embassy\n- Residence permit in Germany",
-            file_name="Germany_Visa_Checklist.txt",
-            mime="text/plain"
-        )
-
-    # Other Countries
-    with st.expander("🌎 Other Countries with Skill Shortages"):
-        st.markdown("""
-        Explore opportunities in countries like **New Zealand**, **Ireland**, and **Singapore**, which offer visa programs for skilled workers:
-        - **New Zealand**: Skilled Migrant Category Visa. Check [workingin.nz](https://www.workingin.nz).
-        - **Ireland**: Critical Skills Employment Permit. Visit [enterprise.gov.ie](https://www.enterprise.gov.ie).
-        - **Singapore**: Employment Pass. Explore [mom.gov.sg](https://www.mom.gov.sg).
-        """)
-
-    # AI-Powered Visa Guidance
+    # AI Visa Assistant (unchanged from your original)
     st.subheader("🤖 Ask AI for Visa Guidance")
     with st.form("visa_guidance_form"):
         visa_query = st.text_area("Ask a Visa Question (e.g., 'What visa for a nurse in Canada?')", height=100)
@@ -1473,33 +1526,14 @@ with tab5:
         visa_answer = get_result(visa_prompt)
         st.markdown(f"**AI Answer**: {visa_answer}")
 
-    # Visa Application Milestones
-    st.subheader("✅ Track Your Visa Application")
-    with st.form("visa_milestone_form"):
-        milestone = st.selectbox("Add Milestone", [
-            "Job Offer Secured",
-            "Credentials Assessed",
-            "Language Test Passed",
-            "Visa Application Submitted",
-            "Residence Permit Received"
-        ])
-        milestone_submit = st.form_submit_button("Add Milestone")
-    if milestone_submit:
-        if milestone not in st.session_state.visa_milestones:
-            st.session_state.visa_milestones.append(milestone)
-            st.success(f"Milestone '{milestone}' added!")
-        st.markdown("**Your Milestones**")
-        for m in st.session_state.visa_milestones:
-            st.markdown(f"- {m}")
-
-    # Recent Updates
-    st.subheader("🆕 2025 Visa and Job Updates")
+    # Recent Updates Section
+    st.subheader("🆕 2025 Visa Updates")
     st.markdown("""
-    - **Australia**: Core Skills Occupation List launches May 2025, prioritizing tech and cybersecurity roles.
-    - **Germany**: Opportunity Card allows 12-month job search without a job offer, ideal for Indian professionals.
-    - **Canada**: Express Entry draws continue, with 825 PNP invitations in April 2025.[](https://immigration.ca/who-qualifies-for-canadian-permanent-residence-skilled-worker-immigration/)
+    - **Global**: Many countries increasing immigration quotas to address labor shortages
+    - **Canada**: Express Entry draws focusing on French proficiency
+    - **UK**: Health & Care Worker visa fee changes
+    - **Australia**: New Pacific Engagement visa introduced
     """)
-
     # Promotional Content
     st.markdown("""
     <div style='background-color:#e3f2fd; border:2px solid #1976d2; border-radius:10px; padding:20px; margin-top:30px;'>
