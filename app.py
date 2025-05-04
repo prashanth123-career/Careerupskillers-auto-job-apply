@@ -1291,9 +1291,11 @@ with tab4:
     </div>
     """, unsafe_allow_html=True)
 
+# ----------------- TAB 5: international_jobs
+with tab5:
     st.header(f"🌍 {t.get('international_jobs', 'International Job Opportunities')}")
     
-    # Initialize session state
+    # Initialize session state for visa application progress
     if 'visa_progress' not in st.session_state:
         st.session_state.visa_progress = {}
     if 'visa_milestones' not in st.session_state:
@@ -1309,7 +1311,8 @@ with tab4:
             sponsor_country = st.selectbox("Country", [
                 "Canada", "USA", "UK", "Australia", "Germany", 
                 "France", "Netherlands", "Sweden", "Japan", 
-                "Singapore", "UAE", "New Zealand", "Ireland"
+                "Singapore", "UAE", "New Zealand", "Ireland",
+                "Switzerland", "Denmark", "Norway", "Finland"
             ])
         with col_search3:
             st.text("")  # For alignment
@@ -1319,16 +1322,24 @@ with tab4:
             # Simulate job search results (in a real app, this would connect to an API)
             fake_jobs = {
                 "Canada": [
-                    {"title": "Senior Software Engineer", "company": "Shopify", "location": "Ottawa", "visa": "✔️ Sponsorship available"},
-                    {"title": "Data Scientist", "company": "TD Bank", "location": "Toronto", "visa": "✔️ LMIA approved"}
+                    {"title": "Senior Software Engineer", "company": "Shopify", "location": "Ottawa", "visa": "✔️ Sponsorship available", "salary": "CAD 110,000"},
+                    {"title": "Data Scientist", "company": "TD Bank", "location": "Toronto", "visa": "✔️ LMIA approved", "salary": "CAD 95,000"},
+                    {"title": "Registered Nurse", "company": "Vancouver Coastal Health", "location": "Vancouver", "visa": "✔️ Provincial Nominee Program", "salary": "CAD 85,000"}
                 ],
                 "USA": [
-                    {"title": "AI Researcher", "company": "Google", "location": "Mountain View", "visa": "✔️ H1B sponsorship"},
-                    {"title": "DevOps Engineer", "company": "Amazon", "location": "Seattle", "visa": "✔️ TN visa possible"}
+                    {"title": "AI Researcher", "company": "Google", "location": "Mountain View", "visa": "✔️ H1B sponsorship", "salary": "$150,000"},
+                    {"title": "DevOps Engineer", "company": "Amazon", "location": "Seattle", "visa": "✔️ TN visa possible", "salary": "$135,000"},
+                    {"title": "Biomedical Engineer", "company": "Medtronic", "location": "Minneapolis", "visa": "✔️ EB-3 visa", "salary": "$120,000"}
                 ],
                 "UK": [
-                    {"title": "NHS Nurse", "company": "National Health Service", "location": "London", "visa": "✔️ Health & Care visa"},
-                    {"title": "FinTech Developer", "company": "Revolut", "location": "London", "visa": "✔️ Skilled Worker visa"}
+                    {"title": "NHS Nurse", "company": "National Health Service", "location": "London", "visa": "✔️ Health & Care visa", "salary": "£35,000"},
+                    {"title": "FinTech Developer", "company": "Revolut", "location": "London", "visa": "✔️ Skilled Worker visa", "salary": "£75,000"},
+                    {"title": "Civil Engineer", "company": "Arup", "location": "Manchester", "visa": "✔️ Sponsorship available", "salary": "£45,000"}
+                ],
+                "Germany": [
+                    {"title": "Full Stack Developer", "company": "TechCorp", "location": "Berlin", "visa": "✔️ Blue Card sponsorship", "salary": "€65,000"},
+                    {"title": "Mechanical Engineer", "company": "AutoGlobal", "location": "Munich", "visa": "✔️ Work visa available", "salary": "€58,000"},
+                    {"title": "Healthcare Worker", "company": "Charité", "location": "Berlin", "visa": "✔️ Fast-track visa", "salary": "€42,000"}
                 ]
             }
             
@@ -1336,35 +1347,39 @@ with tab4:
             
             # Display results in a nice format
             jobs_to_show = fake_jobs.get(sponsor_country, [
-                {"title": "Full Stack Developer", "company": "TechCorp", "location": "Berlin", "visa": "✔️ Blue Card sponsorship"},
-                {"title": "Mechanical Engineer", "company": "AutoGlobal", "location": "Munich", "visa": "✔️ Work visa available"}
+                {"title": "IT Specialist", "company": "TechSolutions", "location": sponsor_country, "visa": "✔️ Work visa sponsorship", "salary": "Competitive"},
+                {"title": "Engineer", "company": "GlobalCorp", "location": sponsor_country, "visa": "✔️ Visa assistance", "salary": "Market rate"}
             ])
             
             for job in jobs_to_show:
                 with st.container():
                     st.markdown(f"""
-                    **{job['title']}**  
-                    🏢 {job['company']} | 📍 {job['location']} | {job['visa']}  
-                    <hr style="margin:5px 0;border-color:#f0f0f0">
+                    <div style="padding:15px; border-radius:10px; background-color:#f5f5f5; margin-bottom:10px;">
+                        <h4>{job['title']}</h4>
+                        <p>🏢 <b>{job['company']}</b> | 📍 {job['location']} | 💰 {job['salary']}</p>
+                        <p>{job['visa']}</p>
+                    </div>
                     """, unsafe_allow_html=True)
                     col_btn1, col_btn2 = st.columns([1,5])
                     with col_btn1:
-                        st.button("Apply", key=f"apply_{job['title']}")
+                        st.button("Apply", key=f"apply_{job['title']}_{job['company']}")
                     with col_btn2:
-                        st.button("Save Job", key=f"save_{job['title']}")
+                        st.button("Save Job", key=f"save_{job['title']}_{job['company']}")
             
             st.markdown("""
-            <div style="background-color:#e3f2fd; padding:10px; border-radius:5px; margin-top:10px;">
-            💡 <strong>Tip:</strong> For real job listings, check these official portals:
-            <ul>
-                <li><a href="https://www.jobbank.gc.ca" target="_blank">Canada Job Bank</a></li>
-                <li><a href="https://www.indeed.com" target="_blank">Indeed (Global)</a></li>
-                <li><a href="https://www.linkedin.com/jobs" target="_blank">LinkedIn Jobs</a></li>
-            </ul>
+            <div style="background-color:#e3f2fd; padding:15px; border-radius:10px; margin-top:20px;">
+                <h4>💡 Official Job Portals for Visa-Sponsored Jobs</h4>
+                <ul>
+                    <li><a href="https://www.jobbank.gc.ca" target="_blank">Canada Job Bank</a> (Official government site)</li>
+                    <li><a href="https://www.myvisajobs.com" target="_blank">MyVisaJobs</a> (USA H1B visa jobs)</li>
+                    <li><a href="https://www.make-it-in-germany.com" target="_blank">Make it in Germany</a> (Official portal)</li>
+                    <li><a href="https://www.gov.uk/government/organisations/uk-visas-and-immigration" target="_blank">UK Visa Sponsors List</a></li>
+                </ul>
+                <p><b>Tip:</b> Search for "visa sponsorship" or "work permit" in job descriptions</p>
             </div>
             """, unsafe_allow_html=True)
 
-    # Progress Tracker (unchanged from your original)
+    # Progress Tracker
     st.subheader("📊 Your Visa Journey Progress")
     col_prog1, col_prog2 = st.columns([3,1])
     with col_prog1:
@@ -1375,7 +1390,7 @@ with tab4:
             st.session_state.visa_milestones = []
             st.rerun()
     
-    # Visual Milestone Path (unchanged)
+    # Visual Milestone Path
     milestones = [
         ("🔍 Research", "Country selection"),
         ("📝 Preparation", "Docs & tests"),
@@ -1397,10 +1412,67 @@ with tab4:
             </div>
             """, unsafe_allow_html=True)
 
-    # Country-Specific Guides - Expanded with more countries
+    # Enhanced Eligibility Checker
+    with st.expander("🔍 Advanced Visa Eligibility Checker", expanded=True):
+        with st.form("enhanced_eligibility"):
+            country = st.selectbox("Target Country", 
+                                 ["Canada", "USA", "UK", "Australia", "Germany", 
+                                  "France", "Netherlands", "Sweden", "Japan", 
+                                  "Singapore", "UAE", "New Zealand", "Ireland"],
+                                 key="enhanced_country")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                profession = st.text_input("Your Profession", "Software Developer")
+                education = st.selectbox("Education Level", 
+                                      ["High School", "Bachelor's", "Master's", "PhD"])
+            with col2:
+                experience = st.select_slider("Years of Experience", 
+                                            options=["0-1", "1-3", "3-5", "5-10", "10+"])
+                language = st.multiselect("Language Tests", 
+                                        ["IELTS", "TOEFL", "TEF", "Goethe-Zertifikat", "JLPT"])
+            
+            if st.form_submit_button("Check Eligibility Score"):
+                # Calculate score logic here
+                score = min(100, 20 + (len(language)*15) + \
+                       (10 if education != "High School" else 0) + \
+                       (20 if experience in ["5-10", "10+"] else 10 if experience in ["3-5"] else 0)
+                
+                st.metric("Your Eligibility Score", f"{score}% match")
+                
+                # Visual score indicator with color coding
+                color = "#4CAF50" if score >= 70 else "#FFC107" if score >= 50 else "#F44336"
+                st.markdown(f"""
+                <style>
+                    .score-bar {{
+                        height: 20px;
+                        background: linear-gradient(90deg, {color} {score}%, #f5f5f5 {score}%);
+                        border-radius: 10px;
+                        margin: 10px 0;
+                    }}
+                </style>
+                <div class="score-bar"></div>
+                """, unsafe_allow_html=True)
+                
+                # Interpretation
+                if score >= 70:
+                    st.success("High eligibility! You have a strong chance for visa approval.")
+                elif score >= 50:
+                    st.warning("Moderate eligibility. Consider improving your qualifications.")
+                else:
+                    st.error("Low eligibility. Focus on gaining more experience or language skills.")
+                
+                # Next steps
+                st.markdown("**Next Steps:**")
+                if score < 70:
+                    st.markdown("- 🎓 Consider higher education if possible")
+                    st.markdown("- 🌐 Improve language test scores")
+                    st.markdown(f"- 💼 Gain more experience in {profession}")
+                st.markdown(f"- 📝 Check specific requirements for {country}")
+
+    # Country-Specific Guides with Tabs
     st.subheader("🌍 Country-Specific Visa Programs")
     
-    # Use tabs for better organization of many countries
     tab_ca, tab_us, tab_uk, tab_au, tab_de, tab_other = st.tabs([
         "🇨🇦 Canada", "🇺🇸 USA", "🇬🇧 UK", "🇦🇺 Australia", "🇩🇪 Germany", "More Countries"
     ])
@@ -1422,11 +1494,26 @@ with tab4:
         3. **Work Permits**
            - LMIA required for most
         
+        **2025 Updates:**
+        - New Tech Talent Strategy (fast-track for tech workers)
+        - Increased quotas for healthcare workers
+        
         **Resources:**
         - [Job Bank](https://www.jobbank.gc.ca)
         - [Express Entry](https://www.canada.ca/express-entry)
         """)
-        st.download_button("📥 Canada Guide", data="Canada immigration guide...", file_name="canada_guide.txt")
+        st.download_button(
+            label="📥 Canada Visa Checklist",
+            data="""Canada Visa Application Checklist:
+1. Language Test (IELTS/CELPIP for English, TEF for French)
+2. Educational Credential Assessment (WES/ICES)
+3. Proof of Funds
+4. Police Clearance Certificate
+5. Medical Examination
+6. Job Offer (if applicable)
+7. Express Entry Profile Creation""",
+            file_name="canada_visa_checklist.txt"
+        )
 
     with tab_us:
         st.markdown("""
@@ -1444,9 +1531,25 @@ with tab4:
         
         **2025 Updates:**
         - H1B lottery system changes
-        - Premium processing fee increase
+        - Premium processing fee increase to $2,500
+        - STEM OPT extension remains at 24 months
+        
+        **Resources:**
+        - [USCIS](https://www.uscis.gov)
+        - [MyVisaJobs](https://www.myvisajobs.com)
         """)
-        st.download_button("📥 USA Visa Checklist", data="USA checklist...", file_name="usa_checklist.txt")
+        st.download_button(
+            label="📥 USA Visa Checklist",
+            data="""USA Visa Application Checklist:
+1. Job Offer from US Employer
+2. Labor Condition Application (LCA)
+3. Form I-129 (Petition for Nonimmigrant Worker)
+4. Proof of Qualifications
+5. Visa Application (DS-160)
+6. Visa Fee Payment
+7. Interview at US Embassy""",
+            file_name="usa_visa_checklist.txt"
+        )
 
     with tab_uk:
         st.markdown("""
@@ -1461,9 +1564,26 @@ with tab4:
         - Salary ≥ £26,200 or going rate
         - English B1 level
         
-        **Useful Links:**
+        **2025 Changes:**
+        - Health & Care Worker visa fee reduced
+        - New Immigration Salary List replaces SOL
+        
+        **Resources:**
+        - [UK Visas](https://www.gov.uk/browse/visas-immigration)
         - [Sponsor list](https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers)
         """)
+        st.download_button(
+            label="📥 UK Visa Checklist",
+            data="""UK Visa Application Checklist:
+1. Certificate of Sponsorship (CoS)
+2. Proof of English Proficiency
+3. Maintenance Funds Evidence
+4. TB Test Results (if applicable)
+5. Visa Application Form
+6. IHS Surcharge Payment
+7. Biometric Appointment""",
+            file_name="uk_visa_checklist.txt"
+        )
 
     with tab_au:
         st.markdown("""
@@ -1477,7 +1597,29 @@ with tab4:
         - Healthcare workers
         - Tech (cybersecurity specialists)
         - Trades (electricians, plumbers)
+        
+        **Points Test:**
+        - Age (max points 30)
+        - English (max 20)
+        - Work Experience (max 15)
+        - Education (max 20)
+        
+        **Resources:**
+        - [Home Affairs](https://immi.homeaffairs.gov.au)
+        - [SkillSelect](https://skillselect.gov.au)
         """)
+        st.download_button(
+            label="📥 Australia Visa Checklist",
+            data="""Australia Visa Application Checklist:
+1. Skills Assessment (VETASSESS/ACS etc.)
+2. IELTS/TOEFL/PTE Score
+3. Expression of Interest (EOI)
+4. Police Clearance
+5. Medical Examination
+6. Proof of Funds
+7. Invitation to Apply""",
+            file_name="australia_visa_checklist.txt"
+        )
 
     with tab_de:
         st.markdown("""
@@ -1490,7 +1632,28 @@ with tab4:
         - IT specialists
         - Engineers
         - Healthcare professionals
+        
+        **Visa Options:**
+        - EU Blue Card (€45k+ salary)
+        - Skilled Worker Visa
+        - IT Specialist Visa (no degree required)
+        
+        **Resources:**
+        - [Make it in Germany](https://www.make-it-in-germany.com)
+        - [Anabin Database](https://anabin.kmk.org)
         """)
+        st.download_button(
+            label="📥 Germany Visa Checklist",
+            data="""Germany Visa Application Checklist:
+1. Recognized Qualifications
+2. Job Offer (except Opportunity Card)
+3. Proof of German/English
+4. Health Insurance
+5. Proof of Accommodation
+6. Visa Application Form
+7. Biometric Photos""",
+            file_name="germany_visa_checklist.txt"
+        )
 
     with tab_other:
         col_other1, col_other2 = st.columns(2)
@@ -1499,60 +1662,121 @@ with tab4:
             **🇳🇿 New Zealand**
             - Skilled Migrant Category
             - Green List occupations
+            - 6-point system
             
             **🇸🇬 Singapore**
             - Employment Pass
             - Tech@SG program
+            - Minimum $5,000/month salary
+            
+            **🇫🇷 France**
+            - Talent Passport
+            - Tech Visa
+            - French language not required for tech
             """)
         
         with col_other2:
             st.markdown("""
-            **🇫🇷 France**
-            - Talent Passport
-            - Tech Visa
-            
             **🇳🇱 Netherlands**
             - Highly Skilled Migrant
             - Orientation Year visa
+            - 30% ruling tax benefit
+            
+            **🇸🇪 Sweden**
+            - Work Permit
+            - Fast track for certain professions
+            - Family can join
+            
+            **🇯🇵 Japan**
+            - Engineer/Specialist visa
+            - Points-based system
+            - JLPT N2/N1 preferred
             """)
 
-    # AI Visa Assistant (unchanged from your original)
+    # Visa Application Milestones
+    st.subheader("✅ Track Your Visa Application")
+    with st.form("visa_milestone_form"):
+        milestone = st.selectbox("Add Milestone", [
+            "Job Offer Secured",
+            "Credentials Assessed",
+            "Language Test Passed",
+            "Visa Application Submitted",
+            "Residence Permit Received",
+            "Flight Booked"
+        ])
+        milestone_date = st.date_input("Date")
+        milestone_submit = st.form_submit_button("Add Milestone")
+    if milestone_submit:
+        if milestone not in [m['name'] for m in st.session_state.visa_milestones]:
+            st.session_state.visa_milestones.append({
+                "name": milestone,
+                "date": milestone_date.strftime("%Y-%m-%d"),
+                "completed": True
+            })
+            st.success(f"Milestone '{milestone}' added!")
+        
+        st.markdown("**Your Visa Journey**")
+        for m in st.session_state.visa_milestones:
+            st.markdown(f"- ✅ {m['name']} ({m['date']})")
+
+    # AI-Powered Visa Guidance
     st.subheader("🤖 Ask AI for Visa Guidance")
     with st.form("visa_guidance_form"):
-        visa_query = st.text_area("Ask a Visa Question (e.g., 'What visa for a nurse in Canada?')", height=100)
+        visa_query = st.text_area("Ask a Visa Question (e.g., 'What visa for a nurse in Canada?')", 
+                                height=100,
+                                placeholder="Type your question about visas, work permits, or immigration...")
         visa_query_submit = st.form_submit_button("Get AI Advice")
     if visa_query_submit and visa_query.strip():
-        visa_prompt = f"Act as an immigration expert. Provide a concise, accurate answer to the following visa-related question: {visa_query}"
-        visa_answer = get_result(visa_prompt)
-        st.markdown(f"**AI Answer**: {visa_answer}")
+        visa_prompt = f"""Act as an immigration expert with 15 years experience. Provide a concise, accurate answer to the following visa-related question. 
+        Include: 1) Relevant visa types, 2) Key requirements, 3) Processing time estimate, 4) Common challenges.
+        Question: {visa_query}"""
+        with st.spinner("Analyzing your visa question..."):
+            visa_answer = get_result(visa_prompt)
+            st.markdown(f"**AI Visa Advice**:\n\n{visa_answer}")
 
-    # Recent Updates Section
-    st.subheader("🆕 2025 Visa Updates")
+    # Recent Updates
+    st.subheader("🆕 2025 Visa and Job Updates")
     st.markdown("""
-    - **Global**: Many countries increasing immigration quotas to address labor shortages
-    - **Canada**: Express Entry draws focusing on French proficiency
-    - **UK**: Health & Care Worker visa fee changes
-    - **Australia**: New Pacific Engagement visa introduced
+    - **Australia**: Core Skills Occupation List launches May 2025, prioritizing tech and cybersecurity roles
+    - **Germany**: Opportunity Card allows 12-month job search without a job offer
+    - **Canada**: Express Entry draws continue, with 825 PNP invitations in April 2025
+    - **UK**: New Immigration Salary List replaces Shortage Occupation List
+    - **USA**: H1B lottery registration fee increases to $250 for FY2025
     """)
+
     # Promotional Content
     st.markdown("""
     <div style='background-color:#e3f2fd; border:2px solid #1976d2; border-radius:10px; padding:20px; margin-top:30px;'>
-        <h3 style='color:#0d47a1;'>\U0001F30D Launch Your Global Career with AI</h3>
-        <p style='font-size:16px; color:#444;'>🌟 Ready to work abroad? <b>AI tools</b> can help you navigate visas and land high-paying jobs in Canada, Australia, or Germany.</p>
-        <h4 style='color:#1565c0;'>🎯 ₹499 Global Career Kit – Your Passport to Success:</h4>
-        <ul style='font-size:15px; color:#333;'>
-            <li>📋 Visa Application Checklists for 10+ Countries</li>
-            <li>💼 50+ Job Search Templates (Cover Letters, LinkedIn Outreach)</li>
-            <li>🧠 AI-Powered Visa Eligibility Assessments</li>
-            <li>🚀 In-Demand Skills Guide for 2025 (Tech, Healthcare, Engineering)</li>
-        </ul>
-        <hr style='margin:15px 0;'>
-        <h4 style='color:#1565c0;'>💬 Success Story:</h4>
-        <p style='font-size:15px; color:#333; font-style:italic;'>"I used the ₹499 Global Career Kit to apply for Canada's Express Entry. Got my ITA in 3 months and now earn CAD 70,000 as a data analyst!"<br>– <b>Rahul V., Data Analyst, Toronto</b></p>
-        <p style='font-size:16px; color:#000; font-weight:bold;'>🌍 Don't wait – start your global career today!</p>
-        <a href='https://pages.razorpay.com/pl_Q9haRTHXpyB9SS/view' target='_blank' style='display:inline-block; padding:10px 20px; background:#1976d2; color:#fff; font-weight:bold; border-radius:6px; text-decoration:none; font-size:16px;'>🌟 Buy ₹499 Global Career Kit</a>
+        <h3 style='color:#0d47a1;'>🚀 Ready to Work Abroad?</h3>
+        <p style='font-size:16px; color:#444;'>Our <b>Global Career Kit</b> includes everything you need for visa applications, job search, and relocation:</p>
+        
+        <div style='display:grid; grid-template-columns:1fr 1fr; gap:15px; margin:15px 0;'>
+            <div style='background:white; padding:10px; border-radius:5px;'>
+                <h4>📋 Visa Checklists</h4>
+                <p>For 15+ countries with requirements</p>
+            </div>
+            <div style='background:white; padding:10px; border-radius:5px;'>
+                <h4>💼 Job Search Templates</h4>
+                <p>Cover letters, LinkedIn messages</p>
+            </div>
+            <div style='background:white; padding:10px; border-radius:5px;'>
+                <h4>🧠 AI Tools</h4>
+                <p>Visa eligibility checker, document review</p>
+            </div>
+            <div style='background:white; padding:10px; border-radius:5px;'>
+                <h4>🌍 Relocation Guides</h4>
+                <p>Housing, banking, healthcare tips</p>
+            </div>
+        </div>
+        
+        <p style='font-size:15px; color:#333; font-style:italic;'>"The Global Career Kit helped me secure a job in Germany within 3 months!"<br>- Priya K., Data Scientist, Berlin</p>
+        
+        <a href='https://pages.razorpay.com/pl_Q9haRTHXpyB9SS/view' target='_blank' style='display:inline-block; padding:12px 24px; background:#1976d2; color:white; font-weight:bold; border-radius:6px; text-decoration:none; font-size:16px; text-align:center;'>
+            Get the Global Career Kit (₹499)
+        </a>
     </div>
-    """, unsafe_allow_html=True)# ----------------- FOOTER -----------------
+    """, unsafe_allow_html=True)
+    # ----------------- FOOTER -----------------
 st.markdown("""
 <hr style='margin-top:40px;'>
 <div style='text-align:center; font-size:16px; color:gray;'>
