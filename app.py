@@ -12,6 +12,9 @@ st.set_page_config(
 import urllib.parse
 import google.generativeai as genai
 from PyPDF2 import PdfReader
+import pdfkit
+import tempfile
+import base64
 from datetime import datetime, date
 
 # 4. Configure Gemini API using Streamlit secrets
@@ -906,6 +909,50 @@ with tab2:
                     st.markdown(suggested_questions)
                 except Exception as e:
                     st.error(f"An error occurred: {str(e)}")
+                        # ---------------- ATS Resume Builder (new) ----------------
+    with ats_tab:
+        st.subheader("📄 Build Your ATS-Friendly Resume")
+
+        with st.form("resume_form"):
+            name = st.text_input("Full Name")
+            email = st.text_input("Email")
+            phone = st.text_input("Phone Number")
+            summary = st.text_area("Professional Summary")
+            education = st.text_area("Education (e.g. B.Tech in CSE, XYZ University, 2020)")
+            experience = st.text_area("Work Experience (e.g. Software Engineer at ABC Corp, 2021-2023)")
+            skills = st.text_area("Skills (comma separated)")
+            submitted = st.form_submit_button("Generate Resume PDF")
+
+        if submitted:
+            html = f"""
+            <html>
+            <head><style>
+            body {{ font-family: Arial, sans-serif; margin: 40px; }}
+            h1, h2 {{ color: #2e6c80; }}
+            </style></head>
+            <body>
+                <h1>{name}</h1>
+                <p><b>Email:</b> {email} | <b>Phone:</b> {phone}</p>
+                <h2>Professional Summary</h2>
+                <p>{summary}</p>
+                <h2>Education</h2>
+                <p>{education}</p>
+                <h2>Work Experience</h2>
+                <p>{experience}</p>
+                <h2>Skills</h2>
+                <p>{skills}</p>
+            </body>
+            </html>
+            """
+
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
+                pdfkit.from_string(html, tmp_pdf.name)
+                with open(tmp_pdf.name, "rb") as f:
+                    pdf_data = f.read()
+                    b64 = base64.b64encode(pdf_data).decode()
+                    href = f'<a href="data:application/pdf;base64,{b64}" download="ATS_Resume.pdf">📥 Download Resume PDF</a>'
+                    st.markdown(href, unsafe_allow_html=True)
+
 
     # Updated promotional content
     st.markdown("""
