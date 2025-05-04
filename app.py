@@ -1301,6 +1301,75 @@ with tab5:
     if 'visa_milestones' not in st.session_state:
         st.session_state.visa_milestones = []
 
+    # Define fake_jobs dictionary at function level
+    fake_jobs = {
+        "Canada": [
+            {"title": "Senior Software Engineer", "company": "Shopify", "location": "Ottawa", "visa": "✔️ Sponsorship available", "salary": "CAD 110,000", "type": "Full-Time"},
+            {"title": "Data Scientist", "company": "TD Bank", "location": "Toronto", "visa": "✔️ LMIA approved", "salary": "CAD 95,000", "type": "Full-Time"},
+            {"title": "Registered Nurse", "company": "Vancouver Coastal Health", "location": "Vancouver", "visa": "✔️ Provincial Nominee Program", "salary": "CAD 85,000", "type": "Full-Time"}
+        ],
+        "USA": [
+            {"title": "AI Researcher", "company": "Google", "location": "Mountain View", "visa": "✔️ H1B sponsorship", "salary": "$150,000", "type": "Full-Time"},
+            {"title": "DevOps Engineer", "company": "Amazon", "location": "Seattle", "visa": "✔️ TN visa possible", "salary": "$135,000", "type": "Full-Time"},
+            {"title": "Biomedical Engineer", "company": "Medtronic", "location": "Minneapolis", "visa": "✔️ EB-3 visa", "salary": "$120,000", "type": "Full-Time"}
+        ],
+        "UK": [
+            {"title": "NHS Nurse", "company": "National Health Service", "location": "London", "visa": "✔️ Health & Care visa", "salary": "£35,000", "type": "Full-Time"},
+            {"title": "FinTech Developer", "company": "Revolut", "location": "London", "visa": "✔️ Skilled Worker visa", "salary": "£75,000", "type": "Full-Time"},
+            {"title": "Civil Engineer", "company": "Arup", "location": "Manchester", "visa": "✔️ Sponsorship available", "salary": "£45,000", "type": "Full-Time"}
+        ],
+        "Germany": [
+            {"title": "Full Stack Developer", "company": "SAP", "location": "Berlin", "visa": "✔️ Blue Card sponsorship", "salary": "€65,000", "type": "Full-Time"},
+            {"title": "Mechanical Engineer", "company": "Siemens", "location": "Munich", "visa": "✔️ Work visa available", "salary": "€58,000", "type": "Full-Time"},
+            {"title": "Healthcare Worker", "company": "Charité", "location": "Berlin", "visa": "✔️ Fast-track visa", "salary": "€42,000", "type": "Full-Time"}
+        ],
+        "Netherlands": [
+            {"title": "Cloud Architect", "company": "Booking.com", "location": "Amsterdam", "visa": "✔️ Highly Skilled Migrant", "salary": "€80,000", "type": "Full-Time"},
+            {"title": "AI Engineer", "company": "Philips", "location": "Eindhoven", "visa": "✔️ Work permit available", "salary": "€75,000", "type": "Full-Time"},
+            {"title": "Data Analyst", "company": "Adyen", "location": "Amsterdam", "visa": "✔️ Sponsorship available", "salary": "€60,000", "type": "Full-Time"}
+        ],
+        "Sweden": [
+            {"title": "Game Developer", "company": "King", "location": "Stockholm", "visa": "✔️ Work permit sponsorship", "salary": "SEK 600,000", "type": "Full-Time"},
+            {"title": "Data Engineer", "company": "Spotify", "location": "Stockholm", "visa": "✔️ EU Blue Card", "salary": "SEK 550,000", "type": "Full-Time"},
+            {"title": "Nurse", "company": "Karolinska Hospital", "location": "Stockholm", "visa": "✔️ Work permit", "salary": "SEK 450,000", "type": "Full-Time"}
+        ],
+        "Ireland": [
+            {"title": "Software Engineer", "company": "Google", "location": "Dublin", "visa": "✔️ Critical Skills Employment Permit", "salary": "€70,000", "type": "Full-Time"},
+            {"title": "Cybersecurity Analyst", "company": "Accenture", "location": "Dublin", "visa": "✔️ Work permit available", "salary": "€65,000", "type": "Full-Time"},
+            {"title": "Pharmaceutical Researcher", "company": "Pfizer", "location": "Cork", "visa": "✔️ Sponsorship available", "salary": "€60,000", "type": "Full-Time"}
+        ],
+        "Spain": [
+            {"title": "Web Developer", "company": "Amadeus", "location": "Madrid", "visa": "✔️ EU Blue Card", "salary": "€40,000", "type": "Full-Time"},
+            {"title": "Tourism Manager", "company": "Meliá Hotels", "location": "Barcelona", "visa": "✔️ Work visa sponsorship", "salary": "€35,000", "type": "Full-Time"},
+            {"title": "Renewable Energy Engineer", "company": "Iberdrola", "location": "Bilbao", "visa": "✔️ Sponsorship available", "salary": "€45,000", "type": "Full-Time"}
+        ],
+        "Denmark": [
+            {"title": "Software Developer", "company": "Maersk", "location": "Copenhagen", "visa": "✔️ Fast-Track Scheme", "salary": "DKK 600,000", "type": "Full-Time"},
+            {"title": "Wind Energy Engineer", "company": "Vestas", "location": "Aarhus", "visa": "✔️ Work permit", "salary": "DKK 550,000", "type": "Full-Time"},
+            {"title": "Nurse", "company": "Rigshospitalet", "location": "Copenhagen", "visa": "✔️ Sponsorship available", "salary": "DKK 400,000", "type": "Full-Time"}
+        ],
+        "Norway": [
+            {"title": "Petroleum Engineer", "company": "Equinor", "location": "Stavanger", "visa": "✔️ Skilled Worker Visa", "salary": "NOK 800,000", "type": "Full-Time"},
+            {"title": "Software Engineer", "company": "Schibsted", "location": "Oslo", "visa": "✔️ Work permit", "salary": "NOK 700,000", "type": "Full-Time"},
+            {"title": "Healthcare Worker", "company": "Oslo University Hospital", "location": "Oslo", "visa": "✔️ Sponsorship available", "salary": "NOK 500,000", "type": "Full-Time"}
+        ],
+        "Finland": [
+            {"title": "Game Programmer", "company": "Supercell", "location": "Helsinki", "visa": "✔️ Residence Permit", "salary": "€60,000", "type": "Full-Time"},
+            {"title": "Data Scientist", "company": "Nokia", "location": "Espoo", "visa": "✔️ EU Blue Card", "salary": "€55,000", "type": "Full-Time"},
+            {"title": "Nurse", "company": "HUS Helsinki", "location": "Helsinki", "visa": "✔️ Sponsorship available", "salary": "€40,000", "type": "Full-Time"}
+        ],
+        "Switzerland": [
+            {"title": "Financial Analyst", "company": "UBS", "location": "Zurich", "visa": "✔️ Work Permit B", "salary": "CHF 120,000", "type": "Full-Time"},
+            {"title": "Pharmaceutical Scientist", "company": "Novartis", "location": "Basel", "visa": "✔️ Sponsorship available", "salary": "CHF 110,000", "type": "Full-Time"},
+            {"title": "Software Engineer", "company": "Google", "location": "Zurich", "visa": "✔️ Work permit", "salary": "CHF 130,000", "type": "Full-Time"}
+        ],
+        "Austria": [
+            {"title": "Mechanical Engineer", "company": "AVL", "location": "Graz", "visa": "✔️ EU Blue Card", "salary": "€55,000", "type": "Full-Time"},
+            {"title": "Software Developer", "company": "A1 Telekom", "location": "Vienna", "visa": "✔️ Red-White-Red Card", "salary": "€50,000", "type": "Full-Time"},
+            {"title": "Nurse", "company": "Vienna General Hospital", "location": "Vienna", "visa": "✔️ Sponsorship available", "salary": "€40,000", "type": "Full-Time"}
+        ]
+    }
+
     # Visa-Sponsored Job Search Section with Filters
     st.subheader("🔎 Search Visa-Sponsored Jobs")
     with st.expander("🔍 Find Jobs Offering Visa Sponsorship", expanded=True):
@@ -1323,75 +1392,6 @@ with tab5:
             search_clicked = st.button("Search Jobs")
         
         if search_clicked:
-            # Simulate job search results (filtered by job type and salary)
-            fake_jobs = {
-                "Canada": [
-                    {"title": "Senior Software Engineer", "company": "Shopify", "location": "Ottawa", "visa": "✔️ Sponsorship available", "salary": "CAD 110,000", "type": "Full-Time"},
-                    {"title": "Data Scientist", "company": "TD Bank", "location": "Toronto", "visa": "✔️ LMIA approved", "salary": "CAD 95,000", "type": "Full-Time"},
-                    {"title": "Registered Nurse", "company": "Vancouver Coastal Health", "location": "Vancouver", "visa": "✔️ Provincial Nominee Program", "salary": "CAD 85,000", "type": "Full-Time"}
-                ],
-                "USA": [
-                    {"title": "AI Researcher", "company": "Google", "location": "Mountain View", "visa": "✔️ H1B sponsorship", "salary": "$150,000", "type": "Full-Time"},
-                    {"title": "DevOps Engineer", "company": "Amazon", "location": "Seattle", "visa": "✔️ TN visa possible", "salary": "$135,000", "type": "Full-Time"},
-                    {"title": "Biomedical Engineer", "company": "Medtronic", "location": "Minneapolis", "visa": "✔️ EB-3 visa", "salary": "$120,000", "type": "Full-Time"}
-                ],
-                "UK": [
-                    {"title": "NHS Nurse", "company": "National Health Service", "location": "London", "visa": "✔️ Health & Care visa", "salary": "£35,000", "type": "Full-Time"},
-                    {"title": "FinTech Developer", "company": "Revolut", "location": "London", "visa": "✔️ Skilled Worker visa", "salary": "£75,000", "type": "Full-Time"},
-                    {"title": "Civil Engineer", "company": "Arup", "location": "Manchester", "visa": "✔️ Sponsorship available", "salary": "£45,000", "type": "Full-Time"}
-                ],
-                "Germany": [
-                    {"title": "Full Stack Developer", "company": "SAP", "location": "Berlin", "visa": "✔️ Blue Card sponsorship", "salary": "€65,000", "type": "Full-Time"},
-                    {"title": "Mechanical Engineer", "company": "Siemens", "location": "Munich", "visa": "✔️ Work visa available", "salary": "€58,000", "type": "Full-Time"},
-                    {"title": "Healthcare Worker", "company": "Charité", "location": "Berlin", "visa": "✔️ Fast-track visa", "salary": "€42,000", "type": "Full-Time"}
-                ],
-                "Netherlands": [
-                    {"title": "Cloud Architect", "company": "Booking.com", "location": "Amsterdam", "visa": "✔️ Highly Skilled Migrant", "salary": "€80,000", "type": "Full-Time"},
-                    {"title": "AI Engineer", "company": "Philips", "location": "Eindhoven", "visa": "✔️ Work permit available", "salary": "€75,000", "type": "Full-Time"},
-                    {"title": "Data Analyst", "company": "Adyen", "location": "Amsterdam", "visa": "✔️ Sponsorship available", "salary": "€60,000", "type": "Full-Time"}
-                ],
-                "Sweden": [
-                    {"title": "Game Developer", "company": "King", "location": "Stockholm", "visa": "✔️ Work permit sponsorship", "salary": "SEK 600,000", "type": "Full-Time"},
-                    {"title": "Data Engineer", "company": "Spotify", "location": "Stockholm", "visa": "✔️ EU Blue Card", "salary": "SEK 550,000", "type": "Full-Time"},
-                    {"title": "Nurse", "company": "Karolinska Hospital", "location": "Stockholm", "visa": "✔️ Work permit", "salary": "SEK 450,000", "type": "Full-Time"}
-                ],
-                "Ireland": [
-                    {"title": "Software Engineer", "company": "Google", "location": "Dublin", "visa": "✔️ Critical Skills Employment Permit", "salary": "€70,000", "type": "Full-Time"},
-                    {"title": "Cybersecurity Analyst", "company": "Accenture", "location": "Dublin", "visa": "✔️ Work permit available", "salary": "€65,000", "type": "Full-Time"},
-                    {"title": "Pharmaceutical Researcher", "company": "Pfizer", "location": "Cork", "visa": "✔️ Sponsorship available", "salary": "€60,000", "type": "Full-Time"}
-                ],
-                "Spain": [
-                    {"title": "Web Developer", "company": "Amadeus", "location": "Madrid", "visa": "✔️ EU Blue Card", "salary": "€40,000", "type": "Full-Time"},
-                    {"title": "Tourism Manager", "company": "Meliá Hotels", "location": "Barcelona", "visa": "✔️ Work visa sponsorship", "salary": "€35,000", "type": "Full-Time"},
-                    {"title": "Renewable Energy Engineer", "company": "Iberdrola", "location": "Bilbao", "visa": "✔️ Sponsorship available", "salary": "€45,000", "type": "Full-Time"}
-                ],
-                "Denmark": [
-                    {"title": "Software Developer", "company": "Maersk", "location": "Copenhagen", "visa": "✔️ Fast-Track Scheme", "salary": "DKK 600,000", "type": "Full-Time"},
-                    {"title": "Wind Energy Engineer", "company": "Vestas", "location": "Aarhus", "visa": "✔️ Work permit", "salary": "DKK 550,000", "type": "Full-Time"},
-                    {"title": "Nurse", "company": "Rigshospitalet", "location": "Copenhagen", "visa": "✔️ Sponsorship available", "salary": "DKK 400,000", "type": "Full-Time"}
-                ],
-                "Norway": [
-                    {"title": "Petroleum Engineer", "company": "Equinor", "location": "Stavanger", "visa": "✔️ Skilled Worker Visa", "salary": "NOK 800,000", "type": "Full-Time"},
-                    {"title": "Software Engineer", "company": "Schibsted", "location": "Oslo", "visa": "✔️ Work permit", "salary": "NOK 700,000", "type": "Full-Time"},
-                    {"title": "Healthcare Worker", "company": "Oslo University Hospital", "location": "Oslo", "visa": "✔️ Sponsorship available", "salary": "NOK 500,000", "type": "Full-Time"}
-                ],
-                "Finland": [
-                    {"title": "Game Programmer", "company": "Supercell", "location": "Helsinki", "visa": "✔️ Residence Permit", "salary": "€60,000", "type": "Full-Time"},
-                    {"title": "Data Scientist", "company": "Nokia", "location": "Espoo", "visa": "✔️ EU Blue Card", "salary": "€55,000", "type": "Full-Time"},
-                    {"title": "Nurse", "company": "HUS Helsinki", "location": "Helsinki", "visa": "✔️ Sponsorship available", "salary": "€40,000", "type": "Full-Time"}
-                ],
-                "Switzerland": [
-                    {"title": "Financial Analyst", "company": "UBS", "location": "Zurich", "visa": "✔️ Work Permit B", "salary": "CHF 120,000", "type": "Full-Time"},
-                    {"title": "Pharmaceutical Scientist", "company": "Novartis", "location": "Basel", "visa": "✔️ Sponsorship available", "salary": "CHF 110,000", "type": "Full-Time"},
-                    {"title": "Software Engineer", "company": "Google", "location": "Zurich", "visa": "✔️ Work permit", "salary": "CHF 130,000", "type": "Full-Time"}
-                ],
-                "Austria": [
-                    {"title": "Mechanical Engineer", "company": "AVL", "location": "Graz", "visa": "✔️ EU Blue Card", "salary": "€55,000", "type": "Full-Time"},
-                    {"title": "Software Developer", "company": "A1 Telekom", "location": "Vienna", "visa": "✔️ Red-White-Red Card", "salary": "€50,000", "type": "Full-Time"},
-                    {"title": "Nurse", "company": "Vienna General Hospital", "location": "Vienna", "visa": "✔️ Sponsorship available", "salary": "€40,000", "type": "Full-Time"}
-                ]
-            }
-            
             # Filter jobs by job type and salary range
             jobs_to_show = fake_jobs.get(sponsor_country, [
                 {"title": "IT Specialist", "company": "TechSolutions", "location": sponsor_country, "visa": "✔️ Work visa sponsorship", "salary": "Competitive", "type": "Full-Time"}
@@ -2053,7 +2053,7 @@ with tab5:
     - **Denmark**: Green tech hiring surge
     - **Norway**: Digital visa portal launch
     - **Switzerland**: Streamlined permit process
-    """)
+    """)  
     # Promotional Content
     st.markdown("""
     <div style='background-color:#e3f2fd; border:2px solid #1976d2; border-radius:10px; padding:20px; margin-top:30px;'>
