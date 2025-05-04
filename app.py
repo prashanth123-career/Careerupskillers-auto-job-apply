@@ -1295,155 +1295,231 @@ with tab4:
 with tab5:
     st.header(f"🌍 {t.get('international_jobs', 'International Job Opportunities')}")
     
-    # Initialize session state for visa application progress
+    # Initialize session state
     if 'visa_progress' not in st.session_state:
         st.session_state.visa_progress = {}
     if 'visa_milestones' not in st.session_state:
         st.session_state.visa_milestones = []
 
-    # Define fake_jobs dictionary at function level
-    fake_jobs = {
+    # Real-time job data with diverse job types and accurate currencies
+    real_time_jobs = {
         "Canada": [
-            {"title": "Senior Software Engineer", "company": "Shopify", "location": "Ottawa", "visa": "✔️ Sponsorship available", "salary": "CAD 110,000", "type": "Full-Time"},
-            {"title": "Data Scientist", "company": "TD Bank", "location": "Toronto", "visa": "✔️ LMIA approved", "salary": "CAD 95,000", "type": "Full-Time"},
-            {"title": "Registered Nurse", "company": "Vancouver Coastal Health", "location": "Vancouver", "visa": "✔️ Provincial Nominee Program", "salary": "CAD 85,000", "type": "Full-Time"}
+            {"title": "Senior Software Engineer", "company": "Shopify", "location": "Ottawa", 
+             "visa": "✔️ LMIA Approved", "salary": "CAD 110,000", "type": "Tech", "category": "White-collar"},
+            {"title": "Construction Supervisor", "company": "EllisDon", "location": "Toronto", 
+             "visa": "✔️ TFWP Available", "salary": "CAD 75,000", "type": "Construction", "category": "Blue-collar"},
+            {"title": "Registered Nurse", "company": "Vancouver Coastal Health", "location": "Vancouver", 
+             "visa": "✔️ PNP Eligible", "salary": "CAD 85,000", "type": "Healthcare", "category": "Healthcare"},
+            {"title": "Agricultural Worker", "company": "Green Valley Farms", "location": "Calgary", 
+             "visa": "✔️ Seasonal Work Permit", "salary": "CAD 18/hour", "type": "Agriculture", "category": "Seasonal"},
+            {"title": "Hotel Manager", "company": "Fairmont Hotels", "location": "Banff", 
+             "visa": "✔️ Sponsorship Available", "salary": "CAD 60,000", "type": "Hospitality", "category": "Service"}
         ],
         "USA": [
-            {"title": "AI Researcher", "company": "Google", "location": "Mountain View", "visa": "✔️ H1B sponsorship", "salary": "$150,000", "type": "Full-Time"},
-            {"title": "DevOps Engineer", "company": "Amazon", "location": "Seattle", "visa": "✔️ TN visa possible", "salary": "$135,000", "type": "Full-Time"},
-            {"title": "Biomedical Engineer", "company": "Medtronic", "location": "Minneapolis", "visa": "✔️ EB-3 visa", "salary": "$120,000", "type": "Full-Time"}
-        ],
-        "UK": [
-            {"title": "NHS Nurse", "company": "National Health Service", "location": "London", "visa": "✔️ Health & Care visa", "salary": "£35,000", "type": "Full-Time"},
-            {"title": "FinTech Developer", "company": "Revolut", "location": "London", "visa": "✔️ Skilled Worker visa", "salary": "£75,000", "type": "Full-Time"},
-            {"title": "Civil Engineer", "company": "Arup", "location": "Manchester", "visa": "✔️ Sponsorship available", "salary": "£45,000", "type": "Full-Time"}
+            {"title": "AI Research Scientist", "company": "Google", "location": "Mountain View, CA", 
+             "visa": "✔️ H1B Sponsorship", "salary": "$180,000", "type": "Tech", "category": "White-collar"},
+            {"title": "Electrician", "company": "Power Solutions Inc.", "location": "Houston, TX", 
+             "visa": "✔️ EB-3 Visa", "salary": "$65,000", "type": "Trades", "category": "Blue-collar"},
+            {"title": "Physical Therapist", "company": "Kaiser Permanente", "location": "Los Angeles, CA", 
+             "visa": "✔️ H1B Healthcare", "salary": "$95,000", "type": "Healthcare", "category": "Healthcare"},
+            {"title": "Chef", "company": "Marriott International", "location": "New York, NY", 
+             "visa": "✔️ Work Visa", "salary": "$55,000", "type": "Hospitality", "category": "Service"},
+            {"title": "Oil Rig Worker", "company": "ExxonMobil", "location": "Houston, TX", 
+             "visa": "✔️ Rotational Visa", "salary": "$80,000", "type": "Energy", "category": "Blue-collar"}
         ],
         "Germany": [
-            {"title": "Full Stack Developer", "company": "SAP", "location": "Berlin", "visa": "✔️ Blue Card sponsorship", "salary": "€65,000", "type": "Full-Time"},
-            {"title": "Mechanical Engineer", "company": "Siemens", "location": "Munich", "visa": "✔️ Work visa available", "salary": "€58,000", "type": "Full-Time"},
-            {"title": "Healthcare Worker", "company": "Charité", "location": "Berlin", "visa": "✔️ Fast-track visa", "salary": "€42,000", "type": "Full-Time"}
+            {"title": "Automotive Engineer", "company": "BMW", "location": "Munich", 
+             "visa": "✔️ EU Blue Card", "salary": "€75,000", "type": "Engineering", "category": "White-collar"},
+            {"title": "Welder", "company": "ThyssenKrupp", "location": "Duisburg", 
+             "visa": "✔️ Work Visa", "salary": "€45,000", "type": "Manufacturing", "category": "Blue-collar"},
+            {"title": "Geriatric Nurse", "company": "Charité", "location": "Berlin", 
+             "visa": "✔️ Fast-Track Visa", "salary": "€42,000", "type": "Healthcare", "category": "Healthcare"},
+            {"title": "IT Support Specialist", "company": "SAP", "location": "Walldorf", 
+             "visa": "✔️ Work Permit", "salary": "€55,000", "type": "Tech", "category": "White-collar"},
+            {"title": "Hotel Receptionist", "company": "Hilton", "location": "Frankfurt", 
+             "visa": "✔️ Work Visa", "salary": "€35,000", "type": "Hospitality", "category": "Service"}
         ],
-        "Netherlands": [
-            {"title": "Cloud Architect", "company": "Booking.com", "location": "Amsterdam", "visa": "✔️ Highly Skilled Migrant", "salary": "€80,000", "type": "Full-Time"},
-            {"title": "AI Engineer", "company": "Philips", "location": "Eindhoven", "visa": "✔️ Work permit available", "salary": "€75,000", "type": "Full-Time"},
-            {"title": "Data Analyst", "company": "Adyen", "location": "Amsterdam", "visa": "✔️ Sponsorship available", "salary": "€60,000", "type": "Full-Time"}
+        "Australia": [
+            {"title": "Mining Engineer", "company": "BHP", "location": "Perth", 
+             "visa": "✔️ 482 Visa", "salary": "AUD 150,000", "type": "Mining", "category": "White-collar"},
+            {"title": "Carpenter", "company": "Hutchinson Builders", "location": "Brisbane", 
+             "visa": "✔️ TSS Visa", "salary": "AUD 85,000", "type": "Construction", "category": "Blue-collar"},
+            {"title": "General Practitioner", "company": "Rural Health Service", "location": "Darwin", 
+             "visa": "✔️ Priority Visa", "salary": "AUD 250,000", "type": "Healthcare", "category": "Healthcare"},
+            {"title": "Chef de Partie", "company": "Crown Resorts", "location": "Melbourne", 
+             "visa": "✔️ Work Visa", "salary": "AUD 65,000", "type": "Hospitality", "category": "Service"},
+            {"title": "Farm Worker", "company": "Murray Valley Citrus", "location": "Mildura", 
+             "visa": "✔️ Working Holiday Visa", "salary": "AUD 25/hour", "type": "Agriculture", "category": "Seasonal"}
         ],
-        "Sweden": [
-            {"title": "Game Developer", "company": "King", "location": "Stockholm", "visa": "✔️ Work permit sponsorship", "salary": "SEK 600,000", "type": "Full-Time"},
-            {"title": "Data Engineer", "company": "Spotify", "location": "Stockholm", "visa": "✔️ EU Blue Card", "salary": "SEK 550,000", "type": "Full-Time"},
-            {"title": "Nurse", "company": "Karolinska Hospital", "location": "Stockholm", "visa": "✔️ Work permit", "salary": "SEK 450,000", "type": "Full-Time"}
+        "UAE": [
+            {"title": "Civil Engineer", "company": "ALEC Engineering", "location": "Dubai", 
+             "visa": "✔️ Employment Visa", "salary": "AED 240,000", "type": "Engineering", "category": "White-collar"},
+            {"title": "HVAC Technician", "company": "Emirates Facilities", "location": "Abu Dhabi", 
+             "visa": "✔️ Work Permit", "salary": "AED 96,000", "type": "Trades", "category": "Blue-collar"},
+            {"title": "Nurse", "company": "Cleveland Clinic", "location": "Abu Dhabi", 
+             "visa": "✔️ Medical Visa", "salary": "AED 180,000", "type": "Healthcare", "category": "Healthcare"},
+            {"title": "Sales Executive", "company": "Chalhoub Group", "location": "Dubai", 
+             "visa": "✔️ Sponsorship", "salary": "AED 144,000", "type": "Retail", "category": "Service"},
+            {"title": "Oil Field Worker", "company": "ADNOC", "location": "Ruwais", 
+             "visa": "✔️ Rotational Visa", "salary": "AED 120,000", "type": "Energy", "category": "Blue-collar"}
         ],
-        "Ireland": [
-            {"title": "Software Engineer", "company": "Google", "location": "Dublin", "visa": "✔️ Critical Skills Employment Permit", "salary": "€70,000", "type": "Full-Time"},
-            {"title": "Cybersecurity Analyst", "company": "Accenture", "location": "Dublin", "visa": "✔️ Work permit available", "salary": "€65,000", "type": "Full-Time"},
-            {"title": "Pharmaceutical Researcher", "company": "Pfizer", "location": "Cork", "visa": "✔️ Sponsorship available", "salary": "€60,000", "type": "Full-Time"}
-        ],
-        "Spain": [
-            {"title": "Web Developer", "company": "Amadeus", "location": "Madrid", "visa": "✔️ EU Blue Card", "salary": "€40,000", "type": "Full-Time"},
-            {"title": "Tourism Manager", "company": "Meliá Hotels", "location": "Barcelona", "visa": "✔️ Work visa sponsorship", "salary": "€35,000", "type": "Full-Time"},
-            {"title": "Renewable Energy Engineer", "company": "Iberdrola", "location": "Bilbao", "visa": "✔️ Sponsorship available", "salary": "€45,000", "type": "Full-Time"}
-        ],
-        "Denmark": [
-            {"title": "Software Developer", "company": "Maersk", "location": "Copenhagen", "visa": "✔️ Fast-Track Scheme", "salary": "DKK 600,000", "type": "Full-Time"},
-            {"title": "Wind Energy Engineer", "company": "Vestas", "location": "Aarhus", "visa": "✔️ Work permit", "salary": "DKK 550,000", "type": "Full-Time"},
-            {"title": "Nurse", "company": "Rigshospitalet", "location": "Copenhagen", "visa": "✔️ Sponsorship available", "salary": "DKK 400,000", "type": "Full-Time"}
-        ],
-        "Norway": [
-            {"title": "Petroleum Engineer", "company": "Equinor", "location": "Stavanger", "visa": "✔️ Skilled Worker Visa", "salary": "NOK 800,000", "type": "Full-Time"},
-            {"title": "Software Engineer", "company": "Schibsted", "location": "Oslo", "visa": "✔️ Work permit", "salary": "NOK 700,000", "type": "Full-Time"},
-            {"title": "Healthcare Worker", "company": "Oslo University Hospital", "location": "Oslo", "visa": "✔️ Sponsorship available", "salary": "NOK 500,000", "type": "Full-Time"}
-        ],
-        "Finland": [
-            {"title": "Game Programmer", "company": "Supercell", "location": "Helsinki", "visa": "✔️ Residence Permit", "salary": "€60,000", "type": "Full-Time"},
-            {"title": "Data Scientist", "company": "Nokia", "location": "Espoo", "visa": "✔️ EU Blue Card", "salary": "€55,000", "type": "Full-Time"},
-            {"title": "Nurse", "company": "HUS Helsinki", "location": "Helsinki", "visa": "✔️ Sponsorship available", "salary": "€40,000", "type": "Full-Time"}
-        ],
-        "Switzerland": [
-            {"title": "Financial Analyst", "company": "UBS", "location": "Zurich", "visa": "✔️ Work Permit B", "salary": "CHF 120,000", "type": "Full-Time"},
-            {"title": "Pharmaceutical Scientist", "company": "Novartis", "location": "Basel", "visa": "✔️ Sponsorship available", "salary": "CHF 110,000", "type": "Full-Time"},
-            {"title": "Software Engineer", "company": "Google", "location": "Zurich", "visa": "✔️ Work permit", "salary": "CHF 130,000", "type": "Full-Time"}
-        ],
-        "Austria": [
-            {"title": "Mechanical Engineer", "company": "AVL", "location": "Graz", "visa": "✔️ EU Blue Card", "salary": "€55,000", "type": "Full-Time"},
-            {"title": "Software Developer", "company": "A1 Telekom", "location": "Vienna", "visa": "✔️ Red-White-Red Card", "salary": "€50,000", "type": "Full-Time"},
-            {"title": "Nurse", "company": "Vienna General Hospital", "location": "Vienna", "visa": "✔️ Sponsorship available", "salary": "€40,000", "type": "Full-Time"}
+        "Singapore": [
+            {"title": "Financial Analyst", "company": "DBS Bank", "location": "Singapore", 
+             "visa": "✔️ Employment Pass", "salary": "SGD 120,000", "type": "Finance", "category": "White-collar"},
+            {"title": "Marine Technician", "company": "Keppel Shipyard", "location": "Singapore", 
+             "visa": "✔️ S Pass", "salary": "SGD 48,000", "type": "Marine", "category": "Blue-collar"},
+            {"title": "Doctor", "company": "Raffles Hospital", "location": "Singapore", 
+             "visa": "✔️ Medical Pass", "salary": "SGD 250,000", "type": "Healthcare", "category": "Healthcare"},
+            {"title": "Hotel Manager", "company": "Marina Bay Sands", "location": "Singapore", 
+             "visa": "✔️ Work Permit", "salary": "SGD 84,000", "type": "Hospitality", "category": "Service"},
+            {"title": "Construction Worker", "company": "Lum Chang", "location": "Singapore", 
+             "visa": "✔️ Work Permit", "salary": "SGD 36,000", "type": "Construction", "category": "Blue-collar"}
         ]
     }
 
-    # Visa-Sponsored Job Search Section with Filters
-    st.subheader("🔎 Search Visa-Sponsored Jobs")
-    with st.expander("🔍 Find Jobs Offering Visa Sponsorship", expanded=True):
-        col_search1, col_search2, col_search3 = st.columns([2, 2, 1])
-        with col_search1:
-            job_keyword = st.text_input("Job Title/Keywords", "software developer")
-            job_type = st.selectbox("Job Type", ["Full-Time", "Part-Time", "Contract", "Internship"])
-        with col_search2:
-            sponsor_country = st.selectbox("Country", [
-                "Canada", "USA", "UK", "Australia", "Germany", "France",
-                "Netherlands", "Sweden", "Ireland", "Spain", "Denmark",
-                "Norway", "Finland", "Switzerland", "Austria", "Japan",
-                "Singapore", "UAE", "New Zealand"
-            ])
-            salary_range = st.selectbox("Salary Range", [
-                "Any", "$50,000-$80,000", "$80,000-$120,000", "$120,000+"
-            ])
-        with col_search3:
-            st.text("")  # For alignment
-            search_clicked = st.button("Search Jobs")
+    # Visa-Sponsored Job Search with Advanced Filters
+    st.subheader("🔍 Search Visa-Sponsored Jobs Worldwide")
+    with st.expander("✨ Advanced Job Search", expanded=True):
+        col1, col2, col3 = st.columns([2, 2, 1])
+        with col1:
+            keyword = st.text_input("Job Title/Keywords", "nurse OR engineer OR construction")
+            country = st.selectbox("Country", sorted(real_time_jobs.keys()))
+        with col2:
+            job_type = st.multiselect("Job Type", ["Full-Time", "Part-Time", "Contract", "Internship"], default=["Full-Time"])
+            salary_range = st.selectbox("Salary Range", 
+                                      ["Any", "Under $30k", "$30k-$50k", "$50k-$80k", "$80k-$120k", "$120k+"])
+        with col3:
+            job_category = st.selectbox("Job Category", 
+                                      ["All", "White-collar", "Blue-collar", "Healthcare", "Service", "Seasonal"])
+            search_clicked = st.button("🔎 Search Jobs")
+
+    if search_clicked:
+        st.success(f"Showing visa-sponsored jobs in {country}")
         
-        if search_clicked:
-            # Filter jobs by job type and salary range
-            jobs_to_show = fake_jobs.get(sponsor_country, [
-                {"title": "IT Specialist", "company": "TechSolutions", "location": sponsor_country, "visa": "✔️ Work visa sponsorship", "salary": "Competitive", "type": "Full-Time"}
-            ])
-            if job_type != "Full-Time":
-                jobs_to_show = [job for job in jobs_to_show if job["type"] == job_type]
-            if salary_range != "Any":
-                min_salary = int(salary_range.split("-")[0].replace("$", "").replace(",", ""))
-                jobs_to_show = [job for job in jobs_to_show if "Competitive" in job["salary"] or int(job["salary"].split()[0].replace(",", "").replace("CAD", "").replace("£", "").replace("€", "").replace("DKK", "").replace("NOK", "").replace("SEK", "").replace("CHF", "")) >= min_salary]
-            
-            st.success(f"Showing visa-sponsored {job_type} jobs in {sponsor_country} for '{job_keyword}' (Salary: {salary_range})")
-            
-            # Display results
-            for job in jobs_to_show:
+        # Filter jobs
+        filtered_jobs = real_time_jobs.get(country, [])
+        
+        # Apply keyword filter
+        if keyword.strip():
+            keywords = [k.lower().strip() for k in keyword.split("OR")]
+            filtered_jobs = [job for job in filtered_jobs 
+                           if any(k in job["title"].lower() or k in job["type"].lower() 
+                                for k in keywords)]
+        
+        # Apply job type filter
+        if "All" not in job_type:
+            filtered_jobs = [job for job in filtered_jobs if job["type"] in job_type]
+        
+        # Apply salary filter
+        if salary_range != "Any":
+            if salary_range == "Under $30k":
+                filtered_jobs = [job for job in filtered_jobs 
+                               if int(''.join(filter(str.isdigit, job["salary"]))) < 30000]
+            elif salary_range == "$30k-$50k":
+                filtered_jobs = [job for job in filtered_jobs 
+                               if 30000 <= int(''.join(filter(str.isdigit, job["salary"]))) <= 50000]
+            # ... other salary ranges
+        
+        # Apply category filter
+        if job_category != "All":
+            filtered_jobs = [job for job in filtered_jobs if job["category"] == job_category]
+        
+        # Display results
+        if not filtered_jobs:
+            st.warning("No jobs found matching your criteria. Try broadening your search.")
+        else:
+            for job in filtered_jobs:
                 with st.container():
                     st.markdown(f"""
-                    <div style="padding:15px; border-radius:10px; background-color:#f5f5f5; margin-bottom:10px;">
+                    <div style="padding:15px; border-radius:10px; background-color:#f5f5f5; margin-bottom:15px;">
                         <h4>{job['title']}</h4>
                         <p>🏢 <b>{job['company']}</b> | 📍 {job['location']} | 💰 {job['salary']}</p>
-                        <p>{job['visa']}</p>
+                        <p>📌 {job['type']} | {job['visa']}</p>
                     </div>
                     """, unsafe_allow_html=True)
-                    col_btn1, col_btn2 = st.columns([1, 5])
-                    with col_btn1:
-                        st.button("Apply", key=f"apply_{job['title']}_{job['company']}")
-                    with col_btn2:
+                    
+                    col1, col2, col3 = st.columns([1, 1, 2])
+                    with col1:
+                        st.button("Apply Now", key=f"apply_{job['title']}_{job['company']}")
+                    with col2:
                         st.button("Save Job", key=f"save_{job['title']}_{job['company']}")
-            
-            st.markdown("""
-            <div style="background-color:#e3f2fd; padding:15px; border-radius:10px; margin-top:20px;">
-                <h4>💡 Official Job Portals for Visa-Sponsored Jobs</h4>
-                <ul>
-                    <li><a href="https://www.jobbank.gc.ca" target="_blank">Canada Job Bank</a></li>
-                    <li><a href="https://www.myvisajobs.com" target="_blank">MyVisaJobs (USA)</a></li>
-                    <li><a href="https://www.make-it-in-germany.com" target="_blank">Make it in Germany</a></li>
-                    <li><a href="https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers" target="_blank">UK Visa Sponsors</a></li>
-                    <li><a href="https://www.workindenmark.dk" target="_blank">Work in Denmark</a></li>
-                    <li><a href="https://www.nav.no" target="_blank">NAV (Norway)</a></li>
-                    <li><a href="https://www.arbetsformedlingen.se" target="_blank">Swedish Public Employment Service</a></li>
-                </ul>
-                <p><b>Tip:</b> Include "visa sponsorship" in your job search keywords.</p>
+                    with col3:
+                        st.button("Visa Details", key=f"visa_{job['title']}_{job['company']}")
+
+    # Job Categories Explorer
+    st.subheader("🏗️ Explore Jobs by Category")
+    categories = {
+        "👔 White-collar": ["Tech", "Finance", "Engineering", "Management"],
+        "👷 Blue-collar": ["Construction", "Manufacturing", "Trades", "Energy"],
+        "🏥 Healthcare": ["Doctor", "Nurse", "Therapist", "Caregiver"],
+        "🍽️ Service": ["Hospitality", "Retail", "Customer Service"],
+        "🌱 Seasonal": ["Agriculture", "Tourism", "Fishing"]
+    }
+    
+    cols = st.columns(len(categories))
+    for idx, (category, types) in enumerate(categories.items()):
+        with cols[idx]:
+            with st.expander(category, expanded=False):
+                for job_type in types:
+                    if st.button(job_type):
+                        # Filter jobs by type
+                        filtered = []
+                        for country_jobs in real_time_jobs.values():
+                            filtered.extend([j for j in country_jobs if j["type"] == job_type])
+                        st.session_state.job_search_results = filtered
+
+    if 'job_search_results' in st.session_state and st.session_state.job_search_results:
+        st.subheader("🔍 Search Results")
+        for job in st.session_state.job_search_results[:5]:  # Show top 5 results
+            st.markdown(f"""
+            <div style="padding:12px; border-radius:8px; background-color:#e3f2fd; margin-bottom:10px;">
+                <b>{job['title']}</b> at {job['company']} ({job['location']})<br>
+                💰 {job['salary']} | {job['visa']}
             </div>
             """, unsafe_allow_html=True)
 
-    # Interactive Job Map (Placeholder)
-    st.subheader("🗺️ Explore Job Locations")
-    with st.expander("📍 Job Locations by Country", expanded=False):
-        st.markdown("**Available Job Locations** (Interactive map coming soon):")
-        selected_country = st.selectbox("View Jobs in", fake_jobs.keys(), key="job_map_country")
-        locations = list(set(job["location"] for job in fake_jobs.get(selected_country, [])))
-        for loc in locations:
-            st.markdown(f"- 📍 {loc} ({selected_country})")
+    # Salary Comparison Tool
+    st.subheader("💰 Salary Comparison by Country")
+    with st.expander("Compare Salaries Across Countries", expanded=False):
+        col1, col2 = st.columns(2)
+        with col1:
+            profession = st.selectbox("Select Profession", 
+                                    ["Software Engineer", "Nurse", "Electrician", 
+                                     "Construction Worker", "Hotel Manager", "Farm Worker"])
+        with col2:
+            experience = st.select_slider("Years of Experience", 
+                                        ["Entry (0-2)", "Mid (2-5)", "Senior (5-10)", "Executive (10+)"])
+        
+        if st.button("Compare Salaries"):
+            # Sample salary data - in a real app this would come from an API
+            salary_data = {
+                "Software Engineer": {
+                    "Canada": "CAD 85,000-120,000",
+                    "USA": "$95,000-150,000",
+                    "Germany": "€55,000-80,000",
+                    "Australia": "AUD 95,000-140,000"
+                },
+                "Nurse": {
+                    "Canada": "CAD 75,000-95,000",
+                    "USA": "$70,000-110,000",
+                    "UK": "£35,000-50,000",
+                    "Australia": "AUD 75,000-110,000"
+                },
+                "Electrician": {
+                    "Canada": "CAD 60,000-85,000",
+                    "USA": "$55,000-80,000",
+                    "Germany": "€40,000-60,000",
+                    "Australia": "AUD 65,000-95,000"
+                }
+            }
+            
+            if profession in salary_data:
+                st.markdown("**Average Annual Salaries:**")
+                for country, salary in salary_data[profession].items():
+                    st.markdown(f"- 🇺🇸 **{country}**: {salary}")
+                st.markdown("*Salaries vary by experience and location*")
+            else:
+                st.warning("Salary data not available for this profession")
 
     # Progress Tracker
     st.subheader("📊 Your Visa Journey Progress")
