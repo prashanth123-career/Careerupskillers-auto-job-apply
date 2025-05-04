@@ -1432,11 +1432,15 @@ with tab5:
                 language = st.multiselect("Language Tests", 
                                         ["IELTS", "TOEFL", "TEF", "Goethe-Zertifikat", "JLPT"])
             
-            if st.form_submit_button("Check Eligibility Score"):
-                # Calculate score logic here
-score = min(100, 20 + (len(language) * 15) + some_other_value)
-                       (10 if education != "High School" else 0) + \
-                       (20 if experience in ["5-10", "10+"] else 10 if experience in ["3-5"] else 0)
+if st.form_submit_button("Check Eligibility Score"):
+    score = min(
+        100,
+        20
+        + (len(language) * 15)
+        + (10 if education != "High School" else 0)
+        + (20 if experience in ["5-10", "10+"] else 10 if experience == "3-5" else 0)
+    )
+    st.success(f"🎯 Your Eligibility Score is: {score}/100")
                 
                 st.metric("Your Eligibility Score", f"{score}% match")
                 
