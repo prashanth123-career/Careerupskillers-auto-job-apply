@@ -4,3 +4,4 @@ google-generativeai==0.5.4
 geocoder==1.38.1
 pdfkit==1.0.0
 jinja2==3.1.2  # Optional but useful for HTML templating
+wkhtmltopdf==0.2
