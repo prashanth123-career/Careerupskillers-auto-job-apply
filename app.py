@@ -12,9 +12,6 @@ st.set_page_config(
 import urllib.parse
 import google.generativeai as genai
 from PyPDF2 import PdfReader
-import pdfkit
-import tempfile
-import base64
 from datetime import datetime, date
 
 # 4. Configure Gemini API using Streamlit secrets
@@ -23,25 +20,6 @@ try:
 except KeyError:
     st.error("GOOGLE_API_KEY not found in Streamlit secrets. Please configure it in Streamlit Cloud settings.")
     st.stop()
-    # 5. Configure pdfkit (requires wkhtmltopdf)
-import os
-
-# Update the path according to your deployment platform
-# For Linux:
-WKHTMLTOPDF_PATH = "/usr/bin/wkhtmltopdf"
-
-# For Windows (example):
-# WKHTMLTOPDF_PATH = "C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe"
-
-# For macOS via Homebrew:
-# WKHTMLTOPDF_PATH = "/opt/homebrew/bin/wkhtmltopdf"
-
-if os.path.exists(WKHTMLTOPDF_PATH):
-    PDFKIT_CONFIG = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_PATH)
-else:
-    st.error("⚠️ `wkhtmltopdf` not found. Please install it on your server or local machine.")
-    st.stop()
-
 
 # ----------------- HELPER FUNCTIONS -----------------
 def get_gemini_model():
@@ -928,75 +906,6 @@ with tab2:
                     st.markdown(suggested_questions)
                 except Exception as e:
                     st.error(f"An error occurred: {str(e)}")
-# Inside tab2, after resume_tab
-ats_tab = st.tabs(["ATS Resume Builder"])[0]
-
-with ats_tab:
-    st.subheader("📄 Build Your ATS-Friendly Resume")
-
-    with st.form("resume_form"):
-        full_name = st.text_input("Full Name")
-        email = st.text_input("Email")
-        phone = st.text_input("Phone Number")
-        location = st.text_input("Location")
-        linkedin = st.text_input("LinkedIn URL")
-        github = st.text_input("GitHub URL (optional)", "")
-        summary = st.text_area("Professional Summary")
-        education = st.text_area("Education (e.g., B.Tech in CSE, XYZ University, 2020)")
-        experience = st.text_area("Work Experience (e.g., Software Engineer at ABC Corp...)")
-        skills = st.text_area("Skills (comma-separated)")
-
-        submitted = st.form_submit_button("Generate Resume")
-
-    if submitted:
-        if not full_name or not email or not phone or not location or not summary:
-            st.error("Please fill in all required fields.")
-        else:
-            resume_html = f"""
-            <html>
-            <head>
-            <style>
-                body {{ font-family: Arial, sans-serif; font-size: 14px; }}
-                h1, h2 {{ color: #2c3e50; }}
-                .section {{ margin-bottom: 20px; }}
-                .heading {{ background-color: #f4f4f4; padding: 6px; font-weight: bold; }}
-            </style>
-            </head>
-            <body>
-                <h1>{full_name}</h1>
-                <p>{email} | {phone} | {location}</p>
-                <p><a href="{linkedin}">LinkedIn</a>{' | <a href="' + github + '">GitHub</a>' if github else ''}</p>
-
-                <div class="section">
-                    <div class="heading">Professional Summary</div>
-                    <p>{summary}</p>
-                </div>
-
-                <div class="section">
-                    <div class="heading">Education</div>
-                    <p>{education}</p>
-                </div>
-
-                <div class="section">
-                    <div class="heading">Work Experience</div>
-                    <p>{experience}</p>
-                </div>
-
-                <div class="section">
-                    <div class="heading">Skills</div>
-                    <p>{skills}</p>
-                </div>
-            </body>
-            </html>
-            """
-
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
-                pdfkit.from_string(resume_html, tmp_file.name, configuration=config)
-                with open(tmp_file.name, "rb") as f:
-                    base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-                pdf_download_link = f'<a href="data:application/pdf;base64,{base64_pdf}" download="ATS_Resume_{full_name.replace(" ", "_")}.pdf">📥 Download Your Resume</a>'
-                st.markdown(pdf_download_link, unsafe_allow_html=True)
-
 
     # Updated promotional content
     st.markdown("""
