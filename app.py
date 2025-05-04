@@ -1862,7 +1862,6 @@ def international_jobs_tab(t):
         st.download_button(
             label="📥 Spain Visa Checklist",
             data="Spain Visa Checklist: Job Offer, Qualifications, Language Proof, Health Insurance, Application Form, Biometrics",
-           発電
             file_name="spain_visa_checklist.txt"
         )
 
@@ -2056,8 +2055,7 @@ def international_jobs_tab(t):
     - **Denmark**: Green tech hiring surge
     - **Norway**: Digital visa portal launch
     - **Switzerland**: Streamlined permit process
-    """)
-    # Promotional Content
+    """)    # Promotional Content
     st.markdown("""
     <div style='background-color:#e3f2fd; border:2px solid #1976d2; border-radius:10px; padding:20px; margin-top:30px;'>
         <h3 style='color:#0d47a1;'>🚀 Ready to Work Abroad?</h3>
