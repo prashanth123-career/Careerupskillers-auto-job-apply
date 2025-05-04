@@ -1434,7 +1434,7 @@ with tab5:
             
             if st.form_submit_button("Check Eligibility Score"):
                 # Calculate score logic here
-                score = min(100, 20 + (len(language)*15) + \
+score = min(100, 20 + (len(language) * 15) + some_other_value)
                        (10 if education != "High School" else 0) + \
                        (20 if experience in ["5-10", "10+"] else 10 if experience in ["3-5"] else 0)
                 
