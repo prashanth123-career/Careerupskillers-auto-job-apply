@@ -1301,111 +1301,101 @@ with tab5:
     if 'visa_milestones' not in st.session_state:
         st.session_state.visa_milestones = []
 
-    # Real-time job data with diverse job types and accurate currencies
-    real_time_jobs = {
-        "Canada": [
-            {"title": "Senior Software Engineer", "company": "Shopify", "location": "Ottawa", 
-             "visa": "✔️ LMIA Approved", "salary": "CAD 110,000", "type": "Tech", "category": "White-collar"},
-            {"title": "Construction Supervisor", "company": "EllisDon", "location": "Toronto", 
-             "visa": "✔️ TFWP Available", "salary": "CAD 75,000", "type": "Construction", "category": "Blue-collar"},
-            {"title": "Registered Nurse", "company": "Vancouver Coastal Health", "location": "Vancouver", 
-             "visa": "✔️ PNP Eligible", "salary": "CAD 85,000", "type": "Healthcare", "category": "Healthcare"},
-            {"title": "Agricultural Worker", "company": "Green Valley Farms", "location": "Calgary", 
-             "visa": "✔️ Seasonal Work Permit", "salary": "CAD 18/hour", "type": "Agriculture", "category": "Seasonal"},
-            {"title": "Hotel Manager", "company": "Fairmont Hotels", "location": "Banff", 
-             "visa": "✔️ Sponsorship Available", "salary": "CAD 60,000", "type": "Hospitality", "category": "Service"}
-        ],
-        "USA": [
-            {"title": "AI Research Scientist", "company": "Google", "location": "Mountain View, CA", 
-             "visa": "✔️ H1B Sponsorship", "salary": "$180,000", "type": "Tech", "category": "White-collar"},
-            {"title": "Electrician", "company": "Power Solutions Inc.", "location": "Houston, TX", 
-             "visa": "✔️ EB-3 Visa", "salary": "$65,000", "type": "Trades", "category": "Blue-collar"},
-            {"title": "Physical Therapist", "company": "Kaiser Permanente", "location": "Los Angeles, CA", 
-             "visa": "✔️ H1B Healthcare", "salary": "$95,000", "type": "Healthcare", "category": "Healthcare"},
-            {"title": "Chef", "company": "Marriott International", "location": "New York, NY", 
-             "visa": "✔️ Work Visa", "salary": "$55,000", "type": "Hospitality", "category": "Service"},
-            {"title": "Oil Rig Worker", "company": "ExxonMobil", "location": "Houston, TX", 
-             "visa": "✔️ Rotational Visa", "salary": "$80,000", "type": "Energy", "category": "Blue-collar"}
-        ],
-        "Germany": [
-            {"title": "Automotive Engineer", "company": "BMW", "location": "Munich", 
-             "visa": "✔️ EU Blue Card", "salary": "€75,000", "type": "Engineering", "category": "White-collar"},
-            {"title": "Welder", "company": "ThyssenKrupp", "location": "Duisburg", 
-             "visa": "✔️ Work Visa", "salary": "€45,000", "type": "Manufacturing", "category": "Blue-collar"},
-            {"title": "Geriatric Nurse", "company": "Charité", "location": "Berlin", 
-             "visa": "✔️ Fast-Track Visa", "salary": "€42,000", "type": "Healthcare", "category": "Healthcare"},
-            {"title": "IT Support Specialist", "company": "SAP", "location": "Walldorf", 
-             "visa": "✔️ Work Permit", "salary": "€55,000", "type": "Tech", "category": "White-collar"},
-            {"title": "Hotel Receptionist", "company": "Hilton", "location": "Frankfurt", 
-             "visa": "✔️ Work Visa", "salary": "€35,000", "type": "Hospitality", "category": "Service"}
-        ],
-        "Australia": [
-            {"title": "Mining Engineer", "company": "BHP", "location": "Perth", 
-             "visa": "✔️ 482 Visa", "salary": "AUD 150,000", "type": "Mining", "category": "White-collar"},
-            {"title": "Carpenter", "company": "Hutchinson Builders", "location": "Brisbane", 
-             "visa": "✔️ TSS Visa", "salary": "AUD 85,000", "type": "Construction", "category": "Blue-collar"},
-            {"title": "General Practitioner", "company": "Rural Health Service", "location": "Darwin", 
-             "visa": "✔️ Priority Visa", "salary": "AUD 250,000", "type": "Healthcare", "category": "Healthcare"},
-            {"title": "Chef de Partie", "company": "Crown Resorts", "location": "Melbourne", 
-             "visa": "✔️ Work Visa", "salary": "AUD 65,000", "type": "Hospitality", "category": "Service"},
-            {"title": "Farm Worker", "company": "Murray Valley Citrus", "location": "Mildura", 
-             "visa": "✔️ Working Holiday Visa", "salary": "AUD 25/hour", "type": "Agriculture", "category": "Seasonal"}
-        ],
-        "UAE": [
-            {"title": "Civil Engineer", "company": "ALEC Engineering", "location": "Dubai", 
-             "visa": "✔️ Employment Visa", "salary": "AED 240,000", "type": "Engineering", "category": "White-collar"},
-            {"title": "HVAC Technician", "company": "Emirates Facilities", "location": "Abu Dhabi", 
-             "visa": "✔️ Work Permit", "salary": "AED 96,000", "type": "Trades", "category": "Blue-collar"},
-            {"title": "Nurse", "company": "Cleveland Clinic", "location": "Abu Dhabi", 
-             "visa": "✔️ Medical Visa", "salary": "AED 180,000", "type": "Healthcare", "category": "Healthcare"},
-            {"title": "Sales Executive", "company": "Chalhoub Group", "location": "Dubai", 
-             "visa": "✔️ Sponsorship", "salary": "AED 144,000", "type": "Retail", "category": "Service"},
-            {"title": "Oil Field Worker", "company": "ADNOC", "location": "Ruwais", 
-             "visa": "✔️ Rotational Visa", "salary": "AED 120,000", "type": "Energy", "category": "Blue-collar"}
-        ],
-        "Singapore": [
-            {"title": "Financial Analyst", "company": "DBS Bank", "location": "Singapore", 
-             "visa": "✔️ Employment Pass", "salary": "SGD 120,000", "type": "Finance", "category": "White-collar"},
-            {"title": "Marine Technician", "company": "Keppel Shipyard", "location": "Singapore", 
-             "visa": "✔️ S Pass", "salary": "SGD 48,000", "type": "Marine", "category": "Blue-collar"},
-            {"title": "Doctor", "company": "Raffles Hospital", "location": "Singapore", 
-             "visa": "✔️ Medical Pass", "salary": "SGD 250,000", "type": "Healthcare", "category": "Healthcare"},
-            {"title": "Hotel Manager", "company": "Marina Bay Sands", "location": "Singapore", 
-             "visa": "✔️ Work Permit", "salary": "SGD 84,000", "type": "Hospitality", "category": "Service"},
-            {"title": "Construction Worker", "company": "Lum Chang", "location": "Singapore", 
-             "visa": "✔️ Work Permit", "salary": "SGD 36,000", "type": "Construction", "category": "Blue-collar"}
-        ]
-    }
+# Real-time job data with diverse job types and accurate currencies
+real_time_jobs = {
+    "Canada": [
+        {"title": "Senior Software Engineer", "company": "Shopify", "location": "Ottawa", 
+         "visa": "✔️ LMIA Approved", "salary": "CAD 110,000", "type": "Tech", "category": "White-collar"},
+        {"title": "Construction Supervisor", "company": "EllisDon", "location": "Toronto", 
+         "visa": "✔️ TFWP Available", "salary": "CAD 75,000", "type": "Construction", "category": "Blue-collar"},
+        {"title": "Registered Nurse", "company": "Vancouver Coastal Health", "location": "Vancouver", 
+         "visa": "✔️ PNP Eligible", "salary": "CAD 85,000", "type": "Healthcare", "category": "Healthcare"},
+        {"title": "Agricultural Worker", "company": "Green Valley Farms", "location": "Calgary", 
+         "visa": "✔️ Seasonal Work Permit", "salary": "CAD 18/hour", "type": "Agriculture", "category": "Seasonal"},
+        {"title": "Hotel Manager", "company": "Fairmont Hotels", "location": "Banff", 
+         "visa": "✔️ Sponsorship Available", "salary": "CAD 60,000", "type": "Hospitality", "category": "Service"}
+    ],
+    "USA": [
+        {"title": "AI Research Scientist", "company": "Google", "location": "Mountain View, CA", 
+         "visa": "✔️ H1B Sponsorship", "salary": "$180,000", "type": "Tech", "category": "White-collar"},
+        {"title": "Electrician", "company": "Power Solutions Inc.", "location": "Houston, TX", 
+         "visa": "✔️ EB-3 Visa", "salary": "$65,000", "type": "Trades", "category": "Blue-collar"},
+        {"title": "Physical Therapist", "company": "Kaiser Permanente", "location": "Los Angeles, CA", 
+         "visa": "✔️ H1B Healthcare", "salary": "$95,000", "type": "Healthcare", "category": "Healthcare"},
+        {"title": "Chef", "company": "Marriott International", "location": "New York, NY", 
+         "visa": "✔️ Work Visa", "salary": "$55,000", "type": "Hospitality", "category": "Service"},
+        {"title": "Oil Rig Worker", "company": "ExxonMobil", "location": "Houston, TX", 
+         "visa": "✔️ Rotational Visa", "salary": "$80,000", "type": "Energy", "category": "Blue-collar"}
+    ],
+    "Germany": [
+        {"title": "Automotive Engineer", "company": "BMW", "location": "Munich", 
+         "visa": "✔️ EU Blue Card", "salary": "€75,000", "type": "Engineering", "category": "White-collar"},
+        {"title": "Welder", "company": "ThyssenKrupp", "location": "Duisburg", 
+         "visa": "✔️ Work Visa", "salary": "€45,000", "type": "Manufacturing", "category": "Blue-collar"},
+        {"title": "Geriatric Nurse", "company": "Charité", "location": "Berlin", 
+         "visa": "✔️ Fast-Track Visa", "salary": "€42,000", "type": "Healthcare", "category": "Healthcare"},
+        {"title": "IT Support Specialist", "company": "SAP", "location": "Walldorf", 
+         "visa": "✔️ Work Permit", "salary": "€55,000", "type": "Tech", "category": "White-collar"},
+        {"title": "Hotel Receptionist", "company": "Hilton", "location": "Frankfurt", 
+         "visa": "✔️ Work Visa", "salary": "€35,000", "type": "Hospitality", "category": "Service"}
+    ],
+    "Australia": [
+        {"title": "Mining Engineer", "company": "BHP", "location": "Perth", 
+         "visa": "✔️ 482 Visa", "salary": "AUD 150,000", "type": "Mining", "category": "White-collar"},
+        {"title": "Carpenter", "company": "Hutchinson Builders", "location": "Brisbane", 
+         "visa": "✔️ TSS Visa", "salary": "AUD 85,000", "type": "Construction", "category": "Blue-collar"},
+        {"title": "General Practitioner", "company": "Rural Health Service", "location": "Darwin", 
+         "visa": "✔️ Priority Visa", "salary": "AUD 250,000", "type": "Healthcare", "category": "Healthcare"},
+        {"title": "Chef de Partie", "company": "Crown Resorts", "location": "Melbourne", 
+         "visa": "✔️ Work Visa", "salary": "AUD 65,000", "type": "Hospitality", "category": "Service"},
+        {"title": "Farm Worker", "company": "Murray Valley Citrus", "location": "Mildura", 
+         "visa": "✔️ Working Holiday Visa", "salary": "AUD 25/hour", "type": "Agriculture", "category": "Seasonal"}
+    ],
+    "UAE": [
+        {"title": "Civil Engineer", "company": "ALEC Engineering", "location": "Dubai", 
+         "visa": "✔️ Employment Visa", "salary": "AED 240,000", "type": "Engineering", "category": "White-collar"},
+        {"title": "HVAC Technician", "company": "Emirates Facilities", "location": "Abu Dhabi", 
+         "visa": "✔️ Work Permit", "salary": "AED 96,000", "type": "Trades", "category": "Blue-collar"},
+        {"title": "Nurse", "company": "Cleveland Clinic", "location": "Abu Dhabi", 
+         "visa": "✔️ Medical Visa", "salary": "AED 180,000", "type": "Healthcare", "category": "Healthcare"},
+        {"title": "Sales Executive", "company": "Chalhoub Group", "location": "Dubai", 
+         "visa": "✔️ Sponsorship", "salary": "AED 144,000", "type": "Retail", "category": "Service"},
+        {"title": "Oil Field Worker", "company": "ADNOC", "location": "Ruwais", 
+         "visa": "✔️ Rotational Visa", "salary": "AED 120,000", "type": "Energy", "category": "Blue-collar"}
+    ],
+    "Singapore": [
+        {"title": "Financial Analyst", "company": "DBS Bank", "location": "Singapore", 
+         "visa": "✔️ Employment Pass", "salary": "SGD 120,000", "type": "Finance", "category": "White-collar"},
+        {"title": "Marine Technician", "company": "Keppel Shipyard", "location": "Singapore", 
+         "visa": "✔️ S Pass", "salary": "SGD 48,000", "type": "Marine", "category": "Blue-collar"},
+        {"title": "Doctor", "company": "Raffles Hospital", "location": "Singapore", 
+         "visa": "✔️ Medical Pass", "salary": "SGD 250,000", "type": "Healthcare", "category": "Healthcare"},
+        {"title": "Hotel Manager", "company": "Marina Bay Sands", "location": "Singapore", 
+         "visa": "✔️ Work Permit", "salary": "SGD 84,000", "type": "Hospitality", "category": "Service"},
+        {"title": "Construction Worker", "company": "Lum Chang", "location": "Singapore", 
+         "visa": "✔️ Work Permit", "salary": "SGD 36,000", "type": "Construction", "category": "Blue-collar"}
+    ]
+}
 
-    # Visa-Sponsored Job Search with Advanced Filters
-    st.subheader("🔍 Search Visa-Sponsored Jobs Worldwide")
-    with st.expander("✨ Advanced Job Search", expanded=True):
-        col1, col2, col3 = st.columns([2, 2, 1])
-        with col1:
-            keyword = st.text_input("Job Title/Keywords", "nurse OR engineer OR construction")
-            country = st.selectbox("Country", sorted(real_time_jobs.keys()))
-        with col2:
-            job_type = st.multiselect("Job Type", ["Full-Time", "Part-Time", "Contract", "Internship"], default=["Full-Time"])
-            salary_range = st.selectbox("Salary Range", 
-                                      ["Any", "Under $30k", "$30k-$50k", "$50k-$80k", "$80k-$120k", "$120k+"])
-        with col3:
-            job_category = st.selectbox("Job Category", 
-                                      ["All", "White-collar", "Blue-collar", "Healthcare", "Service", "Seasonal"])
-            search_clicked = st.button("🔎 Search Jobs")
-
-    if search_clicked:
-        st.success(f"Showing visa-sponsored jobs in {country}")
-        
-        # Filter jobs
-        filtered_jobs = real_time_jobs.get(country, [])
-        
-        # Apply keyword filter
-        if keyword.strip():
-            keywords = [k.lower().strip() for k in keyword.split("OR")]
-            filtered_jobs = [job for job in filtered_jobs 
-                           if any(k in job["title"].lower() or k in job["type"].lower() 
-                                for k in keywords)]
-        
+# Display all visa-sponsored jobs
+for country, jobs in real_time_jobs.items():
+    st.success(f"Visa-sponsored jobs in {country}")
+    for job in jobs:
+        with st.container():
+            st.markdown(f"""
+            <div style="padding:15px; border-radius:10px; background-color:#f5f5f5; margin-bottom:15px;">
+                <h4>{job['title']}</h4>
+                <p>🏢 <b>{job['company']}</b> | 📍 {job['location']} | 💰 {job['salary']}</p>
+                <p>📌 {job['type']} | {job['visa']}</p>
+            </div>
+            """, unsafe_allow_html=True)
+            col1, col2, col3 = st.columns([1, 1, 2])
+            with col1:
+                st.button("Apply Now", key=f"apply_{job['title']}_{job['company']}")
+            with col2:
+                st.button("Save Job", key=f"save_{job['title']}_{job['company']}")
+            with col3:
+                st.button("Visa Details", key=f"visa_{job['title']}_{job['company']}")        
         # Apply job type filter
         if "All" not in job_type:
             filtered_jobs = [job for job in filtered_jobs if job["type"] in job_type]
