@@ -1293,6 +1293,8 @@ with tab4:
 
 # ----------------- TAB 5: international_jobs
 with tab5:
+def international_jobs_tab(t):
+    """International Jobs tab functionality with enhanced features and more European countries."""
     st.header(f"🌍 {t.get('international_jobs', 'International Job Opportunities')}")
     
     # Initialize session state for visa application progress
@@ -1301,56 +1303,110 @@ with tab5:
     if 'visa_milestones' not in st.session_state:
         st.session_state.visa_milestones = []
 
-    # Visa-Sponsored Job Search Section
+    # Visa-Sponsored Job Search Section with Filters
     st.subheader("🔎 Search Visa-Sponsored Jobs")
     with st.expander("🔍 Find Jobs Offering Visa Sponsorship", expanded=True):
-        col_search1, col_search2, col_search3 = st.columns([2,2,1])
+        col_search1, col_search2, col_search3 = st.columns([2, 2, 1])
         with col_search1:
             job_keyword = st.text_input("Job Title/Keywords", "software developer")
+            job_type = st.selectbox("Job Type", ["Full-Time", "Part-Time", "Contract", "Internship"])
         with col_search2:
             sponsor_country = st.selectbox("Country", [
-                "Canada", "USA", "UK", "Australia", "Germany", 
-                "France", "Netherlands", "Sweden", "Japan", 
-                "Singapore", "UAE", "New Zealand", "Ireland",
-                "Switzerland", "Denmark", "Norway", "Finland"
+                "Canada", "USA", "UK", "Australia", "Germany", "France",
+                "Netherlands", "Sweden", "Ireland", "Spain", "Denmark",
+                "Norway", "Finland", "Switzerland", "Austria", "Japan",
+                "Singapore", "UAE", "New Zealand"
+            ])
+            salary_range = st.selectbox("Salary Range", [
+                "Any", "$50,000-$80,000", "$80,000-$120,000", "$120,000+"
             ])
         with col_search3:
             st.text("")  # For alignment
             search_clicked = st.button("Search Jobs")
         
         if search_clicked:
-            # Simulate job search results (in a real app, this would connect to an API)
+            # Simulate job search results (filtered by job type and salary)
             fake_jobs = {
                 "Canada": [
-                    {"title": "Senior Software Engineer", "company": "Shopify", "location": "Ottawa", "visa": "✔️ Sponsorship available", "salary": "CAD 110,000"},
-                    {"title": "Data Scientist", "company": "TD Bank", "location": "Toronto", "visa": "✔️ LMIA approved", "salary": "CAD 95,000"},
-                    {"title": "Registered Nurse", "company": "Vancouver Coastal Health", "location": "Vancouver", "visa": "✔️ Provincial Nominee Program", "salary": "CAD 85,000"}
+                    {"title": "Senior Software Engineer", "company": "Shopify", "location": "Ottawa", "visa": "✔️ Sponsorship available", "salary": "CAD 110,000", "type": "Full-Time"},
+                    {"title": "Data Scientist", "company": "TD Bank", "location": "Toronto", "visa": "✔️ LMIA approved", "salary": "CAD 95,000", "type": "Full-Time"},
+                    {"title": "Registered Nurse", "company": "Vancouver Coastal Health", "location": "Vancouver", "visa": "✔️ Provincial Nominee Program", "salary": "CAD 85,000", "type": "Full-Time"}
                 ],
                 "USA": [
-                    {"title": "AI Researcher", "company": "Google", "location": "Mountain View", "visa": "✔️ H1B sponsorship", "salary": "$150,000"},
-                    {"title": "DevOps Engineer", "company": "Amazon", "location": "Seattle", "visa": "✔️ TN visa possible", "salary": "$135,000"},
-                    {"title": "Biomedical Engineer", "company": "Medtronic", "location": "Minneapolis", "visa": "✔️ EB-3 visa", "salary": "$120,000"}
+                    {"title": "AI Researcher", "company": "Google", "location": "Mountain View", "visa": "✔️ H1B sponsorship", "salary": "$150,000", "type": "Full-Time"},
+                    {"title": "DevOps Engineer", "company": "Amazon", "location": "Seattle", "visa": "✔️ TN visa possible", "salary": "$135,000", "type": "Full-Time"},
+                    {"title": "Biomedical Engineer", "company": "Medtronic", "location": "Minneapolis", "visa": "✔️ EB-3 visa", "salary": "$120,000", "type": "Full-Time"}
                 ],
                 "UK": [
-                    {"title": "NHS Nurse", "company": "National Health Service", "location": "London", "visa": "✔️ Health & Care visa", "salary": "£35,000"},
-                    {"title": "FinTech Developer", "company": "Revolut", "location": "London", "visa": "✔️ Skilled Worker visa", "salary": "£75,000"},
-                    {"title": "Civil Engineer", "company": "Arup", "location": "Manchester", "visa": "✔️ Sponsorship available", "salary": "£45,000"}
+                    {"title": "NHS Nurse", "company": "National Health Service", "location": "London", "visa": "✔️ Health & Care visa", "salary": "£35,000", "type": "Full-Time"},
+                    {"title": "FinTech Developer", "company": "Revolut", "location": "London", "visa": "✔️ Skilled Worker visa", "salary": "£75,000", "type": "Full-Time"},
+                    {"title": "Civil Engineer", "company": "Arup", "location": "Manchester", "visa": "✔️ Sponsorship available", "salary": "£45,000", "type": "Full-Time"}
                 ],
                 "Germany": [
-                    {"title": "Full Stack Developer", "company": "TechCorp", "location": "Berlin", "visa": "✔️ Blue Card sponsorship", "salary": "€65,000"},
-                    {"title": "Mechanical Engineer", "company": "AutoGlobal", "location": "Munich", "visa": "✔️ Work visa available", "salary": "€58,000"},
-                    {"title": "Healthcare Worker", "company": "Charité", "location": "Berlin", "visa": "✔️ Fast-track visa", "salary": "€42,000"}
+                    {"title": "Full Stack Developer", "company": "SAP", "location": "Berlin", "visa": "✔️ Blue Card sponsorship", "salary": "€65,000", "type": "Full-Time"},
+                    {"title": "Mechanical Engineer", "company": "Siemens", "location": "Munich", "visa": "✔️ Work visa available", "salary": "€58,000", "type": "Full-Time"},
+                    {"title": "Healthcare Worker", "company": "Charité", "location": "Berlin", "visa": "✔️ Fast-track visa", "salary": "€42,000", "type": "Full-Time"}
+                ],
+                "Netherlands": [
+                    {"title": "Cloud Architect", "company": "Booking.com", "location": "Amsterdam", "visa": "✔️ Highly Skilled Migrant", "salary": "€80,000", "type": "Full-Time"},
+                    {"title": "AI Engineer", "company": "Philips", "location": "Eindhoven", "visa": "✔️ Work permit available", "salary": "€75,000", "type": "Full-Time"},
+                    {"title": "Data Analyst", "company": "Adyen", "location": "Amsterdam", "visa": "✔️ Sponsorship available", "salary": "€60,000", "type": "Full-Time"}
+                ],
+                "Sweden": [
+                    {"title": "Game Developer", "company": "King", "location": "Stockholm", "visa": "✔️ Work permit sponsorship", "salary": "SEK 600,000", "type": "Full-Time"},
+                    {"title": "Data Engineer", "company": "Spotify", "location": "Stockholm", "visa": "✔️ EU Blue Card", "salary": "SEK 550,000", "type": "Full-Time"},
+                    {"title": "Nurse", "company": "Karolinska Hospital", "location": "Stockholm", "visa": "✔️ Work permit", "salary": "SEK 450,000", "type": "Full-Time"}
+                ],
+                "Ireland": [
+                    {"title": "Software Engineer", "company": "Google", "location": "Dublin", "visa": "✔️ Critical Skills Employment Permit", "salary": "€70,000", "type": "Full-Time"},
+                    {"title": "Cybersecurity Analyst", "company": "Accenture", "location": "Dublin", "visa": "✔️ Work permit available", "salary": "€65,000", "type": "Full-Time"},
+                    {"title": "Pharmaceutical Researcher", "company": "Pfizer", "location": "Cork", "visa": "✔️ Sponsorship available", "salary": "€60,000", "type": "Full-Time"}
+                ],
+                "Spain": [
+                    {"title": "Web Developer", "company": "Amadeus", "location": "Madrid", "visa": "✔️ EU Blue Card", "salary": "€40,000", "type": "Full-Time"},
+                    {"title": "Tourism Manager", "company": "Meliá Hotels", "location": "Barcelona", "visa": "✔️ Work visa sponsorship", "salary": "€35,000", "type": "Full-Time"},
+                    {"title": "Renewable Energy Engineer", "company": "Iberdrola", "location": "Bilbao", "visa": "✔️ Sponsorship available", "salary": "€45,000", "type": "Full-Time"}
+                ],
+                "Denmark": [
+                    {"title": "Software Developer", "company": "Maersk", "location": "Copenhagen", "visa": "✔️ Fast-Track Scheme", "salary": "DKK 600,000", "type": "Full-Time"},
+                    {"title": "Wind Energy Engineer", "company": "Vestas", "location": "Aarhus", "visa": "✔️ Work permit", "salary": "DKK 550,000", "type": "Full-Time"},
+                    {"title": "Nurse", "company": "Rigshospitalet", "location": "Copenhagen", "visa": "✔️ Sponsorship available", "salary": "DKK 400,000", "type": "Full-Time"}
+                ],
+                "Norway": [
+                    {"title": "Petroleum Engineer", "company": "Equinor", "location": "Stavanger", "visa": "✔️ Skilled Worker Visa", "salary": "NOK 800,000", "type": "Full-Time"},
+                    {"title": "Software Engineer", "company": "Schibsted", "location": "Oslo", "visa": "✔️ Work permit", "salary": "NOK 700,000", "type": "Full-Time"},
+                    {"title": "Healthcare Worker", "company": "Oslo University Hospital", "location": "Oslo", "visa": "✔️ Sponsorship available", "salary": "NOK 500,000", "type": "Full-Time"}
+                ],
+                "Finland": [
+                    {"title": "Game Programmer", "company": "Supercell", "location": "Helsinki", "visa": "✔️ Residence Permit", "salary": "€60,000", "type": "Full-Time"},
+                    {"title": "Data Scientist", "company": "Nokia", "location": "Espoo", "visa": "✔️ EU Blue Card", "salary": "€55,000", "type": "Full-Time"},
+                    {"title": "Nurse", "company": "HUS Helsinki", "location": "Helsinki", "visa": "✔️ Sponsorship available", "salary": "€40,000", "type": "Full-Time"}
+                ],
+                "Switzerland": [
+                    {"title": "Financial Analyst", "company": "UBS", "location": "Zurich", "visa": "✔️ Work Permit B", "salary": "CHF 120,000", "type": "Full-Time"},
+                    {"title": "Pharmaceutical Scientist", "company": "Novartis", "location": "Basel", "visa": "✔️ Sponsorship available", "salary": "CHF 110,000", "type": "Full-Time"},
+                    {"title": "Software Engineer", "company": "Google", "location": "Zurich", "visa": "✔️ Work permit", "salary": "CHF 130,000", "type": "Full-Time"}
+                ],
+                "Austria": [
+                    {"title": "Mechanical Engineer", "company": "AVL", "location": "Graz", "visa": "✔️ EU Blue Card", "salary": "€55,000", "type": "Full-Time"},
+                    {"title": "Software Developer", "company": "A1 Telekom", "location": "Vienna", "visa": "✔️ Red-White-Red Card", "salary": "€50,000", "type": "Full-Time"},
+                    {"title": "Nurse", "company": "Vienna General Hospital", "location": "Vienna", "visa": "✔️ Sponsorship available", "salary": "€40,000", "type": "Full-Time"}
                 ]
             }
             
-            st.success(f"Showing visa-sponsored jobs in {sponsor_country} for '{job_keyword}'")
-            
-            # Display results in a nice format
+            # Filter jobs by job type and salary range
             jobs_to_show = fake_jobs.get(sponsor_country, [
-                {"title": "IT Specialist", "company": "TechSolutions", "location": sponsor_country, "visa": "✔️ Work visa sponsorship", "salary": "Competitive"},
-                {"title": "Engineer", "company": "GlobalCorp", "location": sponsor_country, "visa": "✔️ Visa assistance", "salary": "Market rate"}
+                {"title": "IT Specialist", "company": "TechSolutions", "location": sponsor_country, "visa": "✔️ Work visa sponsorship", "salary": "Competitive", "type": "Full-Time"}
             ])
+            if job_type != "Full-Time":
+                jobs_to_show = [job for job in jobs_to_show if job["type"] == job_type]
+            if salary_range != "Any":
+                min_salary = int(salary_range.split("-")[0].replace("$", "").replace(",", ""))
+                jobs_to_show = [job for job in jobs_to_show if "Competitive" in job["salary"] or int(job["salary"].split()[0].replace(",", "").replace("CAD", "").replace("£", "").replace("€", "").replace("DKK", "").replace("NOK", "").replace("SEK", "").replace("CHF", "")) >= min_salary]
             
+            st.success(f"Showing visa-sponsored {job_type} jobs in {sponsor_country} for '{job_keyword}' (Salary: {salary_range})")
+            
+            # Display results
             for job in jobs_to_show:
                 with st.container():
                     st.markdown(f"""
@@ -1360,7 +1416,7 @@ with tab5:
                         <p>{job['visa']}</p>
                     </div>
                     """, unsafe_allow_html=True)
-                    col_btn1, col_btn2 = st.columns([1,5])
+                    col_btn1, col_btn2 = st.columns([1, 5])
                     with col_btn1:
                         st.button("Apply", key=f"apply_{job['title']}_{job['company']}")
                     with col_btn2:
@@ -1370,18 +1426,30 @@ with tab5:
             <div style="background-color:#e3f2fd; padding:15px; border-radius:10px; margin-top:20px;">
                 <h4>💡 Official Job Portals for Visa-Sponsored Jobs</h4>
                 <ul>
-                    <li><a href="https://www.jobbank.gc.ca" target="_blank">Canada Job Bank</a> (Official government site)</li>
-                    <li><a href="https://www.myvisajobs.com" target="_blank">MyVisaJobs</a> (USA H1B visa jobs)</li>
-                    <li><a href="https://www.make-it-in-germany.com" target="_blank">Make it in Germany</a> (Official portal)</li>
-                    <li><a href="https://www.gov.uk/government/organisations/uk-visas-and-immigration" target="_blank">UK Visa Sponsors List</a></li>
+                    <li><a href="https://www.jobbank.gc.ca" target="_blank">Canada Job Bank</a></li>
+                    <li><a href="https://www.myvisajobs.com" target="_blank">MyVisaJobs (USA)</a></li>
+                    <li><a href="https://www.make-it-in-germany.com" target="_blank">Make it in Germany</a></li>
+                    <li><a href="https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers" target="_blank">UK Visa Sponsors</a></li>
+                    <li><a href="https://www.workindenmark.dk" target="_blank">Work in Denmark</a></li>
+                    <li><a href="https://www.nav.no" target="_blank">NAV (Norway)</a></li>
+                    <li><a href="https://www.arbetsformedlingen.se" target="_blank">Swedish Public Employment Service</a></li>
                 </ul>
-                <p><b>Tip:</b> Search for "visa sponsorship" or "work permit" in job descriptions</p>
+                <p><b>Tip:</b> Include "visa sponsorship" in your job search keywords.</p>
             </div>
             """, unsafe_allow_html=True)
 
+    # Interactive Job Map (Placeholder)
+    st.subheader("🗺️ Explore Job Locations")
+    with st.expander("📍 Job Locations by Country", expanded=False):
+        st.markdown("**Available Job Locations** (Interactive map coming soon):")
+        selected_country = st.selectbox("View Jobs in", fake_jobs.keys(), key="job_map_country")
+        locations = list(set(job["location"] for job in fake_jobs.get(selected_country, [])))
+        for loc in locations:
+            st.markdown(f"- 📍 {loc} ({selected_country})")
+
     # Progress Tracker
     st.subheader("📊 Your Visa Journey Progress")
-    col_prog1, col_prog2 = st.columns([3,1])
+    col_prog1, col_prog2 = st.columns([3, 1])
     with col_prog1:
         progress = min(len(st.session_state.visa_milestones) / 5, 1.0)
         st.progress(progress)
@@ -1412,110 +1480,143 @@ with tab5:
             </div>
             """, unsafe_allow_html=True)
 
-    # Enhanced Eligibility Checker
-    with st.expander("🔍 Advanced Visa Eligibility Checker", expanded=True):
-        with st.form("enhanced_eligibility"):
-            country = st.selectbox("Target Country", 
-                                 ["Canada", "USA", "UK", "Australia", "Germany", 
-                                  "France", "Netherlands", "Sweden", "Japan", 
-                                  "Singapore", "UAE", "New Zealand", "Ireland"],
-                                 key="enhanced_country")
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                profession = st.text_input("Your Profession", "Software Developer")
-                education = st.selectbox("Education Level", 
-                                      ["High School", "Bachelor's", "Master's", "PhD"])
-            with col2:
-                experience = st.select_slider("Years of Experience", 
-                                            options=["0-1", "1-3", "3-5", "5-10", "10+"])
-                language = st.multiselect("Language Tests", 
-                                        ["IELTS", "TOEFL", "TEF", "Goethe-Zertifikat", "JLPT"])
-            
-if st.form_submit_button("Check Eligibility Score"):
-    score = min(
-        100,
-        20
-        + (len(language) * 15)
-        + (10 if education != "High School" else 0)
-        + (20 if experience in ["5-10", "10+"] else 10 if experience == "3-5" else 0)
-    )
-    st.success(f"🎯 Your Eligibility Score is: {score}/100")
-                
-                st.metric("Your Eligibility Score", f"{score}% match")
-                
-                # Visual score indicator with color coding
-                color = "#4CAF50" if score >= 70 else "#FFC107" if score >= 50 else "#F44336"
-                st.markdown(f"""
-                <style>
-                    .score-bar {{
-                        height: 20px;
-                        background: linear-gradient(90deg, {color} {score}%, #f5f5f5 {score}%);
-                        border-radius: 10px;
-                        margin: 10px 0;
-                    }}
-                </style>
-                <div class="score-bar"></div>
-                """, unsafe_allow_html=True)
-                
-                # Interpretation
-                if score >= 70:
-                    st.success("High eligibility! You have a strong chance for visa approval.")
-                elif score >= 50:
-                    st.warning("Moderate eligibility. Consider improving your qualifications.")
-                else:
-                    st.error("Low eligibility. Focus on gaining more experience or language skills.")
-                
-                # Next steps
-                st.markdown("**Next Steps:**")
-                if score < 70:
-                    st.markdown("- 🎓 Consider higher education if possible")
-                    st.markdown("- 🌐 Improve language test scores")
-                    st.markdown(f"- 💼 Gain more experience in {profession}")
-                st.markdown(f"- 📝 Check specific requirements for {country}")
+    # Visa Cost Estimator
+    st.subheader("💸 Visa Cost Estimator")
+    with st.form("visa_cost_form"):
+        cost_country = st.selectbox("Select Country", [
+            "Canada", "USA", "UK", "Australia", "Germany", "Netherlands",
+            "Sweden", "Ireland", "Spain", "Denmark", "Norway", "Finland",
+            "Switzerland", "Austria"
+        ])
+        visa_type = st.selectbox("Visa Type", [
+            "Work Permit", "Skilled Worker Visa", "EU Blue Card",
+            "H1B Visa", "Highly Skilled Migrant", "Critical Skills Permit",
+            "Red-White-Red Card"
+        ])
+        include_dependents = st.checkbox("Include Dependents")
+        cost_submit = st.form_submit_button("Estimate Cost")
+    
+    if cost_submit:
+        # Placeholder cost data (in USD for simplicity)
+        cost_data = {
+            "Canada": {"Work Permit": 300, "Skilled Worker Visa": 1000},
+            "USA": {"H1B Visa": 2500, "Skilled Worker Visa": 2000},
+            "UK": {"Skilled Worker Visa": 1500, "EU Blue Card": 1000},
+            "Australia": {"Skilled Worker Visa": 1200},
+            "Germany": {"EU Blue Card": 800, "Work Permit": 500},
+            "Netherlands": {"Highly Skilled Migrant": 700, "EU Blue Card": 800},
+            "Sweden": {"Work Permit": 600, "EU Blue Card": 800},
+            "Ireland": {"Critical Skills Permit": 900, "Work Permit": 600},
+            "Spain": {"EU Blue Card": 700, "Work Permit": 500},
+            "Denmark": {"Work Permit": 650, "Skilled Worker Visa": 900},
+            "Norway": {"Skilled Worker Visa": 800, "Work Permit": 600},
+            "Finland": {"Work Permit": 550, "EU Blue Card": 700},
+            "Switzerland": {"Work Permit": 1000},
+            "Austria": {"Red-White-Red Card": 800, "EU Blue Card": 700}
+        }
+        base_cost = cost_data.get(cost_country, {}).get(visa_type, 500)
+        total_cost = base_cost * (1.5 if include_dependents else 1)
+        st.success(f"Estimated Visa Cost for {visa_type} in {cost_country}: **${total_cost:,.2f} USD**")
+        st.markdown("*Note: Costs are approximate and include application fees only. Additional costs (e.g., biometrics, legal fees) may apply.*")
 
-    # Country-Specific Guides with Tabs
+    # Enhanced Eligibility Checker
+    st.subheader("🔍 Advanced Visa Eligibility Checker")
+    with st.form("enhanced_eligibility"):
+        country = st.selectbox("Target Country", [
+            "Canada", "USA", "UK", "Australia", "Germany", "France",
+            "Netherlands", "Sweden", "Ireland", "Spain", "Denmark",
+            "Norway", "Finland", "Switzerland", "Austria", "Japan",
+            "Singapore", "UAE", "New Zealand"
+        ], key="enhanced_country")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            profession = st.text_input("Your Profession", "Software Developer")
+            education = st.selectbox("Education Level", [
+                "High School", "Bachelor's", "Master's", "PhD"
+            ])
+        with col2:
+            experience = st.select_slider("Years of Experience", 
+                                        options=["0-1", "1-3", "3-5", "5-10", "10+"])
+            language = st.multiselect("Language Tests", [
+                "IELTS", "TOEFL", "TEF", "Goethe-Zertifikat", "JLPT"
+            ])
+        
+        if st.form_submit_button("Check Eligibility Score"):
+            score = min(
+                100,
+                20
+                + (len(language) * 15)
+                + (10 if education != "High School" else 0)
+                + (20 if experience in ["5-10", "10+"] else 10 if experience == "3-5" else 0)
+            )
+            st.success(f"🎯 Your Eligibility Score for {country}: {score}/100")
+            
+            st.metric("Your Eligibility Score", f"{score}% match")
+            
+            # Visual score indicator
+            color = "#4CAF50" if score >= 70 else "#FFC107" if score >= 50 else "#F44336"
+            st.markdown(f"""
+            <style>
+                .score-bar {{
+                    height: 20px;
+                    background: linear-gradient(90deg, {color} {score}%, #f5f5f5 {score}%);
+                    border-radius: 10px;
+                    margin: 10px 0;
+                }}
+            </style>
+            <div class="score-bar"></div>
+            """, unsafe_allow_html=True)
+            
+            # Interpretation
+            if score >= 70:
+                st.success("High eligibility! Strong chance for visa approval.")
+            elif score >= 50:
+                st.warning("Moderate eligibility. Consider improving qualifications.")
+            else:
+                st.error("Low eligibility. Focus on experience or language skills.")
+            
+            # Next steps
+            st.markdown("**Next Steps:**")
+            if score < 70:
+                st.markdown("- 🎓 Consider higher education if possible")
+                st.markdown("- 🌐 Improve language test scores")
+                st.markdown(f"- 💼 Gain more experience in {profession}")
+            st.markdown(f"- 📝 Check specific requirements for {country}")
+
+    # Country-Specific Guides with More European Countries
     st.subheader("🌍 Country-Specific Visa Programs")
     
-    tab_ca, tab_us, tab_uk, tab_au, tab_de, tab_other = st.tabs([
-        "🇨🇦 Canada", "🇺🇸 USA", "🇬🇧 UK", "🇦🇺 Australia", "🇩🇪 Germany", "More Countries"
+    tab_ca, tab_us, tab_uk, tab_au, tab_de, tab_nl, tab_se, tab_ie, tab_fr, tab_es, tab_dk, tab_no, tab_fi, tab_ch, tab_at = st.tabs([
+        "🇨🇦 Canada", "🇺🇸 USA", "🇬🇧 UK", "🇦🇺 Australia", "🇩🇪 Germany",
+        "🇳🇱 Netherlands", "🇸🇪 Sweden", "🇮🇪 Ireland", "🇫🇷 France", "🇪🇸 Spain",
+        "🇩🇰 Denmark", "🇳🇴 Norway", "🇫🇮 Finland", "🇨🇭 Switzerland", "🇦🇹 Austria"
     ])
     
     with tab_ca:
         st.markdown("""
         ### 🇨🇦 Canada Immigration Programs
         **Top Visa-Sponsored Jobs (2025):**
-        - 👨‍💻 Software Developers (NOC 21232) - $85k avg
-        - 👩‍⚕️ Registered Nurses (NOC 31301) - $78k avg
-        - 🔧 Electricians (NOC 72200) - $65k avg
+        - 👨‍💻 Software Developers (NOC 21232) - CAD 85,000 avg
+        - 👩‍⚕️ Registered Nurses (NOC 31301) - CAD 78,000 avg
+        - 🔧 Electricians (NOC 72200) - CAD 65,000 avg
         
         **Visa Pathways:**
-        1. **Express Entry** (FSW, CEC, FST)
-           - CRS score calculator available
-           - Processing: 6-8 months
-        2. **Provincial Nominee Programs (PNP)**
-           - Alberta, BC, Ontario most active
-        3. **Work Permits**
-           - LMIA required for most
+        - **Express Entry**: FSW, CEC, FST (6-8 months processing)
+        - **Provincial Nominee Programs (PNP)**: Alberta, BC, Ontario
+        - **Work Permits**: LMIA required for most
         
         **2025 Updates:**
-        - New Tech Talent Strategy (fast-track for tech workers)
-        - Increased quotas for healthcare workers
+        - Tech Talent Strategy for fast-track tech visas
+        - Increased healthcare worker quotas
         
         **Resources:**
         - [Job Bank](https://www.jobbank.gc.ca)
-        - [Express Entry](https://www.canada.ca/express-entry)
+        - [Express Entry](https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry.html)
         """)
         st.download_button(
             label="📥 Canada Visa Checklist",
-            data="""Canada Visa Application Checklist:
-1. Language Test (IELTS/CELPIP for English, TEF for French)
-2. Educational Credential Assessment (WES/ICES)
-3. Proof of Funds
-4. Police Clearance Certificate
-5. Medical Examination
-6. Job Offer (if applicable)
-7. Express Entry Profile Creation""",
+            data="Canada Visa Checklist: Language Test, ECA, Proof of Funds, Police Clearance, Medical Exam, Job Offer, Express Entry Profile",
             file_name="canada_visa_checklist.txt"
         )
 
@@ -1523,20 +1624,19 @@ if st.form_submit_button("Check Eligibility Score"):
         st.markdown("""
         ### 🇺🇸 USA Work Visa Options
         **Top Visa-Sponsored Jobs:**
-        - 💻 Computer Occupations (H1B most common)
-        - 🏥 Healthcare (RNs, Physicians)
-        - 🎓 University Faculty (J1 visas)
+        - 💻 Computer Occupations - $120,000 avg
+        - 🏥 Healthcare (RNs, Physicians) - $100,000 avg
+        - 🎓 University Faculty - $80,000 avg
         
         **Visa Types:**
-        - H1B (Specialty Occupations)
-        - L1 (Intracompany Transfers)
-        - TN (NAFTA for Canadians/Mexicans)
-        - EB-3 (Skilled Workers)
+        - H1B: Specialty Occupations
+        - L1: Intracompany Transfers
+        - TN: NAFTA Professionals
+        - EB-3: Skilled Workers
         
         **2025 Updates:**
-        - H1B lottery system changes
-        - Premium processing fee increase to $2,500
-        - STEM OPT extension remains at 24 months
+        - H1B registration fee: $250
+        - Premium processing fee: $2,500
         
         **Resources:**
         - [USCIS](https://www.uscis.gov)
@@ -1544,14 +1644,7 @@ if st.form_submit_button("Check Eligibility Score"):
         """)
         st.download_button(
             label="📥 USA Visa Checklist",
-            data="""USA Visa Application Checklist:
-1. Job Offer from US Employer
-2. Labor Condition Application (LCA)
-3. Form I-129 (Petition for Nonimmigrant Worker)
-4. Proof of Qualifications
-5. Visa Application (DS-160)
-6. Visa Fee Payment
-7. Interview at US Embassy""",
+            data="USA Visa Checklist: Job Offer, LCA, Form I-129, Qualifications, DS-160, Visa Fee, Embassy Interview",
             file_name="usa_visa_checklist.txt"
         )
 
@@ -1559,33 +1652,26 @@ if st.form_submit_button("Check Eligibility Score"):
         st.markdown("""
         ### 🇬🇧 UK Skilled Worker Visa
         **Shortage Occupations:**
-        - 👩‍⚕️ Healthcare (Nurses, Doctors)
-        - 👨‍🔬 STEM (Engineers, Data Scientists)
-        - 👨‍🏫 Education (Teachers)
+        - 👩‍⚕️ Healthcare (Nurses, Doctors) - £35,000 avg
+        - 👨‍🔬 STEM (Engineers, Data Scientists) - £50,000 avg
+        - 👨‍🏫 Education (Teachers) - £30,000 avg
         
         **Requirements:**
         - Job offer from licensed sponsor
-        - Salary ≥ £26,200 or going rate
+        - Salary ≥ £26,200
         - English B1 level
         
         **2025 Changes:**
+        - Immigration Salary List replaces SOL
         - Health & Care Worker visa fee reduced
-        - New Immigration Salary List replaces SOL
         
         **Resources:**
-        - [UK Visas](https://www.gov.uk/browse/visas-immigration)
-        - [Sponsor list](https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers)
+        - [UK Visas](https://www.gov.uk/skilled-worker-visa)
+        - [Sponsor List](https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers)
         """)
         st.download_button(
             label="📥 UK Visa Checklist",
-            data="""UK Visa Application Checklist:
-1. Certificate of Sponsorship (CoS)
-2. Proof of English Proficiency
-3. Maintenance Funds Evidence
-4. TB Test Results (if applicable)
-5. Visa Application Form
-6. IHS Surcharge Payment
-7. Biometric Appointment""",
+            data="UK Visa Checklist: CoS, English Proficiency, Maintenance Funds, TB Test, Application Form, IHS Surcharge, Biometrics",
             file_name="uk_visa_checklist.txt"
         )
 
@@ -1593,20 +1679,19 @@ if st.form_submit_button("Check Eligibility Score"):
         st.markdown("""
         ### 🇦🇺 Australia Visa Options
         **Skilled Migration:**
-        - 189 (Independent)
-        - 190 (State Nominated)
-        - 491 (Regional)
+        - 189: Independent
+        - 190: State Nominated
+        - 491: Regional
         
         **2025 Priority:**
-        - Healthcare workers
-        - Tech (cybersecurity specialists)
-        - Trades (electricians, plumbers)
+        - Healthcare Workers - AUD 80,000 avg
+        - Tech (Cybersecurity) - AUD 100,000 avg
+        - Trades (Electricians) - AUD 70,000 avg
         
         **Points Test:**
-        - Age (max points 30)
-        - English (max 20)
-        - Work Experience (max 15)
-        - Education (max 20)
+        - Age: max 30 points
+        - English: max 20 points
+        - Experience: max 15 points
         
         **Resources:**
         - [Home Affairs](https://immi.homeaffairs.gov.au)
@@ -1614,88 +1699,307 @@ if st.form_submit_button("Check Eligibility Score"):
         """)
         st.download_button(
             label="📥 Australia Visa Checklist",
-            data="""Australia Visa Application Checklist:
-1. Skills Assessment (VETASSESS/ACS etc.)
-2. IELTS/TOEFL/PTE Score
-3. Expression of Interest (EOI)
-4. Police Clearance
-5. Medical Examination
-6. Proof of Funds
-7. Invitation to Apply""",
+            data="Australia Visa Checklist: Skills Assessment, IELTS/TOEFL, EOI, Police Clearance, Medical Exam, Proof of Funds, ITA",
             file_name="australia_visa_checklist.txt"
         )
 
     with tab_de:
         st.markdown("""
         ### 🇩🇪 Germany Work Visas
-        **New for 2025:**
-        - Opportunity Card (Job Seeker Visa)
-        - Faster recognition of foreign qualifications
-        
-        **In Demand:**
-        - IT specialists
-        - Engineers
-        - Healthcare professionals
+        **Top Visa-Sponsored Jobs:**
+        - 💻 IT Specialists - €60,000 avg
+        - 🔧 Engineers - €55,000 avg
+        - 🩺 Healthcare Professionals - €50,000 avg
         
         **Visa Options:**
-        - EU Blue Card (€45k+ salary)
-        - Skilled Worker Visa
-        - IT Specialist Visa (no degree required)
+        - EU Blue Card: €58,400+ salary
+        - Opportunity Card: Job seeker visa
+        - Skilled Worker Visa: Recognized qualifications
+        
+        **2025 Updates:**
+        - Faster qualification recognition
+        - Opportunity Card eligibility expanded
         
         **Resources:**
         - [Make it in Germany](https://www.make-it-in-germany.com)
-        - [Anabin Database](https://anabin.kmk.org)
+        - [Stepstone](https://www.stepstone.de)
         """)
         st.download_button(
             label="📥 Germany Visa Checklist",
-            data="""Germany Visa Application Checklist:
-1. Recognized Qualifications
-2. Job Offer (except Opportunity Card)
-3. Proof of German/English
-4. Health Insurance
-5. Proof of Accommodation
-6. Visa Application Form
-7. Biometric Photos""",
+            data="Germany Visa Checklist: Qualifications, Job Offer, Language Proof, Health Insurance, Accommodation, Application Form, Biometrics",
             file_name="germany_visa_checklist.txt"
         )
 
-    with tab_other:
-        col_other1, col_other2 = st.columns(2)
-        with col_other1:
-            st.markdown("""
-            **🇳🇿 New Zealand**
-            - Skilled Migrant Category
-            - Green List occupations
-            - 6-point system
-            
-            **🇸🇬 Singapore**
-            - Employment Pass
-            - Tech@SG program
-            - Minimum $5,000/month salary
-            
-            **🇫🇷 France**
-            - Talent Passport
-            - Tech Visa
-            - French language not required for tech
-            """)
+    with tab_nl:
+        st.markdown("""
+        ### 🇳🇱 Netherlands Work Visas
+        **Top Visa-Sponsored Jobs:**
+        - 👨‍💻 Software Developers - €65,000 avg
+        - 🩺 Healthcare Workers - €50,000 avg
+        - 🔬 R&D Scientists - €60,000 avg
         
-        with col_other2:
-            st.markdown("""
-            **🇳🇱 Netherlands**
-            - Highly Skilled Migrant
-            - Orientation Year visa
-            - 30% ruling tax benefit
-            
-            **🇸🇪 Sweden**
-            - Work Permit
-            - Fast track for certain professions
-            - Family can join
-            
-            **🇯🇵 Japan**
-            - Engineer/Specialist visa
-            - Points-based system
-            - JLPT N2/N1 preferred
-            """)
+        **Visa Pathways:**
+        - Highly Skilled Migrant: €4,752/month
+        - Orientation Year: For graduates
+        - EU Blue Card: €5,670/month
+        
+        **2025 Updates:**
+        - Increased tech/green energy demand
+        - 30% ruling tax benefit extended
+        
+        **Resources:**
+        - [IND](https://ind.nl/en/work/working_in_the_netherlands)
+        - [Indeed NL](https://www.indeed.nl)
+        """)
+        st.download_button(
+            label="📥 Netherlands Visa Checklist",
+            data="Netherlands Visa Checklist: Job Offer, Salary Proof, Qualifications, Health Insurance, Application Form, Biometrics",
+            file_name="netherlands_visa_checklist.txt"
+        )
+
+    with tab_se:
+        st.markdown("""
+        ### 🇸🇪 Sweden Work Visas
+        **Top Visa-Sponsored Jobs:**
+        - 💻 Game Developers - SEK 600,000 avg
+        - 👩‍💻 Data Engineers - SEK 550,000 avg
+        - 🩺 Nurses - SEK 450,000 avg
+        
+        **Visa Pathways:**
+        - Work Permit: Job offer required
+        - EU Blue Card: SEK 59,600/month
+        - Job Seeker Visa: Pilot for 2025
+        
+        **2025 Updates:**
+        - Tech sector growth in Stockholm
+        - Fast-track for shortage occupations
+        
+        **Resources:**
+        - [Arbetsförmedlingen](https://www.arbetsformedlingen.se)
+        - [Migrationsverket](https://www.migrationsverket.se)
+        """)
+        st.download_button(
+            label="📥 Sweden Visa Checklist",
+            data="Sweden Visa Checklist: Job Offer, Qualifications, Language Proof, Health Insurance, Application Form, Biometrics",
+            file_name="sweden_visa_checklist.txt"
+        )
+
+    with tab_ie:
+        st.markdown("""
+        ### 🇮🇪 Ireland Work Visas
+        **Top Visa-Sponsored Jobs:**
+        - 💻 Software Engineers - €70,000 avg
+        - 🔒 Cybersecurity Specialists - €65,000 avg
+        - 🩺 Healthcare Professionals - €55,000 avg
+        
+        **Visa Pathways:**
+        - Critical Skills Employment Permit
+        - General Employment Permit
+        - EU Blue Card: €60,000+
+        
+        **2025 Updates:**
+        - Dublin tech hub expansion
+        - Healthcare worker quotas increased
+        
+        **Resources:**
+        - [Jobs Ireland](https://www.jobsireland.ie)
+        - [Irish Immigration](https://www.irishimmigration.ie)
+        """)
+        st.download_button(
+            label="📥 Ireland Visa Checklist",
+            data="Ireland Visa Checklist: Job Offer, Qualifications, Language Proof, Application Form, Biometrics, Visa Fee",
+            file_name="ireland_visa_checklist.txt"
+        )
+
+    with tab_fr:
+        st.markdown("""
+        ### 🇫🇷 France Work Visas
+        **Top Visa-Sponsored Jobs:**
+        - 👨‍💻 Tech Professionals - €55,000 avg
+        - 🏨 Hospitality Managers - €45,000 avg
+        - 👩‍🏫 Researchers - €50,000 avg
+        
+        **Visa Pathways:**
+        - Talent Passport: Skilled professionals
+        - Tech Visa: Startup employees
+        - EU Blue Card: €53,836+
+        
+        **2025 Updates:**
+        - Paris tech startup growth
+        - Simplified Talent Passport process
+        
+        **Resources:**
+        - [Pôle Emploi](https://www.pole-emploi.fr)
+        - [France Visas](https://france-visas.gouv.fr)
+        """)
+        st.download_button(
+            label="📥 France Visa Checklist",
+            data="France Visa Checklist: Job Offer, Qualifications, Language Proof, Health Insurance, Application Form, Biometrics",
+            file_name="france_visa_checklist.txt"
+        )
+
+    with tab_es:
+        st.markdown("""
+        ### 🇪🇸 Spain Work Visas
+        **Top Visa-Sponsored Jobs:**
+        - 💻 Web Developers - €40,000 avg
+        - 🏨 Tourism Managers - €35,000 avg
+        - 🔬 Renewable Energy Engineers - €45,000 avg
+        
+        **Visa Pathways:**
+        - EU Blue Card: €33,908+
+        - Highly Qualified Professional Visa
+        - Work Permit: Employer-sponsored
+        
+        **2025 Updates:**
+        - Renewable energy sector growth
+        - Digital nomad visa expansion
+        
+        **Resources:**
+        - [InfoJobs](https://www.infojobs.net)
+        - [Exteriores](https://www.exteriores.gob.es)
+        """)
+        st.download_button(
+            label="📥 Spain Visa Checklist",
+            data="Spain Visa Checklist: Job Offer, Qualifications, Language Proof, Health Insurance, Application Form, Biometrics",
+           発電
+            file_name="spain_visa_checklist.txt"
+        )
+
+    with tab_dk:
+        st.markdown("""
+        ### 🇩🇰 Denmark Work Visas
+        **Top Visa-Sponsored Jobs:**
+        - 💻 Software Developers - DKK 600,000 avg
+        - 🔧 Wind Energy Engineers - DKK 550,000 avg
+        - 🩺 Nurses - DKK 400,000 avg
+        
+        **Visa Pathways:**
+        - Fast-Track Scheme: Quick processing
+        - Positive List: Shortage occupations
+        - EU Blue Card: DKK 468,000+
+        
+        **2025 Updates:**
+        - Green tech sector expansion
+        - Simplified family reunification
+        
+        **Resources:**
+        - [Work in Denmark](https://www.workindenmark.dk)
+        - [New to Denmark](https://www.nyidanmark.dk)
+        """)
+        st.download_button(
+            label="📥 Denmark Visa Checklist",
+            data="Denmark Visa Checklist: Job Offer, Qualifications, Language Proof, Health Insurance, Application Form, Biometrics",
+            file_name="denmark_visa_checklist.txt"
+        )
+
+    with tab_no:
+        st.markdown("""
+        ### 🇳🇴 Norway Work Visas
+        **Top Visa-Sponsored Jobs:**
+        - 🔧 Petroleum Engineers - NOK 800,000 avg
+        - 💻 Software Engineers - NOK 700,000 avg
+        - 🩺 Healthcare Workers - NOK 500,000 avg
+        
+        **Visa Pathways:**
+        - Skilled Worker Visa: Job offer required
+        - Job Seeker Visa: For professionals
+        - EU Blue Card: NOK 600,000+
+        
+        **2025 Updates:**
+        - Energy sector hiring surge
+        - Digital application portal launch
+        
+        **Resources:**
+        - [NAV](https://www.nav.no)
+        - [UDI](https://www.udi.no)
+        """)
+        st.download_button(
+            label="📥 Norway Visa Checklist",
+            data="Norway Visa Checklist: Job Offer, Qualifications, Language Proof, Health Insurance, Application Form, Biometrics",
+            file_name="norway_visa_checklist.txt"
+        )
+
+    with tab_fi:
+        st.markdown("""
+        ### 🇫🇮 Finland Work Visas
+        **Top Visa-Sponsored Jobs:**
+        - 💻 Game Programmers - €60,000 avg
+        - 👩‍💻 Data Scientists - €55,000 avg
+        - 🩺 Nurses - €40,000 avg
+        
+        **Visa Pathways:**
+        - Residence Permit: Job offer
+        - EU Blue Card: €48,000+
+        - Specialist Visa: High-skill roles
+        
+        **2025 Updates:**
+        - Helsinki tech hub growth
+        - Healthcare worker recruitment
+        
+        **Resources:**
+        - [Work in Finland](https://www.workinfinland.com)
+        - [Migri](https://migri.fi)
+        """)
+        st.download_button(
+            label="📥 Finland Visa Checklist",
+            data="Finland Visa Checklist: Job Offer, Qualifications, Language Proof, Health Insurance, Application Form, Biometrics",
+            file_name="finland_visa_checklist.txt"
+        )
+
+    with tab_ch:
+        st.markdown("""
+        ### 🇨🇭 Switzerland Work Visas
+        **Top Visa-Sponsored Jobs:**
+        - 💸 Financial Analysts - CHF 120,000 avg
+        - 🔬 Pharmaceutical Scientists - CHF 110,000 avg
+        - 💻 Software Engineers - CHF 130,000 avg
+        
+        **Visa Pathways:**
+        - Work Permit B: Employer-sponsored
+        - Work Permit L: Short-term
+        - EU Blue Card: CHF 100,000+
+        
+        **2025 Updates:**
+        - Finance and pharma hiring surge
+        - Streamlined permit process
+        
+        **Resources:**
+        - [Ch.ch](https://www.ch.ch)
+        - [Swiss Jobs](https://www.jobs.ch)
+        """)
+        st.download_button(
+            label="📥 Switzerland Visa Checklist",
+            data="Switzerland Visa Checklist: Job Offer, Qualifications, Language Proof, Health Insurance, Application Form, Biometrics",
+            file_name="switzerland_visa_checklist.txt"
+        )
+
+    with tab_at:
+        st.markdown("""
+        ### 🇦🇹 Austria Work Visas
+        **Top Visa-Sponsored Jobs:**
+        - 🔧 Mechanical Engineers - €55,000 avg
+        - 💻 Software Developers - €50,000 avg
+        - 🩺 Nurses - €40,000 avg
+        
+        **Visa Pathways:**
+        - Red-White-Red Card: Skilled workers
+        - EU Blue Card: €47,000+
+        - Job Seeker Visa: 6 months
+        
+        **2025 Updates:**
+        - Tech and healthcare demand
+        - Simplified RWR Card process
+        
+        **Resources:**
+        - [Migration.gv.at](https://www.migration.gv.at)
+        - [Karriere.at](https://www.karriere.at)
+        """)
+        st.download_button(
+            label="📥 Austria Visa Checklist",
+            data="Austria Visa Checklist: Job Offer, Qualifications, Language Proof, Health Insurance, Application Form, Biometrics",
+            file_name="austria_visa_checklist.txt"
+        )
 
     # Visa Application Milestones
     st.subheader("✅ Track Your Visa Application")
@@ -1723,7 +2027,7 @@ if st.form_submit_button("Check Eligibility Score"):
         for m in st.session_state.visa_milestones:
             st.markdown(f"- ✅ {m['name']} ({m['date']})")
 
-    # AI-Powered Visa Guidance
+    # Enhanced AI-Powered Visa Guidance
     st.subheader("🤖 Ask AI for Visa Guidance")
     with st.form("visa_guidance_form"):
         visa_query = st.text_area("Ask a Visa Question (e.g., 'What visa for a nurse in Canada?')", 
@@ -1731,8 +2035,12 @@ if st.form_submit_button("Check Eligibility Score"):
                                 placeholder="Type your question about visas, work permits, or immigration...")
         visa_query_submit = st.form_submit_button("Get AI Advice")
     if visa_query_submit and visa_query.strip():
-        visa_prompt = f"""Act as an immigration expert with 15 years experience. Provide a concise, accurate answer to the following visa-related question. 
-        Include: 1) Relevant visa types, 2) Key requirements, 3) Processing time estimate, 4) Common challenges.
+        visa_prompt = f"""Act as an immigration expert with 15 years of experience. Provide a concise, structured answer for the following visa-related question about {sponsor_country}.
+        Format:
+        - **Visa Types**: List relevant visas
+        - **Requirements**: Key eligibility criteria
+        - **Processing Time**: Estimated duration
+        - **Challenges**: Common issues and solutions
         Question: {visa_query}"""
         with st.spinner("Analyzing your visa question..."):
             visa_answer = get_result(visa_prompt)
@@ -1741,13 +2049,14 @@ if st.form_submit_button("Check Eligibility Score"):
     # Recent Updates
     st.subheader("🆕 2025 Visa and Job Updates")
     st.markdown("""
-    - **Australia**: Core Skills Occupation List launches May 2025, prioritizing tech and cybersecurity roles
-    - **Germany**: Opportunity Card allows 12-month job search without a job offer
-    - **Canada**: Express Entry draws continue, with 825 PNP invitations in April 2025
-    - **UK**: New Immigration Salary List replaces Shortage Occupation List
-    - **USA**: H1B lottery registration fee increases to $250 for FY2025
+    - **Australia**: Core Skills Occupation List launches May 2025
+    - **Germany**: Opportunity Card allows 12-month job search
+    - **Canada**: 825 PNP invitations in April 2025
+    - **UK**: Immigration Salary List replaces SOL
+    - **Denmark**: Green tech hiring surge
+    - **Norway**: Digital visa portal launch
+    - **Switzerland**: Streamlined permit process
     """)
-
     # Promotional Content
     st.markdown("""
     <div style='background-color:#e3f2fd; border:2px solid #1976d2; border-radius:10px; padding:20px; margin-top:30px;'>
