@@ -676,12 +676,16 @@ with tab1:
 with tab2:
     st.header(f"🎯 {t['interview_prep']}")
     
-    # Sub-tabs for Interview Prep and Resume Analysis
-    prep_tab, resume_tab = st.tabs(["Interview Prep Resources", t["resume_analysis"]])
+    # Sub-tabs for Interview Prep, Resume Analysis, and ATS Builder
+    prep_tab, resume_tab, ats_tab = st.tabs([
+        "Interview Prep Resources", 
+        t["resume_analysis"],
+        "🚀 ATS Resume Builder"
+    ])
     
     # Interview Prep Resources (Enhanced Functionality)
     with prep_tab:
-        # Initialize session state for confidence tracker
+# Initialize session state for confidence tracker
         if 'interview_practice_count' not in st.session_state:
             st.session_state.interview_practice_count = 0
         if 'star_stories' not in st.session_state:
@@ -900,103 +904,197 @@ with tab2:
                         """
                         star_feedback = get_result(star_feedback_prompt)
                         st.markdown("**AI Feedback on STAR Story**")
-                        st.markdown(star_feedback)
+                        st.markdown(star_feedback)    # Resume Analysis (Enhanced with Interview Question Suggestions)
+    with resume_tab:
+        st.subheader(t["resume_analysis"])
+        with st.form("resume_form"):
+            col1, col2 = st.columns([1, 1])
+            with col1:
+                job_description = st.text_area("Enter the Job Description", height=200, key="resume_job_desc")
+            with col2:
+                uploaded_file = st.file_uploader(t["upload_resume"], type=['pdf'], key="resume_upload")
+            
+            analyze_submitted = st.form_submit_button(t["analyze_resume"])
 
-    # Resume Analysis (Enhanced with Interview Question Suggestions)
-with resume_tab:
-    st.subheader(t["resume_analysis"])
-    with st.form("resume_form"):
-        col1, col2 = st.columns([1, 1])
-        with col1:
-            job_description = st.text_area("Enter the Job Description", height=200, key="resume_job_desc")
-        with col2:
-            uploaded_file = st.file_uploader(t["upload_resume"], type=['pdf'], key="resume_upload")
+        if analyze_submitted:
+            if not job_description:
+                st.error("Please enter a job description.")
+            elif not uploaded_file:
+                st.error("Please upload your resume.")
+            else:
+                try:
+                    # Extract resume text
+                    resume_text = pdf_to_text(uploaded_file)
+                    
+                    # Get match score
+                    score_prompt = construct_score_prompt(resume_text, job_description)
+                    score_result = get_result(score_prompt)
+                    st.subheader("Resume Match Score")
+                    st.markdown(score_result)
+                    
+                    # Get improvement suggestions
+                    improvement_prompt = construct_improvement_prompt(resume_text, job_description)
+                    improvement_result = get_result(improvement_prompt)
+                    st.subheader("Suggestions to Improve Your Resume")
+                    st.markdown(improvement_result)
+                    
+                    # Suggest interview questions
+                    question_prompt = f"""
+                    Based on the resume and job description below, suggest 3 interview questions (1 technical, 1 behavioral, 1 role-specific).
+                    Resume: {resume_text}
+                    Job Description: {job_description}
+                    Return the questions in a bullet-point format.
+                    """
+                    suggested_questions = get_result(question_prompt)
+                    st.subheader("Recommended Interview Questions to Prepare")
+                    st.markdown(suggested_questions)
+
+                    st.markdown("### ✅ Resume Text Preview")
+                    st.text_area("Extracted Text", resume_text, height=300, key="resume_preview")
+                    
+                except Exception as e:
+                    st.error(f"An error occurred: {str(e)}")
+
+    # ATS Resume Builder Tab
+    with ats_tab:
+        st.header("🚀 ATS-Optimized Resume Builder")
+        st.caption("Create a resume that beats Applicant Tracking Systems")
         
-        analyze_submitted = st.form_submit_button(t["analyze_resume"])
-
-    if analyze_submitted:
-        if not job_description:
-            st.error("Please enter a job description.")
-        elif not uploaded_file:
-            st.error("Please upload your resume.")
-        else:
-            try:
-                # Extract resume text
-                resume_text = pdf_to_text(uploaded_file)
+        with st.expander("💡 Quick Tips for ATS", expanded=True):
+            st.markdown("""
+            - **Use standard headings**: "Work Experience", "Education", "Skills"
+            - **Avoid tables/images**: ATS can't read them well
+            - **Include keywords**: Mirror the job description's language
+            - **Simple formatting**: No columns or fancy layouts
+            - **File type**: PDF or plain text works best
+            """)
+        
+        # Resume Builder Form
+        with st.form("ats_resume_form"):
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                full_name = st.text_input("Full Name*")
+                email = st.text_input("Email*")
+                phone = st.text_input("Phone")
+                linkedin = st.text_input("LinkedIn Profile")
                 
-                # Get match score
-                score_prompt = construct_score_prompt(resume_text, job_description)
-                score_result = get_result(score_prompt)
-                st.subheader("Resume Match Score")
-                st.markdown(score_result)
-                
-                # Get improvement suggestions
-                improvement_prompt = construct_improvement_prompt(resume_text, job_description)
-                improvement_result = get_result(improvement_prompt)
-                st.subheader("Suggestions to Improve Your Resume")
-                st.markdown(improvement_result)
-                
-                # Suggest interview questions based on resume analysis
-                question_prompt = f"""
-                Based on the resume and job description below, suggest 3 interview questions (1 technical, 1 behavioral, 1 role-specific) that the candidate should prepare for.
-                Resume: {resume_text}
-                Job Description: {job_description}
-                Return the questions in a bullet-point format.
-                """
-                suggested_questions = get_result(question_prompt)
-                st.subheader("Recommended Interview Questions to Prepare")
-                st.markdown(suggested_questions)
-
-                st.markdown("### ✅ Resume Text Preview")  # <-- FIXED INDENTATION
-                st.text_area("Extracted Text", resume_text, height=300)
-                
-            except Exception as e:
-                st.error(f"An error occurred: {str(e)}")
-        # --- ATS Resume Builder ---
-        st.markdown("### ✨ Generate ATS-Friendly Resume")
-        if st.button("Generate ATS Resume"):
-            with st.spinner("Generating optimized resume..."):
-                ats_resume = generate_ats_friendly_resume(resume_text)
-                st.success("✅ ATS-optimized resume generated!")
-                st.download_button("📥 Download ATS Resume", ats_resume, file_name="ATS_Optimized_Resume.txt")
-
-        # --- Job Description Matching ---
-        st.markdown("### 🔍 Match Resume with Job Description")
-        job_description = st.text_area("Paste Job Description", height=200)
-        if st.button("Analyze Keyword Match"):
-            with st.spinner("Analyzing match score..."):
-                match_result = keyword_match_score(resume_text, job_description)
-                st.markdown("#### 📊 Match Results")
-                st.write(match_result)
-
-# Tab 4 - Resume Builder from Scratch
-with tabs[3]:
-    st.header("🛠️ Build Resume from Scratch")
-    name = st.text_input("Full Name")
-    summary = st.text_area("Professional Summary")
-    skills = st.text_area("Skills (comma-separated)")
-    experience = st.text_area("Work Experience")
-    education = st.text_area("Education")
-
-    if st.button("Generate Resume"):
-        resume_content = f"""
-        {name}
-
-        SUMMARY
-        {summary}
-
-        SKILLS
-        {skills}
-
-        EXPERIENCE
-        {experience}
-
-        EDUCATION
-        {education}
-        """
-        st.success("✅ Resume generated!")
-        st.download_button("📥 Download Resume", resume_content, file_name="Generated_Resume.txt")
-
+            with col2:
+                target_role = st.text_input("Target Job Title*")
+                years_exp = st.number_input("Years of Experience", min_value=0, max_value=50)
+                location = st.text_input("Location")
+                portfolio = st.text_input("Portfolio/GitHub")
+            
+            # Professional Summary
+            summary = st.text_area("Professional Summary*", 
+                                help="3-4 sentences highlighting your key qualifications")
+            
+            # Skills Section
+            skills = st.text_area("Skills* (comma separated)", 
+                                "Python, SQL, Machine Learning, Data Analysis",
+                                help="Include both technical and soft skills")
+            
+            # Work Experience
+            st.subheader("Work Experience")
+            exp1_col1, exp1_col2 = st.columns([3,1])
+            with exp1_col1:
+                exp1_title = st.text_input("Job Title*", key="exp1_title")
+                exp1_company = st.text_input("Company*", key="exp1_company")
+                exp1_desc = st.text_area("Description*", 
+                                       help="Use bullet points with achievements",
+                                       key="exp1_desc")
+            with exp1_col2:
+                exp1_start = st.text_input("Start Date (MM/YYYY)*", key="exp1_start")
+                exp1_end = st.text_input("End Date (MM/YYYY) or 'Present'", key="exp1_end")
+            
+            # Education
+            st.subheader("Education")
+            edu1_col1, edu1_col2 = st.columns([3,1])
+            with edu1_col1:
+                edu1_degree = st.text_input("Degree*", key="edu1_degree")
+                edu1_school = st.text_input("School*", key="edu1_school")
+            with edu1_col2:
+                edu1_year = st.text_input("Graduation Year*", key="edu1_year")
+            
+            # Generate Button
+            submitted = st.form_submit_button("✨ Generate ATS Resume")
+        
+        # Resume Generation Logic
+        if submitted:
+            if not all([full_name, target_role, summary, skills]):
+                st.error("Please fill all required fields (*)")
+            else:
+                with st.spinner("Generating your ATS-friendly resume..."):
+                    # Format the resume content
+                    resume_content = f"""
+                    {full_name.upper()}
+                    {email} | {phone} | {linkedin} | {location}
+                    
+                    OBJECTIVE
+                    {summary}
+                    
+                    SKILLS
+                    {', '.join([s.strip() for s in skills.split(',')])}
+                    
+                    WORK EXPERIENCE
+                    {exp1_title}
+                    {exp1_company} | {exp1_start} - {exp1_end}
+                    - {exp1_desc.replace('\n', '\n- ')}
+                    
+                    EDUCATION
+                    {edu1_degree}
+                    {edu1_school} | {edu1_year}
+                    """
+                    
+                    # Display preview
+                    st.success("✅ ATS Resume Generated!")
+                    with st.expander("👀 Preview Your Resume", expanded=True):
+                        st.text(resume_content)
+                    
+                    # Download buttons
+                    col_d1, col_d2 = st.columns(2)
+                    with col_d1:
+                        st.download_button(
+                            label="📥 Download as TXT",
+                            data=resume_content,
+                            file_name=f"ATS_Resume_{full_name.replace(' ', '_')}.txt",
+                            mime="text/plain"
+                        )
+                    with col_d2:
+                        st.download_button(
+                            label="📄 Download as PDF",
+                            data=resume_content,
+                            file_name=f"ATS_Resume_{full_name.replace(' ', '_')}.pdf",
+                            mime="application/pdf"
+                        )
+                    
+                    # ATS Score Simulation
+                    st.subheader("🔍 ATS Optimization Score")
+                    score = min(100, 70 + len(skills.split(','))*2)  # Simple scoring logic
+                    st.progress(score/100)
+                    st.caption(f"Estimated ATS Match: {score}/100")
+                    
+                    if score < 80:
+                        st.warning("💡 Tip: Add more skills/keywords from the job description to improve your score")
+                    
+                    # AI-powered optimization suggestions
+                    if 'resume_job_desc' in st.session_state and st.session_state.resume_job_desc:
+                        st.subheader("🔎 AI-Powered Optimization Tips")
+                        optimization_prompt = f"""
+                        Suggest specific improvements to make this resume better match the following job description.
+                        Focus on:
+                        1. Missing keywords to add
+                        2. Skills to emphasize
+                        3. Formatting suggestions
+                        
+                        Resume:
+                        {resume_content}
+                        
+                        Job Description:
+                        {st.session_state.resume_job_desc}
+                        """
+                        optimizations = get_result(optimization_prompt)
+                        st.markdown(optimizations)
 
     # Updated promotional content
     st.markdown("""
