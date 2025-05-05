@@ -1215,8 +1215,7 @@ with tab4:
                         ("Clickworker", f"https://www.clickworker.com/clickworker-job-offers/?query={q}"),
                         ("Appen", f"https://connect.appen.com/qrp/public/jobs?keywords={q}"),
                         ("Microworkers", f"https://www.microworkers.com/jobs?search={q}"),
-                        ("Fiverr", f"https://www.fiverr.com/search/gigs?query={q}")
-                    ]
+                        ("Fiverr", "https://go.fiverr.com/visit/?bta=1120398&brand=fp")                      ]
 
                 # General platforms for all job types
                 platforms += [
@@ -1244,7 +1243,7 @@ with tab4:
         """)
         st.markdown("""
         **Recommended Platforms for Beginners:**
-        - [Fiverr](https://www.fiverr.com) – Start with small gigs.
+        - [Fiverr](https://go.fiverr.com/visit/?bta=1120398&brand=fp) – Start with small gigs.
         - [Upwork](https://www.upwork.com) – Entry-level projects.
         - [Clickworker](https://www.clickworker.com) – Micro-tasks for quick cash.
         - [PeoplePerHour](https://www.peopleperhour.com) – Simple freelance jobs.
