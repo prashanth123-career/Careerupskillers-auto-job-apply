@@ -87,7 +87,9 @@ def get_result(prompt):
         return response.text
     except Exception as e:
         return f"Error: Could not process request with Gemini LLM. Details: {str(e)}"
-        def generate_ats_friendly_resume(resume_text):
+
+# This function should be at the same level as get_result(), not inside it
+def generate_ats_friendly_resume(resume_text):
     model = get_gemini_model()
     prompt = f"""
     You are a professional resume writer. Rewrite the following resume in a clean, ATS-optimized format.
@@ -104,7 +106,6 @@ def get_result(prompt):
     """
     response = model.generate_content(prompt)
     return response.text.strip()
-
 def keyword_match_score(resume_text, job_description):
     model = get_gemini_model()
     prompt = f"""
