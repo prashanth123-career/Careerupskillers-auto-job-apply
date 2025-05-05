@@ -685,7 +685,16 @@ with tab2:
     
     # Interview Prep Resources (Enhanced Functionality)
     with prep_tab:
-# Initialize session state for confidence tracker
+        # ----------------- TAB 2: INTERVIEW PREPARATION (Updated with Resume Analysis) -----------------
+with tab2:
+    st.header(f"🎯 {t['interview_prep']}")
+    
+    # Sub-tabs for Interview Prep and Resume Analysis
+    prep_tab, resume_tab = st.tabs(["Interview Prep Resources", t["resume_analysis"]])
+    
+    # Interview Prep Resources (Enhanced Functionality)
+    with prep_tab:
+        # Initialize session state for confidence tracker
         if 'interview_practice_count' not in st.session_state:
             st.session_state.interview_practice_count = 0
         if 'star_stories' not in st.session_state:
@@ -904,7 +913,9 @@ with tab2:
                         """
                         star_feedback = get_result(star_feedback_prompt)
                         st.markdown("**AI Feedback on STAR Story**")
-                        st.markdown(star_feedback)    # Resume Analysis (Enhanced with Interview Question Suggestions)
+                        st.markdown(star_feedback)
+
+    # Resume Analysis (Enhanced with Interview Question Suggestions)
     with resume_tab:
         st.subheader(t["resume_analysis"])
         with st.form("resume_form"):
@@ -1095,7 +1106,6 @@ with tab2:
                         """
                         optimizations = get_result(optimization_prompt)
                         st.markdown(optimizations)
-
     # Updated promotional content
     st.markdown("""
     <div style='background-color:#fffde7; border:2px solid #fdd835; border-radius:10px; padding:20px; margin-top:30px;'>
