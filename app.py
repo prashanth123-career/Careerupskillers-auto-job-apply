@@ -635,8 +635,7 @@ with tab2:
     st.header(f"🎯 {t['interview_prep']}")
     
     # Sub-tabs for Interview Prep and Resume Analysis
-    prep_tab, resume_tab = st.tabs(["Interview Prep Resources", t["resume_analysis"]])
-    
+prep_tab, resume_tab, ats_tab = st.tabs(["Interview Prep Resources", t["resume_analysis"], "ATS Resume Builder"])    
     # Interview Prep Resources (Enhanced Functionality)
     with prep_tab:
         # Initialize session state for confidence tracker
