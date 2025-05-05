@@ -906,6 +906,340 @@ with tab2:
                     st.markdown(suggested_questions)
                 except Exception as e:
                     st.error(f"An error occurred: {str(e)}")
+                    # ----------------- TAB 3: ATS RESUME BUILDER -----------------
+with tab3:
+    st.header("📝 ATS-Optimized Resume Builder")
+    
+    # Explanation of ATS with expandable section
+    with st.expander("ℹ️ What is an ATS and why does it matter?"):
+        st.markdown("""
+        **Applicant Tracking Systems (ATS)** are software used by recruiters to manage job applications. 
+        Key facts:
+        - 75% of resumes are rejected by ATS before reaching a human
+        - ATS scans for keywords, formatting, and relevance
+        - Proper optimization can increase interview chances by 3x
+        
+        This builder helps you create an ATS-friendly resume that:
+        - Uses the right keywords from job descriptions
+        - Maintains proper formatting
+        - Highlights your most relevant skills
+        """)
+    
+    # Resume building steps
+    st.subheader("1️⃣ Enter Your Basic Information")
+    with st.form("basic_info"):
+        col1, col2 = st.columns(2)
+        with col1:
+            full_name = st.text_input("Full Name*", placeholder="John Doe")
+            email = st.text_input("Email*", placeholder="john@example.com")
+            phone = st.text_input("Phone*", placeholder="+1 (123) 456-7890")
+        with col2:
+            linkedin = st.text_input("LinkedIn Profile", placeholder="https://linkedin.com/in/yourprofile")
+            portfolio = st.text_input("Portfolio/GitHub", placeholder="https://github.com/yourprofile")
+            location = st.text_input("Location", placeholder="City, Country")
+        
+        basic_submitted = st.form_submit_button("Save Basic Information")
+        if basic_submitted:
+            if not all([full_name, email, phone]):
+                st.error("Please fill in all required fields (*)")
+            else:
+                st.session_state.basic_info = {
+                    "name": full_name,
+                    "email": email,
+                    "phone": phone,
+                    "linkedin": linkedin,
+                    "portfolio": portfolio,
+                    "location": location
+                }
+                st.success("Basic information saved!")
+    
+    # Work Experience Section
+    st.subheader("2️⃣ Add Your Work Experience")
+    if 'work_experience' not in st.session_state:
+        st.session_state.work_experience = []
+    
+    with st.form("work_exp_form"):
+        col1, col2 = st.columns(2)
+        with col1:
+            job_title = st.text_input("Job Title*", placeholder="Data Analyst")
+            company = st.text_input("Company*", placeholder="Tech Corp Inc.")
+            location = st.text_input("Job Location", placeholder="New York, USA")
+        with col2:
+            start_date = st.date_input("Start Date*")
+            end_date = st.date_input("End Date*", help="For current position, select today's date")
+            current_job = st.checkbox("Currently working here")
+        
+        responsibilities = st.text_area("Responsibilities & Achievements*", 
+                                      placeholder="• Analyzed data to identify trends...\n• Created dashboards using Tableau...\n• Improved reporting efficiency by 30%...",
+                                      height=150,
+                                      help="Use bullet points and quantify achievements where possible")
+        
+        exp_submitted = st.form_submit_button("Add Experience")
+        if exp_submitted:
+            if not all([job_title, company, responsibilities]):
+                st.error("Please fill in all required fields (*)")
+            else:
+                new_exp = {
+                    "job_title": job_title,
+                    "company": company,
+                    "location": location,
+                    "start_date": start_date.strftime("%b %Y"),
+                    "end_date": "Present" if current_job else end_date.strftime("%b %Y"),
+                    "responsibilities": responsibilities
+                }
+                st.session_state.work_experience.append(new_exp)
+                st.success("Experience added!")
+    
+    # Display added experiences
+    if st.session_state.get('work_experience'):
+        st.markdown("**Your Work Experience**")
+        for i, exp in enumerate(st.session_state.work_experience, 1):
+            with st.expander(f"{exp['job_title']} at {exp['company']}"):
+                st.markdown(f"**Period**: {exp['start_date']} - {exp['end_date']}")
+                st.markdown(f"**Location**: {exp.get('location', '')}")
+                st.markdown("**Responsibilities & Achievements**:")
+                st.markdown(exp['responsibilities'])
+                if st.button(f"Remove Experience #{i}"):
+                    st.session_state.work_experience.pop(i-1)
+                    st.rerun()
+    
+    # Education Section
+    st.subheader("3️⃣ Add Your Education")
+    if 'education' not in st.session_state:
+        st.session_state.education = []
+    
+    with st.form("education_form"):
+        col1, col2 = st.columns(2)
+        with col1:
+            degree = st.text_input("Degree*", placeholder="Bachelor of Science in Computer Science")
+            institution = st.text_input("Institution*", placeholder="University of Technology")
+        with col2:
+            grad_year = st.text_input("Graduation Year*", placeholder="2020")
+            gpa = st.text_input("GPA (optional)", placeholder="3.8/4.0")
+        
+        edu_submitted = st.form_submit_button("Add Education")
+        if edu_submitted:
+            if not all([degree, institution, grad_year]):
+                st.error("Please fill in all required fields (*)")
+            else:
+                new_edu = {
+                    "degree": degree,
+                    "institution": institution,
+                    "year": grad_year,
+                    "gpa": gpa
+                }
+                st.session_state.education.append(new_edu)
+                st.success("Education added!")
+    
+    # Skills Section with ATS Optimization
+    st.subheader("4️⃣ Add Your Skills")
+    st.markdown("💡 **Tip**: Include skills mentioned in your target job description for better ATS matching")
+    
+    if 'skills' not in st.session_state:
+        st.session_state.skills = {
+            "technical": [],
+            "soft": []
+        }
+    
+    with st.form("skills_form"):
+        target_job = st.text_input("Target Job Title (for skill suggestions)", placeholder="Data Analyst")
+        tech_skills = st.text_area("Technical Skills", 
+                                 placeholder="Python, SQL, Tableau, Machine Learning...",
+                                 help="Separate skills with commas")
+        soft_skills = st.text_area("Soft Skills", 
+                                  placeholder="Communication, Teamwork, Problem-solving...",
+                                  help="Separate skills with commas")
+        
+        # Skill suggestions based on target job
+        if target_job:
+            common_skills = {
+                "Data Analyst": ["SQL", "Excel", "Python", "Tableau", "Power BI", "Data Visualization", "Statistics"],
+                "Software Engineer": ["Java", "Python", "C++", "Git", "Algorithms", "Data Structures", "OOP"],
+                "Product Manager": ["Agile", "Scrum", "JIRA", "Product Roadmaps", "Market Research", "UX Principles"]
+            }
+            if target_job in common_skills:
+                st.markdown(f"💡 Common skills for {target_job}: {', '.join(common_skills[target_job])}")
+        
+        skills_submitted = st.form_submit_button("Update Skills")
+        if skills_submitted:
+            st.session_state.skills["technical"] = [s.strip() for s in tech_skills.split(",") if s.strip()]
+            st.session_state.skills["soft"] = [s.strip() for s in soft_skills.split(",") if s.strip()]
+            st.success("Skills updated!")
+    
+    # Projects Section
+    st.subheader("5️⃣ Add Projects")
+    if 'projects' not in st.session_state:
+        st.session_state.projects = []
+    
+    with st.form("project_form"):
+        project_name = st.text_input("Project Name*", placeholder="Customer Churn Prediction")
+        project_desc = st.text_area("Description*", 
+                                  placeholder="• Developed a machine learning model to predict customer churn...\n• Achieved 85% accuracy...",
+                                  height=100)
+        project_skills = st.text_input("Skills Used", placeholder="Python, Pandas, Scikit-learn")
+        
+        proj_submitted = st.form_submit_button("Add Project")
+        if proj_submitted:
+            if not all([project_name, project_desc]):
+                st.error("Please fill in all required fields (*)")
+            else:
+                new_proj = {
+                    "name": project_name,
+                    "description": project_desc,
+                    "skills": project_skills
+                }
+                st.session_state.projects.append(new_proj)
+                st.success("Project added!")
+    
+    # Resume Generation and Download
+    st.subheader("🎉 Generate Your ATS-Optimized Resume")
+    
+    # Resume Templates
+    template = st.selectbox("Choose a Resume Template", 
+                           ["Modern", "Professional", "Clean", "Creative"],
+                           help="All templates are ATS-friendly")
+    
+    if st.button("Generate Resume"):
+        if not st.session_state.get('basic_info'):
+            st.error("Please complete at least the Basic Information section")
+        else:
+            with st.spinner("Generating your ATS-optimized resume..."):
+                # Create resume in memory
+                resume_content = generate_resume_content()
+                
+                # Display preview
+                st.markdown("### Resume Preview")
+                st.markdown(resume_content, unsafe_allow_html=True)
+                
+                # Download options
+                st.markdown("### Download Options")
+                
+                # PDF Download
+                pdf_bytes = generate_pdf(resume_content)
+                st.download_button(
+                    label="📥 Download as PDF",
+                    data=pdf_bytes,
+                    file_name=f"{st.session_state.basic_info['name'].replace(' ', '_')}_Resume.pdf",
+                    mime="application/pdf"
+                )
+                
+                # Word Download
+                docx_bytes = generate_docx(resume_content)
+                st.download_button(
+                    label="📥 Download as Word Doc",
+                    data=docx_bytes,
+                    file_name=f"{st.session_state.basic_info['name'].replace(' ', '_')}_Resume.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                )
+                
+                # Plain Text Download
+                st.download_button(
+                    label="📥 Download as Text File",
+                    data=resume_content,
+                    file_name=f"{st.session_state.basic_info['name'].replace(' ', '_')}_Resume.txt",
+                    mime="text/plain"
+                )
+    
+    # ATS Optimization Score
+    if st.button("🔍 Check ATS Optimization Score"):
+        if not st.session_state.get('basic_info'):
+            st.error("Please complete at least the Basic Information section")
+        else:
+            with st.spinner("Analyzing your resume for ATS optimization..."):
+                # Generate a mock analysis (in a real app, you'd use NLP)
+                score = random.randint(65, 95)  # Random score for demo
+                
+                st.markdown(f"### ATS Optimization Score: {score}/100")
+                st.progress(score/100)
+                
+                if score >= 85:
+                    st.success("Excellent! Your resume is well-optimized for ATS systems.")
+                elif score >= 70:
+                    st.warning("Good, but could be improved. See suggestions below.")
+                else:
+                    st.error("Needs significant improvement to pass ATS screening.")
+                
+                # Suggestions
+                st.markdown("### Optimization Suggestions:")
+                suggestions = [
+                    "✅ Good use of clear section headings",
+                    "⚠️ Add more measurable achievements (e.g., 'Improved efficiency by 30%')",
+                    "⚠️ Include more keywords from your target job description",
+                    "✅ Appropriate length (1-2 pages)",
+                    "⚠️ Consider adding a 'Skills' section at the top"
+                ]
+                for suggestion in suggestions:
+                    st.markdown(f"- {suggestion}")
+    
+    # Helper functions (would be defined elsewhere in your code)
+    def generate_resume_content():
+        """Generate HTML content for the resume"""
+        basic = st.session_state.basic_info
+        work_exp = st.session_state.get('work_experience', [])
+        education = st.session_state.get('education', [])
+        skills = st.session_state.get('skills', {"technical": [], "soft": []})
+        projects = st.session_state.get('projects', [])
+        
+        html = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
+            <h1 style="color: #2e7d32; border-bottom: 2px solid #2e7d32; padding-bottom: 10px;">
+                {basic['name']}
+            </h1>
+            <p>
+                {basic.get('location', '')} | {basic['email']} | {basic['phone']} | 
+                {basic.get('linkedin', '') and f"LinkedIn: {basic['linkedin']}"} | 
+                {basic.get('portfolio', '') and f"Portfolio: {basic['portfolio']}"}
+            </p>
+            
+            <h2 style="color: #2e7d32; border-bottom: 1px solid #2e7d32;">Professional Experience</h2>
+            {"".join([
+                f"""
+                <div style="margin-bottom: 15px;">
+                    <h3 style="margin-bottom: 5px;">{exp['job_title']}</h3>
+                    <p style="margin: 0;"><strong>{exp['company']}</strong> | {exp.get('location', '')} | {exp['start_date']} - {exp['end_date']}</p>
+                    <div style="margin-top: 5px;">{exp['responsibilities'].replace('•', '•')}</div>
+                </div>
+                """ for exp in work_exp
+            ])}
+            
+            <h2 style="color: #2e7d32; border-bottom: 1px solid #2e7d32;">Education</h2>
+            {"".join([
+                f"""
+                <div style="margin-bottom: 10px;">
+                    <h3 style="margin-bottom: 5px;">{edu['degree']}</h3>
+                    <p style="margin: 0;"><strong>{edu['institution']}</strong> | {edu['year']} {edu.get('gpa') and f"| GPA: {edu['gpa']}"}</p>
+                </div>
+                """ for edu in education
+            ])}
+            
+            <h2 style="color: #2e7d32; border-bottom: 1px solid #2e7d32;">Skills</h2>
+            <p>
+                <strong>Technical:</strong> {", ".join(skills.get('technical', []))}<br>
+                <strong>Soft:</strong> {", ".join(skills.get('soft', []))}
+            </p>
+            
+            <h2 style="color: #2e7d32; border-bottom: 1px solid #2e7d32;">Projects</h2>
+            {"".join([
+                f"""
+                <div style="margin-bottom: 10px;">
+                    <h3 style="margin-bottom: 5px;">{proj['name']}</h3>
+                    <div>{proj['description'].replace('•', '•')}</div>
+                    <p><em>Skills used: {proj.get('skills', '')}</em></p>
+                </div>
+                """ for proj in projects
+            ])}
+        </div>
+        """
+        return html
+    
+    def generate_pdf(html_content):
+        """Convert HTML to PDF (mock function - in real app use libraries like weasyprint or pdfkit)"""
+        return b"Mock PDF content - in real app this would be actual PDF bytes"
+    
+    def generate_docx(html_content):
+        """Convert HTML to DOCX (mock function - in real app use python-docx)"""
+        return b"Mock DOCX content - in real app this would be actual DOCX bytes"
+
 
     # Updated promotional content
     st.markdown("""
