@@ -903,54 +903,55 @@ with tab2:
                         st.markdown(star_feedback)
 
     # Resume Analysis (Enhanced with Interview Question Suggestions)
-    with resume_tab:
-        st.subheader(t["resume_analysis"])
-        with st.form("resume_form"):
-            col1, col2 = st.columns([1, 1])
-            with col1:
-                job_description = st.text_area("Enter the Job Description", height=200, key="resume_job_desc")
-            with col2:
-                uploaded_file = st.file_uploader(t["upload_resume"], type=['pdf'], key="resume_upload")
-            
-            analyze_submitted = st.form_submit_button(t["analyze_resume"])
+with resume_tab:
+    st.subheader(t["resume_analysis"])
+    with st.form("resume_form"):
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            job_description = st.text_area("Enter the Job Description", height=200, key="resume_job_desc")
+        with col2:
+            uploaded_file = st.file_uploader(t["upload_resume"], type=['pdf'], key="resume_upload")
+        
+        analyze_submitted = st.form_submit_button(t["analyze_resume"])
 
-        if analyze_submitted:
-            if not job_description:
-                st.error("Please enter a job description.")
-            elif not uploaded_file:
-                st.error("Please upload your resume.")
-            else:
-                try:
-                    # Extract resume text
-                    resume_text = pdf_to_text(uploaded_file)
-                    
-                    # Get match score
-                    score_prompt = construct_score_prompt(resume_text, job_description)
-                    score_result = get_result(score_prompt)
-                    st.subheader("Resume Match Score")
-                    st.markdown(score_result)
-                    
-                    # Get improvement suggestions
-                    improvement_prompt = construct_improvement_prompt(resume_text, job_description)
-                    improvement_result = get_result(improvement_prompt)
-                    st.subheader("Suggestions to Improve Your Resume")
-                    st.markdown(improvement_result)
-                    
-                    # Suggest interview questions based on resume analysis
-                    question_prompt = f"""
-                    Based on the resume and job description below, suggest 3 interview questions (1 technical, 1 behavioral, 1 role-specific) that the candidate should prepare for.
-                    Resume: {resume_text}
-                    Job Description: {job_description}
-                    Return the questions in a bullet-point format.
-                    """
-                    suggested_questions = get_result(question_prompt)
-                    st.subheader("Recommended Interview Questions to Prepare")
-                    st.markdown(suggested_questions)
-                except Exception as e:
-                    st.error(f"An error occurred: {str(e)}")
-                            st.markdown("### ✅ Resume Text Preview")
-        st.text_area("Extracted Text", resume_text, height=300)
+    if analyze_submitted:
+        if not job_description:
+            st.error("Please enter a job description.")
+        elif not uploaded_file:
+            st.error("Please upload your resume.")
+        else:
+            try:
+                # Extract resume text
+                resume_text = pdf_to_text(uploaded_file)
+                
+                # Get match score
+                score_prompt = construct_score_prompt(resume_text, job_description)
+                score_result = get_result(score_prompt)
+                st.subheader("Resume Match Score")
+                st.markdown(score_result)
+                
+                # Get improvement suggestions
+                improvement_prompt = construct_improvement_prompt(resume_text, job_description)
+                improvement_result = get_result(improvement_prompt)
+                st.subheader("Suggestions to Improve Your Resume")
+                st.markdown(improvement_result)
+                
+                # Suggest interview questions based on resume analysis
+                question_prompt = f"""
+                Based on the resume and job description below, suggest 3 interview questions (1 technical, 1 behavioral, 1 role-specific) that the candidate should prepare for.
+                Resume: {resume_text}
+                Job Description: {job_description}
+                Return the questions in a bullet-point format.
+                """
+                suggested_questions = get_result(question_prompt)
+                st.subheader("Recommended Interview Questions to Prepare")
+                st.markdown(suggested_questions)
 
+                st.markdown("### ✅ Resume Text Preview")  # <-- FIXED INDENTATION
+                st.text_area("Extracted Text", resume_text, height=300)
+                
+            except Exception as e:
+                st.error(f"An error occurred: {str(e)}")
         # --- ATS Resume Builder ---
         st.markdown("### ✨ Generate ATS-Friendly Resume")
         if st.button("Generate ATS Resume"):
