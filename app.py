@@ -905,6 +905,123 @@ prep_tab, resume_tab, ats_tab = st.tabs(["Interview Prep Resources", t["resume_a
                     st.markdown(suggested_questions)
                 except Exception as e:
                     st.error(f"An error occurred: {str(e)}")
+                    # ----------------- ATS RESUME BUILDER TAB -----------------
+with ats_tab:
+    st.header("📝 ATS-Friendly Resume Builder")
+    st.markdown("""
+    <div style='background-color:#e3f2fd; padding:15px; border-radius:10px; margin-bottom:20px;'>
+        ℹ️ <b>What is an ATS Resume?</b> Many companies use Applicant Tracking Systems to scan resumes. 
+        This builder helps you create a resume that passes these systems.
+    </div>
+    """, unsafe_allow_html=True)
+    
+    with st.form("ats_resume_form"):
+        st.subheader("Personal Information")
+        col1, col2 = st.columns(2)
+        with col1:
+            full_name = st.text_input("Full Name*")
+            email = st.text_input("Email*")
+        with col2:
+            phone = st.text_input("Phone*")
+            linkedin = st.text_input("LinkedIn Profile")
+        
+        st.subheader("Professional Summary")
+        summary = st.text_area("Write a short professional summary (3-5 sentences)*", height=100)
+        
+        st.subheader("Work Experience")
+        experience = st.text_area("List your work experience (Include job titles, company names, dates, and bullet points of achievements)*", height=150)
+        
+        st.subheader("Education")
+        education = st.text_area("List your education (Degree, Institution, Year)*", height=100)
+        
+        st.subheader("Skills")
+        skills = st.text_area("List your key skills (Separate with commas)*", height=100, 
+                            placeholder="Python, Data Analysis, Project Management, ...")
+        
+        st.subheader("Additional Sections (Optional)")
+        certifications = st.text_area("Certifications", height=80)
+        projects = st.text_area("Projects", height=80)
+        languages = st.text_area("Languages", height=80)
+        
+        submitted = st.form_submit_button("Generate ATS Resume")
+    
+    if submitted:
+        if not all([full_name, email, phone, summary, experience, education, skills]):
+            st.error("Please fill in all required fields (*)")
+        else:
+            # Create the resume content
+            resume_content = f"""
+            {full_name.upper()}
+            {email} | {phone} | {linkedin if linkedin else ''}
+            
+            ------------------------------------------------------------------------
+            
+            PROFESSIONAL SUMMARY:
+            {summary}
+            
+            ------------------------------------------------------------------------
+            
+            WORK EXPERIENCE:
+            {experience}
+            
+            ------------------------------------------------------------------------
+            
+            EDUCATION:
+            {education}
+            
+            ------------------------------------------------------------------------
+            
+            SKILLS:
+            {skills}
+            """
+            
+            # Add optional sections if provided
+            if certifications:
+                resume_content += f"""
+                
+                CERTIFICATIONS:
+                {certifications}
+                """
+            
+            if projects:
+                resume_content += f"""
+                
+                PROJECTS:
+                {projects}
+                """
+            
+            if languages:
+                resume_content += f"""
+                
+                LANGUAGES:
+                {languages}
+                """
+            
+            # Show preview
+            st.subheader("Your ATS-Friendly Resume Preview")
+            st.text_area("Resume Preview", resume_content, height=500)
+            
+            # Download button
+            st.download_button(
+                label="📥 Download Resume as TXT",
+                data=resume_content,
+                file_name=f"{full_name.replace(' ', '_')}_ATS_Resume.txt",
+                mime="text/plain"
+            )
+            
+            # Tips section
+            st.markdown("""
+            <div style='background-color:#fff8e1; padding:15px; border-radius:10px; margin-top:20px;'>
+                <h4>💡 ATS Resume Tips:</h4>
+                <ul>
+                    <li>Use standard fonts like Arial or Times New Roman</li>
+                    <li>Include keywords from the job description</li>
+                    <li>Avoid tables, images, or fancy formatting</li>
+                    <li>Keep it to 1-2 pages maximum</li>
+                    <li>Save as PDF when submitting (convert from this TXT file)</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
 
     # Updated promotional content
     st.markdown("""
