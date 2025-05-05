@@ -891,7 +891,7 @@ with tab2:
                     # Get improvement suggestions
                     improvement_prompt = construct_improvement_prompt(resume_text, job_description)
                     improvement_result = get_result(improvement_prompt)
-                    st.subheader("Suggestions to Improve Your Resume")
+                    st.subheader("Suggestions to Improve Your ATS Friendly Resume")
                     st.markdown(improvement_result)
                     
                     # Suggest interview questions based on resume analysis
