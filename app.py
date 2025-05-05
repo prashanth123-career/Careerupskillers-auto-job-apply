@@ -86,7 +86,48 @@ def get_result(prompt):
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
-        return f"Error: Could not process request with Gemini LLM. Details: {str(e)}"        
+        return f"Error: Could not process request with Gemini LLM. Details: {str(e)}"
+        def generate_ats_friendly_resume(resume_text):
+    model = get_gemini_model()
+    prompt = f"""
+    You are a professional resume writer. Rewrite the following resume in a clean, ATS-optimized format.
+
+    Rules:
+    - No graphics, tables, or columns.
+    - Use standard fonts, bullet points, and clear headings.
+    - Include: Summary, Skills, Experience, Education.
+    - Highlight achievements with metrics if present.
+    - Keep it in professional, concise tone.
+
+    Resume Content:
+    {resume_text}
+    """
+    response = model.generate_content(prompt)
+    return response.text.strip()
+
+def keyword_match_score(resume_text, job_description):
+    model = get_gemini_model()
+    prompt = f"""
+    You are an ATS keyword analyst.
+
+    Compare the following resume and job description:
+    ---
+    Resume:
+    {resume_text}
+    ---
+    Job Description:
+    {job_description}
+    ---
+
+    Output:
+    1. Match Score (in %)
+    2. Relevant keywords found
+    3. Important keywords missing
+    4. Suggestions to improve keyword alignment
+    """
+    response = model.generate_content(prompt)
+    return response.text.strip()
+
 # ----------------- LANGUAGE SUPPORT -----------------
 LANGUAGES = {
     "English": "en",
@@ -906,6 +947,54 @@ with tab2:
                     st.markdown(suggested_questions)
                 except Exception as e:
                     st.error(f"An error occurred: {str(e)}")
+                            st.markdown("### ✅ Resume Text Preview")
+        st.text_area("Extracted Text", resume_text, height=300)
+
+        # --- ATS Resume Builder ---
+        st.markdown("### ✨ Generate ATS-Friendly Resume")
+        if st.button("Generate ATS Resume"):
+            with st.spinner("Generating optimized resume..."):
+                ats_resume = generate_ats_friendly_resume(resume_text)
+                st.success("✅ ATS-optimized resume generated!")
+                st.download_button("📥 Download ATS Resume", ats_resume, file_name="ATS_Optimized_Resume.txt")
+
+        # --- Job Description Matching ---
+        st.markdown("### 🔍 Match Resume with Job Description")
+        job_description = st.text_area("Paste Job Description", height=200)
+        if st.button("Analyze Keyword Match"):
+            with st.spinner("Analyzing match score..."):
+                match_result = keyword_match_score(resume_text, job_description)
+                st.markdown("#### 📊 Match Results")
+                st.write(match_result)
+
+# Tab 4 - Resume Builder from Scratch
+with tabs[3]:
+    st.header("🛠️ Build Resume from Scratch")
+    name = st.text_input("Full Name")
+    summary = st.text_area("Professional Summary")
+    skills = st.text_area("Skills (comma-separated)")
+    experience = st.text_area("Work Experience")
+    education = st.text_area("Education")
+
+    if st.button("Generate Resume"):
+        resume_content = f"""
+        {name}
+
+        SUMMARY
+        {summary}
+
+        SKILLS
+        {skills}
+
+        EXPERIENCE
+        {experience}
+
+        EDUCATION
+        {education}
+        """
+        st.success("✅ Resume generated!")
+        st.download_button("📥 Download Resume", resume_content, file_name="Generated_Resume.txt")
+
 
     # Updated promotional content
     st.markdown("""
