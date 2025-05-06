@@ -923,21 +923,21 @@ with ats_tab:
 
     if submit_resume:
         ats_text = f"""
-{full_name}
-Email: {email} | Phone: {phone} | LinkedIn: {linkedin}
-
-Professional Summary:
-{summary}
-
-Skills:
-{skills}
-
-Work Experience:
-{experience}
-
-Education:
-{education}
-"""
+            {full_name}
+            Email: {email} | Phone: {phone} | LinkedIn: {linkedin}
+            
+            Professional Summary:
+            {summary}
+            
+            Skills:
+            {skills}
+            
+            Work Experience:
+            {experience}
+            
+            Education:
+            {education}
+            """
 
         # DOCX creation
         doc = Document()
