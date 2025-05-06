@@ -637,292 +637,292 @@ with tab2:
 # Sub-tabs for Interview Prep, Resume Analysis, and ATS Builder
 prep_tab, resume_tab, ats_tab = st.tabs(["Interview Prep Resources", t["resume_analysis"], "🎓 Professional ATS Resume Builder"])
     
-    # Interview Prep Resources (Enhanced Functionality)
-    with prep_tab:
-        # Initialize session state for confidence tracker
-        if 'interview_practice_count' not in st.session_state:
-            st.session_state.interview_practice_count = 0
-        if 'star_stories' not in st.session_state:
-            st.session_state.star_stories = []
+# Interview Prep Resources (Enhanced Functionality)
+with prep_tab:
+    # Initialize session state for confidence tracker
+    if 'interview_practice_count' not in st.session_state:
+        st.session_state.interview_practice_count = 0
+    if 'star_stories' not in st.session_state:
+        st.session_state.star_stories = []
 
-        # Confidence Tracker
-        st.markdown(f"💪 **Interview Confidence**: {st.session_state.interview_practice_count} practice sessions completed")
-        progress = min(st.session_state.interview_practice_count / 10, 1.0)  # Max at 10 sessions
-        st.progress(progress)
-        if st.session_state.interview_practice_count >= 10:
-            st.success("🎉 Badge Earned: 10 Questions Mastered!")
+    # Confidence Tracker
+    st.markdown(f"💪 **Interview Confidence**: {st.session_state.interview_practice_count} practice sessions completed")
+    progress = min(st.session_state.interview_practice_count / 10, 1.0)  # Max at 10 sessions
+    st.progress(progress)
+    if st.session_state.interview_practice_count >= 10:
+        st.success("🎉 Badge Earned: 10 Questions Mastered!")
 
-        # Updated form with company-specific trending questions
-        with st.form("interview_form"):
-            col1, col2 = st.columns([1, 2])
-            with col1:
-                role = st.text_input(t["job_title"], "Data Analyst", key="int_role")
-                country = st.selectbox(t["country"], list(PORTALS_BY_COUNTRY.keys()), key="int_country")
-                exp_level = st.selectbox(t["experience"], t["experience_options"])
-            with col2:
-                prep_type = st.selectbox("Preparation Type", [
-                    "Technical Questions", 
-                    "Behavioral Questions",
-                    "Case Studies",
-                    "Salary Negotiation",
-                    "Resume Tips"
-                ])
-                company = st.text_input("Target Company (optional)", placeholder="Google, TCS, etc.")
+    # Updated form with company-specific trending questions
+    with st.form("interview_form"):
+        col1, col2 = st.columns([1, 2])
+        with col1:
+            role = st.text_input(t["job_title"], "Data Analyst", key="int_role")
+            country = st.selectbox(t["country"], list(PORTALS_BY_COUNTRY.keys()), key="int_country")
+            exp_level = st.selectbox(t["experience"], t["experience_options"])
+        with col2:
+            prep_type = st.selectbox("Preparation Type", [
+                "Technical Questions", 
+                "Behavioral Questions",
+                "Case Studies",
+                "Salary Negotiation",
+                "Resume Tips"
+            ])
+            company = st.text_input("Target Company (optional)", placeholder="Google, TCS, etc.")
+        
+        submitted = st.form_submit_button(f"🔗 {t['generate_link']}")
+
+    if submitted:
+        if not role.strip():
+            st.error("Please enter a job title.")
+        else:
+            base_query = f"{role} {prep_type} {exp_level} {company} {country}"
+            encoded_query = urllib.parse.quote_plus(base_query)
             
-            submitted = st.form_submit_button(f"🔗 {t['generate_link']}")
-
-        if submitted:
-            if not role.strip():
-                st.error("Please enter a job title.")
-            else:
-                base_query = f"{role} {prep_type} {exp_level} {company} {country}"
-                encoded_query = urllib.parse.quote_plus(base_query)
-                
-                st.subheader("🔍 Best Preparation Resources")
-                
-                # Updated resource matrix with region-specific resources
-                RESOURCE_MATRIX = {
-                    "Technical Questions": {
-                        "India": "https://www.indiabix.com",
-                        "USA": "https://leetcode.com",
-                        "Global": "https://www.hackerrank.com"
-                    },
-                    "Behavioral Questions": {
-                        "India": "https://www.ambitionbox.com/interviews",
-                        "USA": "https://www.themuse.com/advice/behavioral-interview-questions",
-                        "Global": "https://www.vault.com/career-advice/interviewing"
-                    },
-                    "Case Studies": {
-                        "India": "https://www.mbauniverse.com",
-                        "USA": "https://www.caseinterview.com",
-                        "Global": "https://www.preplounge.com"
-                    },
-                    "Salary Negotiation": {
-                        "India": "https://www.payscale.com",
-                        "USA": "https://www.glassdoor.com",
-                        "Global": "https://www.salary.com"
-                    },
-                    "Resume Tips": {
-                        "India": "https://www.naukri.com",
-                        "USA": "https://www.resume.com",
-                        "Global": "https://www.zety.com"
-                    }
+            st.subheader("🔍 Best Preparation Resources")
+            
+            # Updated resource matrix with region-specific resources
+            RESOURCE_MATRIX = {
+                "Technical Questions": {
+                    "India": "https://www.indiabix.com",
+                    "USA": "https://leetcode.com",
+                    "Global": "https://www.hackerrank.com"
+                },
+                "Behavioral Questions": {
+                    "India": "https://www.ambitionbox.com/interviews",
+                    "USA": "https://www.themuse.com/advice/behavioral-interview-questions",
+                    "Global": "https://www.vault.com/career-advice/interviewing"
+                },
+                "Case Studies": {
+                    "India": "https://www.mbauniverse.com",
+                    "USA": "https://www.caseinterview.com",
+                    "Global": "https://www.preplounge.com"
+                },
+                "Salary Negotiation": {
+                    "India": "https://www.payscale.com",
+                    "USA": "https://www.glassdoor.com",
+                    "Global": "https://www.salary.com"
+                },
+                "Resume Tips": {
+                    "India": "https://www.naukri.com",
+                    "USA": "https://www.resume.com",
+                    "Global": "https://www.zety.com"
                 }
-                
-                region_key = country if country in ["India", "USA"] else "Global"
-                main_resource = RESOURCE_MATRIX.get(prep_type, {}).get(region_key)
-                if main_resource:
-                    st.markdown(f"""
-                    <div style="padding:15px; background:#e8f5e9; border-radius:10px; margin-bottom:20px;">
-                        <h4>🎯 Recommended Resource</h4>
-                        <a href="{main_resource}" target="_blank" style="color:#2e7d32; font-weight:bold;">
-                            Best {prep_type} Guide for {country} → 
-                        </a>
-                    </div>
-                    """, unsafe_allow_html=True)
-                
+            }
+            
+            region_key = country if country in ["India", "USA"] else "Global"
+            main_resource = RESOURCE_MATRIX.get(prep_type, {}).get(region_key)
+            if main_resource:
                 st.markdown(f"""
-                <div style="padding:15px; background:#fff3e0; border-radius:10px;">
-                    <h4>🔎 More Resources via Smart Search</h4>
-                    <a href="https://www.google.com/search?q={encoded_query}+filetype:pdf" target="_blank">
-                        📄 Find PDF Guides
-                    </a><br>
-                    <a href="https://www.google.com/search?q={encoded_query}+site:youtube.com" target="_blank">
-                        🎥 Video Tutorials
-                    </a><br>
-                    <a href="https://www.google.com/search?q={encoded_query}+forum" target="_blank">
-                        💬 Discussion Forums
+                <div style="padding:15px; background:#e8f5e9; border-radius:10px; margin-bottom:20px;">
+                    <h4>🎯 Recommended Resource</h4>
+                    <a href="{main_resource}" target="_blank" style="color:#2e7d32; font-weight:bold;">
+                        Best {prep_type} Guide for {country} → 
                     </a>
                 </div>
                 """, unsafe_allow_html=True)
+            
+            st.markdown(f"""
+            <div style="padding:15px; background:#fff3e0; border-radius:10px;">
+                <h4>🔎 More Resources via Smart Search</h4>
+                <a href="https://www.google.com/search?q={encoded_query}+filetype:pdf" target="_blank">
+                    📄 Find PDF Guides
+                </a><br>
+                <a href="https://www.google.com/search?q={encoded_query}+site:youtube.com" target="_blank">
+                    🎥 Video Tutorials
+                </a><br>
+                <a href="https://www.google.com/search?q={encoded_query}+forum" target="_blank">
+                    💬 Discussion Forums
+                </a>
+            </div>
+            """, unsafe_allow_html=True)
 
-                # Trending Interview Questions
-                st.subheader("🔥 Trending Interview Questions")
-                trending_questions = {
-                    "Data Analyst": [
-                        "Explain the difference between supervised and unsupervised learning.",
-                        "How do you handle missing data in a dataset?",
-                        "Describe a time you used data visualization to influence a decision."
-                    ],
-                    "Software Engineer": [
-                        "Reverse a linked list in-place.",
-                        "Design a REST API for a booking system.",
-                        "How do you optimize a slow-performing application?"
-                    ],
-                    "Product Manager": [
-                        "How would you prioritize features for a new app?",
-                        "Describe a failed project and what you learned.",
-                        "Walk us through your process for launching a product."
-                    ]
-                }
-                role_key = role if role in trending_questions else "Data Analyst"
-                for q in trending_questions[role_key]:
-                    st.markdown(f"- {q}")
+            # Trending Interview Questions
+            st.subheader("🔥 Trending Interview Questions")
+            trending_questions = {
+                "Data Analyst": [
+                    "Explain the difference between supervised and unsupervised learning.",
+                    "How do you handle missing data in a dataset?",
+                    "Describe a time you used data visualization to influence a decision."
+                ],
+                "Software Engineer": [
+                    "Reverse a linked list in-place.",
+                    "Design a REST API for a booking system.",
+                    "How do you optimize a slow-performing application?"
+                ],
+                "Product Manager": [
+                    "How would you prioritize features for a new app?",
+                    "Describe a failed project and what you learned.",
+                    "Walk us through your process for launching a product."
+                ]
+            }
+            role_key = role if role in trending_questions else "Data Analyst"
+            for q in trending_questions[role_key]:
+                st.markdown(f"- {q}")
 
-                # Personalized Checklist
-                checklist_items = {
-                    "Technical Questions": ["Review core concepts", "Practice 5 coding problems", "Study system design"],
-                    "Behavioral Questions": ["Prepare 3 STAR stories", "Research company values", "Practice timing"],
-                    "Case Studies": ["Practice problem-solving", "Review case frameworks", "Mock interviews"],
-                    "Salary Negotiation": ["Research market salary", "Prepare counter-offers", "Practice negotiation"],
-                    "Resume Tips": ["Update skills section", "Tailor to job", "Proofread"]
-                }.get(prep_type, [])
-                st.subheader("✅ Personalized Checklist")
-                for item in checklist_items:
-                    st.checkbox(item, key=f"check_{item}")
+            # Personalized Checklist
+            checklist_items = {
+                "Technical Questions": ["Review core concepts", "Practice 5 coding problems", "Study system design"],
+                "Behavioral Questions": ["Prepare 3 STAR stories", "Research company values", "Practice timing"],
+                "Case Studies": ["Practice problem-solving", "Review case frameworks", "Mock interviews"],
+                "Salary Negotiation": ["Research market salary", "Prepare counter-offers", "Practice negotiation"],
+                "Resume Tips": ["Update skills section", "Tailor to job", "Proofread"]
+            }.get(prep_type, [])
+            st.subheader("✅ Personalized Checklist")
+            for item in checklist_items:
+                st.checkbox(item, key=f"check_{item}")
 
-                # Downloadable Interview Prep Roadmap
-                roadmap_content = f"Interview Prep Roadmap for {role} ({exp_level})\n\n"
-                roadmap_content += f"Target Company: {company or 'Any'}\nCountry: {country}\nPreparation Type: {prep_type}\n\n"
-                roadmap_content += "Checklist:\n" + "\n".join([f"- [ ] {item}" for item in checklist_items])
-                roadmap_content += f"\n\nRecommended Resource: {main_resource}\n"
-                roadmap_content += f"Trending Questions:\n" + "\n".join([f"- {q}" for q in trending_questions[role_key]])
-                st.download_button(
-                    label="📥 Download Prep Roadmap",
-                    data=roadmap_content,
-                    file_name=f"{role}_Interview_Roadmap.txt",
-                    mime="text/plain"
-                )
+            # Downloadable Interview Prep Roadmap
+            roadmap_content = f"Interview Prep Roadmap for {role} ({exp_level})\n\n"
+            roadmap_content += f"Target Company: {company or 'Any'}\nCountry: {country}\nPreparation Type: {prep_type}\n\n"
+            roadmap_content += "Checklist:\n" + "\n".join([f"- [ ] {item}" for item in checklist_items])
+            roadmap_content += f"\n\nRecommended Resource: {main_resource}\n"
+            roadmap_content += f"Trending Questions:\n" + "\n".join([f"- {q}" for q in trending_questions[role_key]])
+            st.download_button(
+                label="📥 Download Prep Roadmap",
+                data=roadmap_content,
+                file_name=f"{role}_Interview_Roadmap.txt",
+                mime="text/plain"
+            )
 
-        # AI-Powered Mock Interview Simulator
-        st.subheader("🤖 AI Mock Interview Simulator")
-        with st.form("mock_interview_form"):
-            mock_role = st.text_input("Enter Role for Mock Interview", role, key="mock_role")
-            mock_question_type = st.selectbox("Question Type", ["Technical", "Behavioral"], key="mock_question_type")
-            mock_submit = st.form_submit_button("Generate Mock Question")
+    # AI-Powered Mock Interview Simulator
+    st.subheader("🤖 AI Mock Interview Simulator")
+    with st.form("mock_interview_form"):
+        mock_role = st.text_input("Enter Role for Mock Interview", role, key="mock_role")
+        mock_question_type = st.selectbox("Question Type", ["Technical", "Behavioral"], key="mock_question_type")
+        mock_submit = st.form_submit_button("Generate Mock Question")
+    
+    if mock_submit:
+        st.session_state.interview_practice_count += 1
+        mock_prompt = f"""
+        Act as an experienced interviewer. Generate one {mock_question_type.lower()} interview question for a {mock_role} role at {exp_level} level.
+        Ensure the question is realistic, specific, and relevant to 2025 job trends.
+        Return only the question as a single sentence.
+        """
+        mock_question = get_result(mock_prompt)
+        st.markdown(f"**Question**: {mock_question}")
         
-        if mock_submit:
-            st.session_state.interview_practice_count += 1
-            mock_prompt = f"""
-            Act as an experienced interviewer. Generate one {mock_question_type.lower()} interview question for a {mock_role} role at {exp_level} level.
-            Ensure the question is realistic, specific, and relevant to 2025 job trends.
-            Return only the question as a single sentence.
+        with st.form("mock_answer_form"):
+            user_answer = st.text_area("Your Answer", height=150, key="mock_answer")
+            feedback_submit = st.form_submit_button("Get AI Feedback")
+        
+        if feedback_submit and user_answer.strip():
+            feedback_prompt = f"""
+            Act as a career coach with 15 years of experience. Review the user's answer to the following {mock_question_type.lower()} interview question for a {mock_role} role: "{mock_question}".
+            User Answer: "{user_answer}"
+            Provide concise feedback focusing on:
+            1. Clarity and structure
+            2. Relevance to the question
+            3. Suggestions for improvement
+            Return the feedback in a bullet-point format.
             """
-            mock_question = get_result(mock_prompt)
-            st.markdown(f"**Question**: {mock_question}")
-            
-            with st.form("mock_answer_form"):
-                user_answer = st.text_area("Your Answer", height=150, key="mock_answer")
-                feedback_submit = st.form_submit_button("Get AI Feedback")
-            
-            if feedback_submit and user_answer.strip():
-                feedback_prompt = f"""
-                Act as a career coach with 15 years of experience. Review the user's answer to the following {mock_question_type.lower()} interview question for a {mock_role} role: "{mock_question}".
-                User Answer: "{user_answer}"
-                Provide concise feedback focusing on:
-                1. Clarity and structure
-                2. Relevance to the question
-                3. Suggestions for improvement
-                Return the feedback in a bullet-point format.
-                """
-                feedback = get_result(feedback_prompt)
-                st.markdown("**AI Feedback**")
-                st.markdown(feedback)
+            feedback = get_result(feedback_prompt)
+            st.markdown("**AI Feedback**")
+            st.markdown(feedback)
 
-        # Interactive STAR Method Guide
-        st.subheader("🌟 Craft STAR Stories")
-        with st.form("star_form"):
-            situation = st.text_area("Situation (Describe the context)", height=100)
-            task = st.text_area("Task (What was your responsibility?)", height=100)
-            action = st.text_area("Action (What did you do?)", height=100)
-            result = st.text_area("Result (What was the outcome?)", height=100)
-            star_submit = st.form_submit_button("Save STAR Story")
+    # Interactive STAR Method Guide
+    st.subheader("🌟 Craft STAR Stories")
+    with st.form("star_form"):
+        situation = st.text_area("Situation (Describe the context)", height=100)
+        task = st.text_area("Task (What was your responsibility?)", height=100)
+        action = st.text_area("Action (What did you do?)", height=100)
+        result = st.text_area("Result (What was the outcome?)", height=100)
+        star_submit = st.form_submit_button("Save STAR Story")
+    
+    if star_submit and all([situation.strip(), task.strip(), action.strip(), result.strip()]):
+        st.session_state.star_stories.append({
+            "Situation": situation,
+            "Task": task,
+            "Action": action,
+            "Result": result
+        })
+        st.success("STAR Story saved!")
         
-        if star_submit and all([situation.strip(), task.strip(), action.strip(), result.strip()]):
-            st.session_state.star_stories.append({
-                "Situation": situation,
-                "Task": task,
-                "Action": action,
-                "Result": result
-            })
-            st.success("STAR Story saved!")
-            
-            # Display saved STAR stories
-            if st.session_state.star_stories:
-                st.markdown("**Your STAR Stories**")
-                for i, story in enumerate(st.session_state.star_stories, 1):
-                    st.markdown(f"**Story {i}**")
-                    st.markdown(f"- **Situation**: {story['Situation']}")
-                    st.markdown(f"- **Task**: {story['Task']}")
-                    st.markdown(f"- **Action**: {story['Action']}")
-                    st.markdown(f"- **Result**: {story['Result']}")
-                    # AI Feedback on STAR Story
-                    if st.button("Get AI Feedback", key=f"star_feedback_{i}"):
-                        star_feedback_prompt = f"""
-                        Act as a career coach. Review the following STAR story for a {mock_role} interview:
-                        Situation: {story['Situation']}
-                        Task: {story['Task']}
-                        Action: {story['Action']}
-                        Result: {story['Result']}
-                        Provide feedback on structure, impact, and suggestions for improvement in bullet points.
-                        """
-                        star_feedback = get_result(star_feedback_prompt)
-                        st.markdown("**AI Feedback on STAR Story**")
-                        st.markdown(star_feedback)
-
-    # Resume Analysis (Enhanced with Interview Question Suggestions)
-    with resume_tab:
-        st.subheader(t["resume_analysis"])
-        with st.form("resume_form"):
-            col1, col2 = st.columns([1, 1])
-            with col1:
-                job_description = st.text_area("Enter the Job Description", height=200, key="resume_job_desc")
-            with col2:
-                uploaded_file = st.file_uploader(t["upload_resume"], type=['pdf'], key="resume_upload")
-            
-            analyze_submitted = st.form_submit_button(t["analyze_resume"])
-
-        if analyze_submitted:
-            if not job_description:
-                st.error("Please enter a job description.")
-            elif not uploaded_file:
-                st.error("Please upload your resume.")
-            else:
-                try:
-                    # Extract resume text
-                    resume_text = pdf_to_text(uploaded_file)
-                    
-                    # Get match score
-                    score_prompt = construct_score_prompt(resume_text, job_description)
-                    score_result = get_result(score_prompt)
-                    st.subheader("Resume Match Score")
-                    st.markdown(score_result)
-                    
-                    # Get improvement suggestions
-                    improvement_prompt = construct_improvement_prompt(resume_text, job_description)
-                    improvement_result = get_result(improvement_prompt)
-                    st.subheader("Suggestions to Improve Your Resume")
-                    st.markdown(improvement_result)
-                    
-                    # Suggest interview questions based on resume analysis
-                    question_prompt = f"""
-                    Based on the resume and job description below, suggest 3 interview questions (1 technical, 1 behavioral, 1 role-specific) that the candidate should prepare for.
-                    Resume: {resume_text}
-                    Job Description: {job_description}
-                    Return the questions in a bullet-point format.
+        # Display saved STAR stories
+        if st.session_state.star_stories:
+            st.markdown("**Your STAR Stories**")
+            for i, story in enumerate(st.session_state.star_stories, 1):
+                st.markdown(f"**Story {i}**")
+                st.markdown(f"- **Situation**: {story['Situation']}")
+                st.markdown(f"- **Task**: {story['Task']}")
+                st.markdown(f"- **Action**: {story['Action']}")
+                st.markdown(f"- **Result**: {story['Result']}")
+                # AI Feedback on STAR Story
+                if st.button("Get AI Feedback", key=f"star_feedback_{i}"):
+                    star_feedback_prompt = f"""
+                    Act as a career coach. Review the following STAR story for a {mock_role} interview:
+                    Situation: {story['Situation']}
+                    Task: {story['Task']}
+                    Action: {story['Action']}
+                    Result: {story['Result']}
+                    Provide feedback on structure, impact, and suggestions for improvement in bullet points.
                     """
-                    suggested_questions = get_result(question_prompt)
-                    st.subheader("Recommended Interview Questions to Prepare")
-                    st.markdown(suggested_questions)
-                except Exception as e:
-                    st.error(f"An error occurred: {str(e)}")
-                        # ----------------- ATS Resume Builder -----------------
-    with ats_tab:
-        st.subheader("🧩 Build Your Professional ATS-Friendly Resume")
+                    star_feedback = get_result(star_feedback_prompt)
+                    st.markdown("**AI Feedback on STAR Story**")
+                    st.markdown(star_feedback)
 
-        with st.form("manual_resume_form"):
-            full_name = st.text_input("Full Name")
-            email = st.text_input("Email")
-            phone = st.text_input("Phone")
-            linkedin = st.text_input("LinkedIn URL")
-            summary = st.text_area("Professional Summary")
-            skills = st.text_area("Skills (comma-separated)")
-            experience = st.text_area("Work Experience")
-            education = st.text_area("Education")
-            submit_resume = st.form_submit_button("Generate ATS Resume")
+# Resume Analysis (Enhanced with Interview Question Suggestions)
+with resume_tab:
+    st.subheader(t["resume_analysis"])
+    with st.form("resume_form"):
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            job_description = st.text_area("Enter the Job Description", height=200, key="resume_job_desc")
+        with col2:
+            uploaded_file = st.file_uploader(t["upload_resume"], type=['pdf'], key="resume_upload")
+        
+        analyze_submitted = st.form_submit_button(t["analyze_resume"])
 
-        if submit_resume:
-            ats_text = f"""
+    if analyze_submitted:
+        if not job_description:
+            st.error("Please enter a job description.")
+        elif not uploaded_file:
+            st.error("Please upload your resume.")
+        else:
+            try:
+                # Extract resume text
+                resume_text = pdf_to_text(uploaded_file)
+                
+                # Get match score
+                score_prompt = construct_score_prompt(resume_text, job_description)
+                score_result = get_result(score_prompt)
+                st.subheader("Resume Match Score")
+                st.markdown(score_result)
+                
+                # Get improvement suggestions
+                improvement_prompt = construct_improvement_prompt(resume_text, job_description)
+                improvement_result = get_result(improvement_prompt)
+                st.subheader("Suggestions to Improve Your Resume")
+                st.markdown(improvement_result)
+                
+                # Suggest interview questions based on resume analysis
+                question_prompt = f"""
+                Based on the resume and job description below, suggest 3 interview questions (1 technical, 1 behavioral, 1 role-specific) that the candidate should prepare for.
+                Resume: {resume_text}
+                Job Description: {job_description}
+                Return the questions in a bullet-point format.
+                """
+                suggested_questions = get_result(question_prompt)
+                st.subheader("Recommended Interview Questions to Prepare")
+                st.markdown(suggested_questions)
+            except Exception as e:
+                st.error(f"An error occurred: {str(e)}")
+                    # ----------------- ATS Resume Builder -----------------
+with ats_tab:
+    st.subheader("🧩 Build Your Professional ATS-Friendly Resume")
+
+    with st.form("manual_resume_form"):
+        full_name = st.text_input("Full Name")
+        email = st.text_input("Email")
+        phone = st.text_input("Phone")
+        linkedin = st.text_input("LinkedIn URL")
+        summary = st.text_area("Professional Summary")
+        skills = st.text_area("Skills (comma-separated)")
+        experience = st.text_area("Work Experience")
+        education = st.text_area("Education")
+        submit_resume = st.form_submit_button("Generate ATS Resume")
+
+    if submit_resume:
+        ats_text = f"""
 {full_name}
 Email: {email} | Phone: {phone} | LinkedIn: {linkedin}
 
@@ -939,23 +939,23 @@ Education:
 {education}
 """
 
-            # DOCX creation
-            doc = Document()
-            for line in ats_text.strip().split("\\n"):
-                doc.add_paragraph(line.strip())
+        # DOCX creation
+        doc = Document()
+        for line in ats_text.strip().split("\\n"):
+            doc.add_paragraph(line.strip())
 
-            docx_file = BytesIO()
-            doc.save(docx_file)
-            docx_file.seek(0)
+        docx_file = BytesIO()
+        doc.save(docx_file)
+        docx_file.seek(0)
 
-            # PDF creation (basic version using StringIO as fallback)
-            pdf_file = BytesIO()
-            pdf_file.write(ats_text.encode("utf-8"))
-            pdf_file.seek(0)
+        # PDF creation (basic version using StringIO as fallback)
+        pdf_file = BytesIO()
+        pdf_file.write(ats_text.encode("utf-8"))
+        pdf_file.seek(0)
 
-            st.success("✅ ATS Resume Ready for Download!")
-            st.download_button("📄 Download DOCX", data=docx_file, file_name="ATS_Resume.docx")
-            st.download_button("📄 Download PDF", data=pdf_file, file_name="ATS_Resume.pdf")
+        st.success("✅ ATS Resume Ready for Download!")
+        st.download_button("📄 Download DOCX", data=docx_file, file_name="ATS_Resume.docx")
+        st.download_button("📄 Download PDF", data=pdf_file, file_name="ATS_Resume.pdf")
 
 
     # Updated promotional content
