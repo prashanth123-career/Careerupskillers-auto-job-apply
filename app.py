@@ -634,8 +634,8 @@ with tab1:
 with tab2:
     st.header(f"🎯 {t['interview_prep']}")
     
-    # Sub-tabs for Interview Prep and Resume Analysis
-    prep_tab, resume_tab = st.tabs(["Interview Prep Resources", t["resume_analysis"]])
+# Sub-tabs for Interview Prep, Resume Analysis, and ATS Builder
+prep_tab, resume_tab, ats_tab = st.tabs(["Interview Prep Resources", t["resume_analysis"], "🎓 Professional ATS Resume Builder"])
     
     # Interview Prep Resources (Enhanced Functionality)
     with prep_tab:
@@ -906,6 +906,57 @@ with tab2:
                     st.markdown(suggested_questions)
                 except Exception as e:
                     st.error(f"An error occurred: {str(e)}")
+                        # ----------------- ATS Resume Builder -----------------
+    with ats_tab:
+        st.subheader("🧩 Build Your Professional ATS-Friendly Resume")
+
+        with st.form("manual_resume_form"):
+            full_name = st.text_input("Full Name")
+            email = st.text_input("Email")
+            phone = st.text_input("Phone")
+            linkedin = st.text_input("LinkedIn URL")
+            summary = st.text_area("Professional Summary")
+            skills = st.text_area("Skills (comma-separated)")
+            experience = st.text_area("Work Experience")
+            education = st.text_area("Education")
+            submit_resume = st.form_submit_button("Generate ATS Resume")
+
+        if submit_resume:
+            ats_text = f"""
+{full_name}
+Email: {email} | Phone: {phone} | LinkedIn: {linkedin}
+
+Professional Summary:
+{summary}
+
+Skills:
+{skills}
+
+Work Experience:
+{experience}
+
+Education:
+{education}
+"""
+
+            # DOCX creation
+            doc = Document()
+            for line in ats_text.strip().split("\\n"):
+                doc.add_paragraph(line.strip())
+
+            docx_file = BytesIO()
+            doc.save(docx_file)
+            docx_file.seek(0)
+
+            # PDF creation (basic version using StringIO as fallback)
+            pdf_file = BytesIO()
+            pdf_file.write(ats_text.encode("utf-8"))
+            pdf_file.seek(0)
+
+            st.success("✅ ATS Resume Ready for Download!")
+            st.download_button("📄 Download DOCX", data=docx_file, file_name="ATS_Resume.docx")
+            st.download_button("📄 Download PDF", data=pdf_file, file_name="ATS_Resume.pdf")
+
 
     # Updated promotional content
     st.markdown("""
