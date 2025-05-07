@@ -14,6 +14,7 @@ import google.generativeai as genai
 from PyPDF2 import PdfReader
 from datetime import datetime, date
 from docx import Document
+from fpdf import FPDF
 from io import BytesIO
 
 
