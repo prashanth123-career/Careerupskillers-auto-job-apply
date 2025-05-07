@@ -958,25 +958,25 @@ Education:
     st.download_button("📄 Download PDF Resume", data=pdf_buffer, file_name="resume.pdf", mime="application/pdf")
 
     # Generate DOCX
-        doc = Document()
-        doc.add_heading(full_name, 0)
-        doc.add_paragraph(f"Email: {email} | Phone: {phone} | LinkedIn: {linkedin}")
-        doc.add_heading("Professional Summary", level=1)
-        doc.add_paragraph(summary)
-        doc.add_heading("Skills", level=1)
-        doc.add_paragraph(skills)
-        doc.add_heading("Work Experience", level=1)
-        doc.add_paragraph(experience)
-        doc.add_heading("Education", level=1)
-        doc.add_paragraph(education)
+    doc = Document()
+    doc.add_heading(full_name, 0)
+    doc.add_paragraph(f"Email: {email} | Phone: {phone} | LinkedIn: {linkedin}")
+    doc.add_heading("Professional Summary", level=1)
+    doc.add_paragraph(summary)
+    doc.add_heading("Skills", level=1)
+    doc.add_paragraph(skills)
+    doc.add_heading("Work Experience", level=1)
+    doc.add_paragraph(experience)
+    doc.add_heading("Education", level=1)
+    doc.add_paragraph(education)
 
-        docx_buffer = BytesIO()
-        doc.save(docx_buffer)
-        docx_buffer.seek(0)
+    docx_buffer = BytesIO()
+    doc.save(docx_buffer)
+    docx_buffer.seek(0)
 
-        # Download buttons
-        st.download_button("⬇️ Download as PDF", data=pdf_buffer, file_name="ATS_Resume.pdf", mime="application/pdf")
-        st.download_button("⬇️ Download as DOCX", data=docx_buffer, file_name="ATS_Resume.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+    # Download buttons
+    st.download_button("⬇️ Download as PDF", data=pdf_buffer, file_name="ATS_Resume.pdf", mime="application/pdf")
+    st.download_button("⬇️ Download as DOCX", data=docx_buffer, file_name="ATS_Resume.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
 
     # Updated promotional content
