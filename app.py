@@ -965,12 +965,22 @@ Education:
     # ---- 📄 Generate PDF ----
     pdf = FPDF()
     pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
     pdf.set_font("Arial", size=12)
-    for line in ats_text.strip().split("\n"):
-        pdf.cell(200, 10, txt=line.strip(), ln=True)
-    pdf_io = BytesIO()
-    pdf.output(pdf_io)
-    pdf_io.seek(0)
+
+    for line in ats_text.strip().split('\n'):
+        pdf.multi_cell(0, 10, line.strip())
+
+    pdf_buffer = BytesIO()
+    pdf.output(pdf_buffer)
+    pdf_buffer.seek(0)
+
+    st.download_button(
+        label="📄 Download PDF Resume",
+        data=pdf_buffer,
+        file_name="ATS_Resume.pdf",
+        mime="application/pdf"
+    )
 
     # ---- 🎯 Download Buttons ----
     st.download_button("📄 Download DOCX Resume", docx_io, file_name="ATS_Resume.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
