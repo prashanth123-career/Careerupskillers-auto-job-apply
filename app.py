@@ -13,6 +13,8 @@ import urllib.parse
 import google.generativeai as genai
 from PyPDF2 import PdfReader
 from datetime import datetime, date
+from docx import Document
+
 
 # 4. Configure Gemini API using Streamlit secrets
 try:
