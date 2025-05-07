@@ -955,7 +955,12 @@ pdf_buffer = BytesIO()
 pdf.output(pdf_buffer, 'F')  # 'F' means file-like object
 pdf_buffer.seek(0)
 
-        st.download_button("📄 Download PDF Resume", data=pdf_buffer, file_name="ATS_Resume.pdf", mime="application/pdf")
+st.download_button(
+    label="📄 Download as PDF",
+    data=pdf_buffer,
+    file_name="ATS_Resume.pdf",
+    mime="application/pdf"
+)
 
         # ----- Generate DOCX -----
         doc = Document()
