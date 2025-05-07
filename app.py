@@ -13,6 +13,9 @@ import urllib.parse
 import google.generativeai as genai
 from PyPDF2 import PdfReader
 from datetime import datetime, date
+from docx import Document
+from io import BytesIO
+
 
 
 # 4. Configure Gemini API using Streamlit secrets
@@ -922,41 +925,56 @@ with ats_tab:
         education = st.text_area("Education")
         submit_resume = st.form_submit_button("Generate ATS Resume")
 
-    if submit_resume:
-        ats_text = f"""
-            {full_name}
-            Email: {email} | Phone: {phone} | LinkedIn: {linkedin}
-            
-            Professional Summary:
-            {summary}
-            
-            Skills:
-            {skills}
-            
-            Work Experience:
-            {experience}
-            
-            Education:
-            {education}
-            """
+if submit_resume:
+    ats_text = f"""
+{full_name}
+Email: {email} | Phone: {phone} | LinkedIn: {linkedin}
 
-        # DOC creation
-        doc = Document()
-        for line in ats_text.strip().split("\\n"):
-            doc.add_paragraph(line.strip())
+Summary:
+{summary}
 
-        docx_file = BytesIO()
-        doc.save(docx_file)
-        docx_file.seek(0)
+Skills:
+{skills}
 
-        # PDF creation (basic version using StringIO as fallback)
-        pdf_file = BytesIO()
-        pdf_file.write(ats_text.encode("utf-8"))
-        pdf_file.seek(0)
+Experience:
+{experience}
 
-        st.success("✅ ATS Resume Ready for Download!")
-        st.download_button("📄 Download DOCX", data=docx_file, file_name="ATS_Resume.docx")
-        st.download_button("📄 Download PDF", data=pdf_file, file_name="ATS_Resume.pdf")
+Education:
+{education}
+"""
+
+    st.success("✅ ATS Resume generated successfully!")
+
+    # ---- 📄 Generate DOCX ----
+    doc = Document()
+    doc.add_heading(full_name, 0)
+    doc.add_paragraph(f"Email: {email} | Phone: {phone} | LinkedIn: {linkedin}")
+    doc.add_heading("Summary", level=1)
+    doc.add_paragraph(summary)
+    doc.add_heading("Skills", level=1)
+    doc.add_paragraph(skills)
+    doc.add_heading("Experience", level=1)
+    doc.add_paragraph(experience)
+    doc.add_heading("Education", level=1)
+    doc.add_paragraph(education)
+
+    docx_io = BytesIO()
+    doc.save(docx_io)
+    docx_io.seek(0)
+
+    # ---- 📄 Generate PDF ----
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    for line in ats_text.strip().split("\n"):
+        pdf.cell(200, 10, txt=line.strip(), ln=True)
+    pdf_io = BytesIO()
+    pdf.output(pdf_io)
+    pdf_io.seek(0)
+
+    # ---- 🎯 Download Buttons ----
+    st.download_button("📄 Download DOCX Resume", docx_io, file_name="ATS_Resume.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+    st.download_button("📄 Download PDF Resume", pdf_io, file_name="ATS_Resume.pdf", mime="application/pdf")
 
 
     # Updated promotional content
