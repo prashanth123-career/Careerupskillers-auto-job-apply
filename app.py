@@ -912,79 +912,68 @@ with resume_tab:
                 st.error(f"An error occurred: {str(e)}")
                     # ----------------- ATS Resume Builder -----------------
 with ats_tab:
-    st.subheader("🧩 Build Your Professional ATS-Friendly Resume")
+st.subheader("🧩 Build Your Professional ATS-Friendly Resume")
 
-    with st.form("manual_resume_form"):
-        full_name = st.text_input("Full Name")
-        email = st.text_input("Email")
-        phone = st.text_input("Phone")
-        linkedin = st.text_input("LinkedIn URL")
-        summary = st.text_area("Professional Summary")
-        skills = st.text_area("Skills (comma-separated)")
-        experience = st.text_area("Work Experience")
-        education = st.text_area("Education")
-        submit_resume = st.form_submit_button("Generate ATS Resume")
+with st.form("manual_resume_form"):
+    full_name = st.text_input("Full Name")
+    email = st.text_input("Email")
+    phone = st.text_input("Phone")
+    linkedin = st.text_input("LinkedIn URL")
+    summary = st.text_area("Professional Summary")
+    skills = st.text_area("Skills (comma-separated)")
+    experience = st.text_area("Work Experience")
+    education = st.text_area("Education")
+    submit_resume = st.form_submit_button("Generate ATS Resume")
 
 if submit_resume:
-    ats_text = f"""
-{full_name}
+    ats_text = f"""{full_name}
 Email: {email} | Phone: {phone} | LinkedIn: {linkedin}
 
-Summary:
+Professional Summary:
 {summary}
 
 Skills:
 {skills}
 
-Experience:
+Work Experience:
 {experience}
 
 Education:
 {education}
 """
 
-    st.success("✅ ATS Resume generated successfully!")
-
-    # ---- 📄 Generate DOCX ----
-    doc = Document()
-    doc.add_heading(full_name, 0)
-    doc.add_paragraph(f"Email: {email} | Phone: {phone} | LinkedIn: {linkedin}")
-    doc.add_heading("Summary", level=1)
-    doc.add_paragraph(summary)
-    doc.add_heading("Skills", level=1)
-    doc.add_paragraph(skills)
-    doc.add_heading("Experience", level=1)
-    doc.add_paragraph(experience)
-    doc.add_heading("Education", level=1)
-    doc.add_paragraph(education)
-
-    docx_io = BytesIO()
-    doc.save(docx_io)
-    docx_io.seek(0)
-
-    # ---- 📄 Generate PDF ----
+    # Generate PDF
     pdf = FPDF()
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.set_font("Arial", size=12)
-
-    for line in ats_text.strip().split('\n'):
-        pdf.multi_cell(0, 10, line.strip())
+    for line in ats_text.strip().split("\n"):
+        pdf.multi_cell(0, 10, line)
 
     pdf_buffer = BytesIO()
     pdf.output(pdf_buffer)
     pdf_buffer.seek(0)
 
-    st.download_button(
-        label="📄 Download PDF Resume",
-        data=pdf_buffer,
-        file_name="ATS_Resume.pdf",
-        mime="application/pdf"
-    )
+    # Generate DOCX
+    doc = Document()
+    doc.add_heading(full_name, 0)
+    doc.add_paragraph(f"Email: {email} | Phone: {phone} | LinkedIn: {linkedin}")
+    doc.add_heading("Professional Summary", level=1)
+    doc.add_paragraph(summary)
+    doc.add_heading("Skills", level=1)
+    doc.add_paragraph(skills)
+    doc.add_heading("Work Experience", level=1)
+    doc.add_paragraph(experience)
+    doc.add_heading("Education", level=1)
+    doc.add_paragraph(education)
 
-    # ---- 🎯 Download Buttons ----
-    st.download_button("📄 Download DOCX Resume", docx_io, file_name="ATS_Resume.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-    st.download_button("📄 Download PDF Resume", pdf_io, file_name="ATS_Resume.pdf", mime="application/pdf")
+    docx_buffer = BytesIO()
+    doc.save(docx_buffer)
+    docx_buffer.seek(0)
+
+    st.success("✅ ATS Resume generated successfully!")
+    st.download_button(label="📄 Download as PDF", data=pdf_buffer, file_name="ATS_Resume.pdf", mime="application/pdf")
+    st.download_button(label="📝 Download as DOCX", data=docx_buffer, file_name="ATS_Resume.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
 
     # Updated promotional content
