@@ -934,7 +934,9 @@ with ats_tab:
     if submit_resume:
         if not all([full_name, email, summary, skills, experience, education]):
             st.error("Please fill all required fields (*)")
-            return
+def my_function():
+    if condition:
+        return  # OK: 'return' is inside a function
 
         # Generate formatted text
         ats_text = f"""{full_name.upper()}
