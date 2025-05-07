@@ -940,7 +940,7 @@ with ats_tab:
             {education}
             """
 
-        # DOCX creation
+        # DOC creation
         doc = Document()
         for line in ats_text.strip().split("\\n"):
             doc.add_paragraph(line.strip())
