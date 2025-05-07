@@ -945,17 +945,15 @@ Education:
 """
 
         # ----- Generate PDF -----
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_auto_page_break(auto=True, margin=15)
-        pdf.set_font("Arial", size=12)
+pdf = FPDF()
+pdf.add_page()
+pdf.set_font("Arial", size=12)
+for line in ats_text.strip().split('\n'):
+    pdf.multi_cell(0, 10, line)
 
-        for line in ats_text.split('\n'):
-            pdf.multi_cell(0, 10, line)
-
-        pdf_buffer = BytesIO()
-        pdf.output(pdf_buffer)
-        pdf_buffer.seek(0)
+pdf_buffer = BytesIO()
+pdf.output(pdf_buffer, 'F')  # 'F' means file-like object
+pdf_buffer.seek(0)
 
         st.download_button("📄 Download PDF Resume", data=pdf_buffer, file_name="ATS_Resume.pdf", mime="application/pdf")
 
