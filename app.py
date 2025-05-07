@@ -957,7 +957,7 @@ Education:
 
     st.download_button("📄 Download PDF Resume", data=pdf_buffer, file_name="resume.pdf", mime="application/pdf")
 
-        # Generate DOCX
+    # Generate DOCX
         doc = Document()
         doc.add_heading(full_name, 0)
         doc.add_paragraph(f"Email: {email} | Phone: {phone} | LinkedIn: {linkedin}")
