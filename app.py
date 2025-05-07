@@ -916,67 +916,131 @@ with ats_tab:
     st.subheader("🧩 Build Your Professional ATS-Friendly Resume")
 
     with st.form("manual_resume_form"):
-        full_name = st.text_input("Full Name")
-        email = st.text_input("Email")
-        phone = st.text_input("Phone")
-        linkedin = st.text_input("LinkedIn URL")
-        summary = st.text_area("Professional Summary")
-        skills = st.text_area("Skills (comma-separated)")
-        experience = st.text_area("Work Experience")
-        education = st.text_area("Education")
-        submit_resume = st.form_submit_button("Generate ATS Resume")
+        full_name = st.text_input("Full Name*", placeholder="John Doe")
+        email = st.text_input("Email*", placeholder="john.doe@example.com")
+        phone = st.text_input("Phone", placeholder="+1 (123) 456-7890")
+        linkedin = st.text_input("LinkedIn URL", placeholder="linkedin.com/in/johndoe")
+        summary = st.text_area("Professional Summary*", 
+                             placeholder="Results-driven professional with 5+ years of experience...")
+        skills = st.text_area("Skills (comma-separated)*", 
+                            "Python, SQL, Data Analysis, Machine Learning",
+                            help="Separate skills with commas")
+        experience = st.text_area("Work Experience*", 
+                                placeholder="Senior Data Analyst, XYZ Corp (2020-Present)\n- Analyzed large datasets...")
+        education = st.text_area("Education*", 
+                               placeholder="BSc in Computer Science, University of ABC (2019)")
+        submit_resume = st.form_submit_button("✨ Generate ATS Resume")
 
     if submit_resume:
-        ats_text = f"""{full_name}
+        if not all([full_name, email, summary, skills, experience, education]):
+            st.error("Please fill all required fields (*)")
+            return
+
+        # Generate formatted text
+        ats_text = f"""{full_name.upper()}
 Email: {email} | Phone: {phone} | LinkedIn: {linkedin}
 
-Professional Summary:
+PROFESSIONAL SUMMARY:
 {summary}
 
-Skills:
-{skills}
+SKILLS:
+{', '.join([skill.strip() for skill in skills.split(',')])}
 
-Work Experience:
+WORK EXPERIENCE:
 {experience}
 
-Education:
+EDUCATION:
 {education}
 """
+        st.success("✅ ATS Resume Generated!")
+        
+        # Display preview
+        with st.expander("👀 Preview Your Resume", expanded=True):
+            st.text(ats_text)
 
         # Generate PDF
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    for line in ats_text.strip().split('\n'):
-        pdf.multi_cell(0, 10, line)
+        try:
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("Arial", size=12)
+            
+            # Set title in bold and larger font
+            pdf.set_font("Arial", 'B', 16)
+            pdf.cell(0, 10, full_name, ln=1)
+            pdf.set_font("Arial", size=12)
+            pdf.cell(0, 10, f"Email: {email} | Phone: {phone} | LinkedIn: {linkedin}", ln=1)
+            pdf.ln(5)
+            
+            # Add sections with proper formatting
+            sections = [
+                ("PROFESSIONAL SUMMARY", summary),
+                ("SKILLS", ', '.join([skill.strip() for skill in skills.split(',')])),
+                ("WORK EXPERIENCE", experience),
+                ("EDUCATION", education)
+            ]
+            
+            for header, content in sections:
+                pdf.set_font("Arial", 'B', 12)
+                pdf.cell(0, 10, header, ln=1)
+                pdf.set_font("Arial", size=12)
+                pdf.multi_cell(0, 8, content)
+                pdf.ln(3)
+            
+            pdf_buffer = BytesIO()
+            pdf_bytes = pdf.output(dest='S').encode('latin1')
+            pdf_buffer.write(pdf_bytes)
+            pdf_buffer.seek(0)
+        except Exception as e:
+            st.error(f"Error generating PDF: {str(e)}")
+            return
 
-    # Save PDF to BytesIO
-    pdf_buffer = BytesIO()
-    pdf.output(pdf_buffer, 'S').encode('latin1')  # Return string
-    pdf_buffer.seek(0)
+        # Generate DOCX
+        try:
+            doc = Document()
+            
+            # Add title
+            doc.add_heading(full_name, 0)
+            doc.add_paragraph(f"Email: {email} | Phone: {phone} | LinkedIn: {linkedin}")
+            
+            # Add sections
+            doc.add_heading("Professional Summary", level=1)
+            doc.add_paragraph(summary)
+            
+            doc.add_heading("Skills", level=1)
+            doc.add_paragraph(', '.join([skill.strip() for skill in skills.split(',')]))
+            
+            doc.add_heading("Work Experience", level=1)
+            for exp in experience.split('\n'):
+                doc.add_paragraph(exp)
+            
+            doc.add_heading("Education", level=1)
+            doc.add_paragraph(education)
+            
+            docx_buffer = BytesIO()
+            doc.save(docx_buffer)
+            docx_buffer.seek(0)
+        except Exception as e:
+            st.error(f"Error generating DOCX: {str(e)}")
+            return
 
-    st.download_button("📄 Download PDF Resume", data=pdf_buffer, file_name="resume.pdf", mime="application/pdf")
-
-    # Generate DOCX
-    doc = Document()
-    doc.add_heading(full_name, 0)
-    doc.add_paragraph(f"Email: {email} | Phone: {phone} | LinkedIn: {linkedin}")
-    doc.add_heading("Professional Summary", level=1)
-    doc.add_paragraph(summary)
-    doc.add_heading("Skills", level=1)
-    doc.add_paragraph(skills)
-    doc.add_heading("Work Experience", level=1)
-    doc.add_paragraph(experience)
-    doc.add_heading("Education", level=1)
-    doc.add_paragraph(education)
-
-    docx_buffer = BytesIO()
-    doc.save(docx_buffer)
-    docx_buffer.seek(0)
-
-    # Download buttons
-    st.download_button("⬇️ Download as PDF", data=pdf_buffer, file_name="ATS_Resume.pdf", mime="application/pdf")
-    st.download_button("⬇️ Download as DOCX", data=docx_buffer, file_name="ATS_Resume.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        # Download buttons
+        col1, col2 = st.columns(2)
+        with col1:
+            st.download_button(
+                label="📄 Download PDF",
+                data=pdf_buffer,
+                file_name=f"{full_name.replace(' ', '_')}_Resume.pdf",
+                mime="application/pdf",
+                help="Best for ATS systems"
+            )
+        with col2:
+            st.download_button(
+                label="📝 Download DOCX",
+                data=docx_buffer,
+                file_name=f"{full_name.replace(' ', '_')}_Resume.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                help="Editable Microsoft Word version"
+            )
 
 
     # Updated promotional content
