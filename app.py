@@ -962,16 +962,16 @@ st.download_button(
     mime="application/pdf"
 )
 
-        # ----- Generate DOCX -----
-        doc = Document()
-        for section in ats_text.split('\n\n'):
-            doc.add_paragraph(section.strip())
+    # ----- Generate DOCX -----
+    doc = Document()
+    for section in ats_text.split('\n\n'):
+    doc.add_paragraph(section.strip())
 
-        docx_buffer = BytesIO()
-        doc.save(docx_buffer)
-        docx_buffer.seek(0)
+     docx_buffer = BytesIO()
+     doc.save(docx_buffer)
+     docx_buffer.seek(0)
 
-        st.download_button("📝 Download DOCX Resume", data=docx_buffer, file_name="ATS_Resume.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+     st.download_button("📝 Download DOCX Resume", data=docx_buffer, file_name="ATS_Resume.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
 
     # Updated promotional content
