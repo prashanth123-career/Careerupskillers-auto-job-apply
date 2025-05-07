@@ -944,15 +944,18 @@ Education:
 """
 
         # Generate PDF
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("Arial", size=12)
-        for line in ats_text.strip().split('\n'):
-            pdf.multi_cell(0, 10, line)
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    for line in ats_text.strip().split('\n'):
+        pdf.multi_cell(0, 10, line)
 
-        pdf_buffer = BytesIO()
-        pdf.output(pdf_buffer, 'F')
-        pdf_buffer.seek(0)
+    # Save PDF to BytesIO
+    pdf_buffer = BytesIO()
+    pdf.output(pdf_buffer, 'S').encode('latin1')  # Return string
+    pdf_buffer.seek(0)
+
+    st.download_button("📄 Download PDF Resume", data=pdf_buffer, file_name="resume.pdf", mime="application/pdf")
 
         # Generate DOCX
         doc = Document()
