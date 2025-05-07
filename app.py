@@ -927,11 +927,10 @@ with ats_tab:
         submit_resume = st.form_submit_button("Generate ATS Resume")
 
     if submit_resume:
-        # Format text
         ats_text = f"""{full_name}
 Email: {email} | Phone: {phone} | LinkedIn: {linkedin}
 
-Summary:
+Professional Summary:
 {summary}
 
 Skills:
@@ -944,34 +943,37 @@ Education:
 {education}
 """
 
-        # ----- Generate PDF -----
-pdf = FPDF()
-pdf.add_page()
-pdf.set_font("Arial", size=12)
-for line in ats_text.strip().split('\n'):
-    pdf.multi_cell(0, 10, line)
+        # Generate PDF
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        for line in ats_text.strip().split('\n'):
+            pdf.multi_cell(0, 10, line)
 
-pdf_buffer = BytesIO()
-pdf.output(pdf_buffer, 'F')  # 'F' means file-like object
-pdf_buffer.seek(0)
+        pdf_buffer = BytesIO()
+        pdf.output(pdf_buffer, 'F')
+        pdf_buffer.seek(0)
 
-st.download_button(
-    label="📄 Download as PDF",
-    data=pdf_buffer,
-    file_name="ATS_Resume.pdf",
-    mime="application/pdf"
-)
+        # Generate DOCX
+        doc = Document()
+        doc.add_heading(full_name, 0)
+        doc.add_paragraph(f"Email: {email} | Phone: {phone} | LinkedIn: {linkedin}")
+        doc.add_heading("Professional Summary", level=1)
+        doc.add_paragraph(summary)
+        doc.add_heading("Skills", level=1)
+        doc.add_paragraph(skills)
+        doc.add_heading("Work Experience", level=1)
+        doc.add_paragraph(experience)
+        doc.add_heading("Education", level=1)
+        doc.add_paragraph(education)
 
-    # ----- Generate DOCX -----
-    doc = Document()
-    for section in ats_text.split('\n\n'):
-    doc.add_paragraph(section.strip())
+        docx_buffer = BytesIO()
+        doc.save(docx_buffer)
+        docx_buffer.seek(0)
 
-     docx_buffer = BytesIO()
-     doc.save(docx_buffer)
-     docx_buffer.seek(0)
-
-     st.download_button("📝 Download DOCX Resume", data=docx_buffer, file_name="ATS_Resume.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        # Download buttons
+        st.download_button("⬇️ Download as PDF", data=pdf_buffer, file_name="ATS_Resume.pdf", mime="application/pdf")
+        st.download_button("⬇️ Download as DOCX", data=docx_buffer, file_name="ATS_Resume.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
 
     # Updated promotional content
