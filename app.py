@@ -912,24 +912,25 @@ with resume_tab:
                 st.error(f"An error occurred: {str(e)}")
                     # ----------------- ATS Resume Builder -----------------
 with ats_tab:
-st.subheader("🧩 Build Your Professional ATS-Friendly Resume")
+    st.subheader("🧩 Build Your Professional ATS-Friendly Resume")
 
-with st.form("manual_resume_form"):
-    full_name = st.text_input("Full Name")
-    email = st.text_input("Email")
-    phone = st.text_input("Phone")
-    linkedin = st.text_input("LinkedIn URL")
-    summary = st.text_area("Professional Summary")
-    skills = st.text_area("Skills (comma-separated)")
-    experience = st.text_area("Work Experience")
-    education = st.text_area("Education")
-    submit_resume = st.form_submit_button("Generate ATS Resume")
+    with st.form("manual_resume_form"):
+        full_name = st.text_input("Full Name")
+        email = st.text_input("Email")
+        phone = st.text_input("Phone")
+        linkedin = st.text_input("LinkedIn URL")
+        summary = st.text_area("Professional Summary")
+        skills = st.text_area("Skills (comma-separated)")
+        experience = st.text_area("Work Experience")
+        education = st.text_area("Education")
+        submit_resume = st.form_submit_button("Generate ATS Resume")
 
-if submit_resume:
-    ats_text = f"""{full_name}
+    if submit_resume:
+        # Format text
+        ats_text = f"""{full_name}
 Email: {email} | Phone: {phone} | LinkedIn: {linkedin}
 
-Professional Summary:
+Summary:
 {summary}
 
 Skills:
@@ -942,38 +943,31 @@ Education:
 {education}
 """
 
-    # Generate PDF
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_auto_page_break(auto=True, margin=15)
-    pdf.set_font("Arial", size=12)
-    for line in ats_text.strip().split("\n"):
-        pdf.multi_cell(0, 10, line)
+        # ----- Generate PDF -----
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_auto_page_break(auto=True, margin=15)
+        pdf.set_font("Arial", size=12)
 
-    pdf_buffer = BytesIO()
-    pdf.output(pdf_buffer)
-    pdf_buffer.seek(0)
+        for line in ats_text.split('\n'):
+            pdf.multi_cell(0, 10, line)
 
-    # Generate DOCX
-    doc = Document()
-    doc.add_heading(full_name, 0)
-    doc.add_paragraph(f"Email: {email} | Phone: {phone} | LinkedIn: {linkedin}")
-    doc.add_heading("Professional Summary", level=1)
-    doc.add_paragraph(summary)
-    doc.add_heading("Skills", level=1)
-    doc.add_paragraph(skills)
-    doc.add_heading("Work Experience", level=1)
-    doc.add_paragraph(experience)
-    doc.add_heading("Education", level=1)
-    doc.add_paragraph(education)
+        pdf_buffer = BytesIO()
+        pdf.output(pdf_buffer)
+        pdf_buffer.seek(0)
 
-    docx_buffer = BytesIO()
-    doc.save(docx_buffer)
-    docx_buffer.seek(0)
+        st.download_button("📄 Download PDF Resume", data=pdf_buffer, file_name="ATS_Resume.pdf", mime="application/pdf")
 
-    st.success("✅ ATS Resume generated successfully!")
-    st.download_button(label="📄 Download as PDF", data=pdf_buffer, file_name="ATS_Resume.pdf", mime="application/pdf")
-    st.download_button(label="📝 Download as DOCX", data=docx_buffer, file_name="ATS_Resume.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        # ----- Generate DOCX -----
+        doc = Document()
+        for section in ats_text.split('\n\n'):
+            doc.add_paragraph(section.strip())
+
+        docx_buffer = BytesIO()
+        doc.save(docx_buffer)
+        docx_buffer.seek(0)
+
+        st.download_button("📝 Download DOCX Resume", data=docx_buffer, file_name="ATS_Resume.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
 
     # Updated promotional content
