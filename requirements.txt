@@ -5,3 +5,6 @@ geocoder==1.38.1
 pdfkit==1.0.0
 jinja2==3.1.2  # Optional but useful for HTML templating
 wkhtmltopdf==0.2
+fpdf==1.7.2
+python-docx==1.1.0
+openai==1.24.1
