@@ -934,12 +934,9 @@ with ats_tab:
     if submit_resume:
         if not all([full_name, email, summary, skills, experience, education]):
             st.error("Please fill all required fields (*)")
-def my_function():
-    if condition:
-        return  # OK: 'return' is inside a function
-
-        # Generate formatted text
-        ats_text = f"""{full_name.upper()}
+        else:
+            # Generate formatted text
+            ats_text = f"""{full_name.upper()}
 Email: {email} | Phone: {phone} | LinkedIn: {linkedin}
 
 PROFESSIONAL SUMMARY:
@@ -954,96 +951,95 @@ WORK EXPERIENCE:
 EDUCATION:
 {education}
 """
-        st.success("✅ ATS Resume Generated!")
-        
-        # Display preview
-        with st.expander("👀 Preview Your Resume", expanded=True):
-            st.text(ats_text)
+            st.success("✅ ATS Resume Generated!")
+            
+            # Display preview
+            with st.expander("👀 Preview Your Resume", expanded=True):
+                st.text(ats_text)
 
-        # Generate PDF
-        try:
-            pdf = FPDF()
-            pdf.add_page()
-            pdf.set_font("Arial", size=12)
-            
-            # Set title in bold and larger font
-            pdf.set_font("Arial", 'B', 16)
-            pdf.cell(0, 10, full_name, ln=1)
-            pdf.set_font("Arial", size=12)
-            pdf.cell(0, 10, f"Email: {email} | Phone: {phone} | LinkedIn: {linkedin}", ln=1)
-            pdf.ln(5)
-            
-            # Add sections with proper formatting
-            sections = [
-                ("PROFESSIONAL SUMMARY", summary),
-                ("SKILLS", ', '.join([skill.strip() for skill in skills.split(',')])),
-                ("WORK EXPERIENCE", experience),
-                ("EDUCATION", education)
-            ]
-            
-            for header, content in sections:
-                pdf.set_font("Arial", 'B', 12)
-                pdf.cell(0, 10, header, ln=1)
+            # Generate PDF
+            try:
+                pdf = FPDF()
+                pdf.add_page()
                 pdf.set_font("Arial", size=12)
-                pdf.multi_cell(0, 8, content)
-                pdf.ln(3)
-            
-            pdf_buffer = BytesIO()
-            pdf_bytes = pdf.output(dest='S').encode('latin1')
-            pdf_buffer.write(pdf_bytes)
-            pdf_buffer.seek(0)
-        except Exception as e:
-            st.error(f"Error generating PDF: {str(e)}")
-            return
+                
+                # Set title in bold and larger font
+                pdf.set_font("Arial", 'B', 16)
+                pdf.cell(0, 10, full_name, ln=1)
+                pdf.set_font("Arial", size=12)
+                pdf.cell(0, 10, f"Email: {email} | Phone: {phone} | LinkedIn: {linkedin}", ln=1)
+                pdf.ln(5)
+                
+                # Add sections with proper formatting
+                sections = [
+                    ("PROFESSIONAL SUMMARY", summary),
+                    ("SKILLS", ', '.join([skill.strip() for skill in skills.split(',')])),
+                    ("WORK EXPERIENCE", experience),
+                    ("EDUCATION", education)
+                ]
+                
+                for header, content in sections:
+                    pdf.set_font("Arial", 'B', 12)
+                    pdf.cell(0, 10, header, ln=1)
+                    pdf.set_font("Arial", size=12)
+                    pdf.multi_cell(0, 8, content)
+                    pdf.ln(3)
+                
+                pdf_buffer = BytesIO()
+                pdf_bytes = pdf.output(dest='S').encode('latin1')
+                pdf_buffer.write(pdf_bytes)
+                pdf_buffer.seek(0)
+            except Exception as e:
+                st.error(f"Error generating PDF: {str(e)}")
+                return
 
-        # Generate DOCX
-        try:
-            doc = Document()
-            
-            # Add title
-            doc.add_heading(full_name, 0)
-            doc.add_paragraph(f"Email: {email} | Phone: {phone} | LinkedIn: {linkedin}")
-            
-            # Add sections
-            doc.add_heading("Professional Summary", level=1)
-            doc.add_paragraph(summary)
-            
-            doc.add_heading("Skills", level=1)
-            doc.add_paragraph(', '.join([skill.strip() for skill in skills.split(',')]))
-            
-            doc.add_heading("Work Experience", level=1)
-            for exp in experience.split('\n'):
-                doc.add_paragraph(exp)
-            
-            doc.add_heading("Education", level=1)
-            doc.add_paragraph(education)
-            
-            docx_buffer = BytesIO()
-            doc.save(docx_buffer)
-            docx_buffer.seek(0)
-        except Exception as e:
-            st.error(f"Error generating DOCX: {str(e)}")
-            return
+            # Generate DOCX
+            try:
+                doc = Document()
+                
+                # Add title
+                doc.add_heading(full_name, 0)
+                doc.add_paragraph(f"Email: {email} | Phone: {phone} | LinkedIn: {linkedin}")
+                
+                # Add sections
+                doc.add_heading("Professional Summary", level=1)
+                doc.add_paragraph(summary)
+                
+                doc.add_heading("Skills", level=1)
+                doc.add_paragraph(', '.join([skill.strip() for skill in skills.split(',')]))
+                
+                doc.add_heading("Work Experience", level=1)
+                for exp in experience.split('\n'):
+                    doc.add_paragraph(exp)
+                
+                doc.add_heading("Education", level=1)
+                doc.add_paragraph(education)
+                
+                docx_buffer = BytesIO()
+                doc.save(docx_buffer)
+                docx_buffer.seek(0)
+            except Exception as e:
+                st.error(f"Error generating DOCX: {str(e)}")
+                return
 
-        # Download buttons
-        col1, col2 = st.columns(2)
-        with col1:
-            st.download_button(
-                label="📄 Download PDF",
-                data=pdf_buffer,
-                file_name=f"{full_name.replace(' ', '_')}_Resume.pdf",
-                mime="application/pdf",
-                help="Best for ATS systems"
-            )
-        with col2:
-            st.download_button(
-                label="📝 Download DOCX",
-                data=docx_buffer,
-                file_name=f"{full_name.replace(' ', '_')}_Resume.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                help="Editable Microsoft Word version"
-            )
-
+            # Download buttons
+            col1, col2 = st.columns(2)
+            with col1:
+                st.download_button(
+                    label="📄 Download PDF",
+                    data=pdf_buffer,
+                    file_name=f"{full_name.replace(' ', '_')}_Resume.pdf",
+                    mime="application/pdf",
+                    help="Best for ATS systems"
+                )
+            with col2:
+                st.download_button(
+                    label="📝 Download DOCX",
+                    data=docx_buffer,
+                    file_name=f"{full_name.replace(' ', '_')}_Resume.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    help="Editable Microsoft Word version"
+                )
 
     # Updated promotional content
     st.markdown("""
