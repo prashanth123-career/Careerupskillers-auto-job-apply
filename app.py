@@ -991,7 +991,8 @@ EDUCATION:
                 pdf_buffer.seek(0)
             except Exception as e:
                 st.error(f"Error generating PDF: {str(e)}")
-                return
+                # Remove the return statement here since we're not in a function
+                continue
 
             # Generate DOCX
             try:
@@ -1020,7 +1021,8 @@ EDUCATION:
                 docx_buffer.seek(0)
             except Exception as e:
                 st.error(f"Error generating DOCX: {str(e)}")
-                return
+                # Remove the return statement here since we're not in a function
+                continue
 
             # Download buttons
             col1, col2 = st.columns(2)
@@ -1040,7 +1042,6 @@ EDUCATION:
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                     help="Editable Microsoft Word version"
                 )
-
     # Updated promotional content
     st.markdown("""
     <div style='background-color:#fffde7; border:2px solid #fdd835; border-radius:10px; padding:20px; margin-top:30px;'>
