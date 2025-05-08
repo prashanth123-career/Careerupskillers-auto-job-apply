@@ -927,6 +927,10 @@ with ats_tab:
     </div>
     """, unsafe_allow_html=True)
 
+    # Initialize session state for resume analysis
+    if 'resume_analysis' not in st.session_state:
+        st.session_state.resume_analysis = None
+
     with st.form("resume_builder_form"):
         col1, col2 = st.columns(2)
         
@@ -939,18 +943,15 @@ with ats_tab:
             
             st.markdown("### 🎓 Education & Certifications")
             education = st.text_area("Education*", 
-                                  placeholder="""Bachelor of Science in Mechanical Engineering
-University of Michigan | 2018-2022
-GPA: 3.6/4.0""",
+                                  placeholder="Bachelor of Science in Computer Science\nUniversity of California, Berkeley | 2018-2022\nGPA: 3.7/4.0",
                                   help="Include degree, institution, and year")
             certifications = st.text_area("Certifications", 
-                                        placeholder="""Certified Mechanical Engineer (CME)
-Six Sigma Green Belt Certification""",
+                                        placeholder="AWS Certified Solutions Architect - Associate (2023)\nGoogle Data Analytics Professional Certificate (2022)",
                                         help="List relevant certifications")
             
         with col2:
             st.markdown("### 💼 Target Role")
-            # Modified role selection - combo of dropdown and free text
+            # Modified role selection with more options
             role_options = ["Select common role...", 
                           "Data Scientist", "Software Engineer", "Product Manager", 
                           "UX Designer", "Marketing Specialist", "Financial Analyst",
@@ -966,24 +967,18 @@ Six Sigma Green Belt Certification""",
             
             st.markdown("### 🛠 Skills")
             skills = st.text_area("Skills (comma-separated)*", 
-                                placeholder="""CAD Software (SolidWorks, AutoCAD), Finite Element Analysis, 
-Thermodynamics, Project Management, Technical Documentation""",
+                                placeholder="Python, SQL, Machine Learning, Data Analysis, \nTableau, Statistical Modeling, Communication, Team Leadership",
                                 help="Include both technical and soft skills relevant to your target role")
             
             st.markdown("### 📌 Optional Sections")
             projects = st.text_area("Key Projects", 
-                                  placeholder="""Solar-Powered Irrigation System:
-- Designed and implemented a sustainable irrigation solution for rural areas
-- Reduced water consumption by 40% compared to traditional systems""",
+                                  placeholder="Customer Churn Prediction Model:\n- Developed ML model to predict customer churn with 92% accuracy\n- Implemented using Python and Scikit-learn, saving $2M annually",
                                   help="Describe 2-3 key projects with impact")
             languages = st.text_input("Languages", placeholder="English (Fluent), Spanish (Intermediate)")
         
         st.markdown("### 🏢 Work Experience")
         experience = st.text_area("Work Experience*", 
-                                placeholder="""Mechanical Engineering Intern | ABC Manufacturing | Summer 2021
-- Assisted in redesigning production line layout, improving efficiency by 15%
-- Conducted stress analysis on components using ANSYS
-- Collaborated with senior engineers on CAD models for new product line""",
+                                placeholder="Data Analyst | ABC Corp | Jan 2022-Present\n- Analyzed customer data to identify trends, resulting in 15% increase in retention\n- Built automated reporting system saving 20 hours/month\n- Collaborated with cross-functional teams to implement data-driven solutions\n\nData Science Intern | XYZ Tech | Jun-Aug 2021\n- Developed predictive models for sales forecasting\n- Cleaned and processed large datasets (1M+ records)",
                                 help="Include company names, job titles, dates, and bullet points of achievements")
         
         st.markdown("### 🔍 ATS Optimization")
@@ -996,83 +991,78 @@ Thermodynamics, Project Management, Technical Documentation""",
         if not all([full_name, email, role, skills, experience, education]):
             st.error("Please fill all required fields (*)")
         else:
-            # Generate professional summary tailored to the specific role
-            summary_prompt = f"""
-            Generate a professional summary for a {role} with these qualifications:
-            - Skills: {skills}
-            - Experience: {experience.split('\n')[0] if experience else ''}
-            - Education: {education.split('\n')[0] if education else ''}
-            
-            Make it 3-4 sentences maximum, focused on achievements and tailored for ATS systems.
-            Include relevant keywords for {role} positions.
+            # Generate professional summary first
+            summary_prompt = (
+                f"Generate a concise 3-4 sentence professional summary for a {role} with: "
+                f"Skills: {skills}. "
+                f"Experience: {experience.splitlines()[0] if experience else ''}. "
+                f"Education: {education.splitlines()[0] if education else ''}. "
+                "Make it achievement-oriented and tailored for ATS systems. "
+                "Example format: 'Results-driven [Role] with [X] years of experience in [skills]. "
+                "Proven track record in [achievements]. Strong background in [education/technical skills]. "
+                "Passionate about [relevant industry focus].'"
+            )
             
             with st.spinner("🤖 AI is generating your professional summary..."):
                 professional_summary = get_result(summary_prompt)
             
-            # Build resume text
-            resume_content = f"""
-            CANDIDATE: {full_name}
-            TARGET ROLE: {role}
-            CONTACT: {email} | {phone} | {linkedin}
-            
-            PROFESSIONAL SUMMARY:
-            {professional_summary}
-            
-            SKILLS:
-            {skills}
-            
-            WORK EXPERIENCE:
-            {experience}
-            
-            EDUCATION:
-            {education}
-            """
+            # Build resume text without problematic backslashes
+            resume_content_parts = [
+                f"CANDIDATE: {full_name}",
+                f"TARGET ROLE: {role}",
+                f"CONTACT: {email} | {phone} | {linkedin}",
+                "",
+                "PROFESSIONAL SUMMARY:",
+                professional_summary,
+                "",
+                "SKILLS:",
+                skills,
+                "",
+                "WORK EXPERIENCE:",
+                experience,
+                "",
+                "EDUCATION:",
+                education
+            ]
             
             if certifications:
-                resume_content += f"\nCERTIFICATIONS:\n{certifications}"
+                resume_content_parts.extend(["", "CERTIFICATIONS:", certifications])
             if projects:
-                resume_content += f"\nPROJECTS:\n{projects}"
+                resume_content_parts.extend(["", "PROJECTS:", projects])
             if languages:
-                resume_content += f"\nLANGUAGES:\n{languages}"
+                resume_content_parts.extend(["", "LANGUAGES:", languages])
+            
+            resume_content = "\n".join(resume_content_parts)
             
             # Generate AI analysis
             with st.spinner("🤖 AI is analyzing your resume..."):
-                analysis_prompt = f"""
-                Analyze this resume for a {role} position and provide specific improvement suggestions:
-                
-                1. ATS Optimization: 
-                   - Score (1-10) based on keyword optimization
-                   - List missing keywords for this role category
-                   - Check for proper resume structure
-                
-                2. Content Quality:
-                   - Identify vague statements that need quantification
-                   - Suggest stronger action verbs
-                   - Highlight missing metrics/achievements
-                
-                3. Skills Matching:
-                   - Compare skills against typical {role} requirements
-                   - Identify any critical missing skills
-                
-                4. Professional Summary:
-                   - Evaluate strength and relevance
-                   - Suggest improvements if needed
-                
-                Resume Content:
-                {resume_content}
-                
-                Provide output in this format:
-                
-                ### 🔍 AI Analysis Report
-                **ATS Score**: [X]/10
-                **Missing Keywords**: [comma-separated list]
-                **Content Improvements**:
-                - [Bulleted list of suggestions]
-                - [Specific examples from resume]
-                
-                **Professional Summary Evaluation**:
-                [Feedback on summary with improvement suggestions if needed]
-                """
+                analysis_prompt = (
+                    f"Analyze this resume for a {role} position and provide specific improvement suggestions:\n\n"
+                    "1. ATS Optimization: \n"
+                    "   - Score (1-10) based on keyword optimization\n"
+                    "   - List missing keywords for this role category\n"
+                    "   - Check for proper resume structure\n\n"
+                    "2. Content Quality:\n"
+                    "   - Identify vague statements that need quantification\n"
+                    "   - Suggest stronger action verbs\n"
+                    "   - Highlight missing metrics/achievements\n\n"
+                    "3. Skills Matching:\n"
+                    "   - Compare skills against typical {role} requirements\n"
+                    "   - Identify any critical missing skills\n\n"
+                    "4. Professional Summary:\n"
+                    "   - Evaluate strength and relevance\n"
+                    "   - Suggest improvements if needed\n\n"
+                    f"Resume Content:\n{resume_content}\n\n"
+                    "Provide output in this format:\n\n"
+                    "### 🔍 AI Analysis Report\n"
+                    "**ATS Score**: [X]/10\n"
+                    "**Missing Keywords**: [comma-separated list]\n"
+                    "**Content Improvements**:\n"
+                    "- [Bulleted list of suggestions]\n"
+                    "- [Specific examples from resume]\n\n"
+                    "**Professional Summary Evaluation**:\n"
+                    "[Feedback on summary with improvement suggestions if needed]"
+                )
                 
                 st.session_state.resume_analysis = get_result(analysis_prompt)
             
@@ -1087,30 +1077,32 @@ Thermodynamics, Project Management, Technical Documentation""",
             st.markdown("### 📤 Download Your Resume")
             
             # Create formatted resume text (ATS-friendly format)
-            formatted_resume = f"""
-            {full_name.upper()}
-            {email} | {phone} | {linkedin}
-            --------------------------------------------------
-            
-            PROFESSIONAL SUMMARY:
-            {professional_summary}
-            
-            TECHNICAL SKILLS:
-            {skills}
-            
-            PROFESSIONAL EXPERIENCE:
-            {experience}
-            
-            EDUCATION:
-            {education}
-            """
+            formatted_resume_parts = [
+                full_name.upper(),
+                f"{email} | {phone} | {linkedin}",
+                "--------------------------------------------------",
+                "",
+                "PROFESSIONAL SUMMARY:",
+                professional_summary,
+                "",
+                "TECHNICAL SKILLS:",
+                skills,
+                "",
+                "PROFESSIONAL EXPERIENCE:",
+                experience,
+                "",
+                "EDUCATION:",
+                education
+            ]
             
             if certifications:
-                formatted_resume += f"\nCERTIFICATIONS:\n{certifications}"
+                formatted_resume_parts.extend(["", "CERTIFICATIONS:", certifications])
             if projects:
-                formatted_resume += f"\nKEY PROJECTS:\n{projects}"
+                formatted_resume_parts.extend(["", "KEY PROJECTS:", projects])
             if languages:
-                formatted_resume += f"\nLANGUAGES:\n{languages}"
+                formatted_resume_parts.extend(["", "LANGUAGES:", languages])
+            
+            formatted_resume = "\n".join(formatted_resume_parts)
             
             # PDF Generation with improved ATS-friendly formatting
             pdf = FPDF()
