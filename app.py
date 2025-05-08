@@ -1005,7 +1005,6 @@ Thermodynamics, Project Management, Technical Documentation""",
             
             Make it 3-4 sentences maximum, focused on achievements and tailored for ATS systems.
             Include relevant keywords for {role} positions.
-            """
             
             with st.spinner("🤖 AI is generating your professional summary..."):
                 professional_summary = get_result(summary_prompt)
