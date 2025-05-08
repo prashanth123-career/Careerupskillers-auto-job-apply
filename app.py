@@ -917,129 +917,377 @@ from docx import Document
 from docx.shared import Pt, RGBColor
 from fpdf import FPDF
 from io import BytesIO
+
 with ats_tab:
     st.subheader("🧩 AI-Powered ATS Resume Builder")
-
+    
     st.markdown("""
     <div style="background-color:#e3f2fd; padding:15px; border-radius:10px; margin-bottom:20px;">
-        <b>Pro Tip:</b> This builder creates resumes optimized for Applicant Tracking Systems (ATS) while maintaining 
-        professional design. Our AI analyzes your content for keyword optimization and recruiter appeal.
+        <b>Pro Tip:</b> Our AI analyzes your resume for ATS optimization, keyword matching, and recruiter appeal.
+        Get real-time suggestions to improve your resume's effectiveness.
     </div>
     """, unsafe_allow_html=True)
 
+    # Initialize session state for resume analysis
+    if 'resume_analysis' not in st.session_state:
+        st.session_state.resume_analysis = None
+
     with st.form("resume_builder_form"):
-        role = st.selectbox("Target Role*", ["Senior Software Developer", "Software Tester", "Data Scientist", "Product Manager"])
-
-        st.markdown("### 📝 Personal Information")
-        full_name = st.text_input("Full Name*")
-        email = st.text_input("Email*")
-        phone = st.text_input("Phone")
-        linkedin = st.text_input("LinkedIn URL")
-
-        st.markdown("### 💼 Professional Details")
-        summary = st.text_area("Professional Summary*")
-
-        st.markdown("### 🛠 Skills")
-        skills = st.text_area("Skills (comma-separated)*")
-
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("### 📝 Personal Information")
+            full_name = st.text_input("Full Name*")
+            email = st.text_input("Email*")
+            phone = st.text_input("Phone")
+            linkedin = st.text_input("LinkedIn URL")
+            
+            st.markdown("### 🎓 Education & Certifications")
+            education = st.text_area("Education*", help="Include degree, institution, and year")
+            certifications = st.text_area("Certifications", help="List relevant certifications")
+            
+        with col2:
+            st.markdown("### 💼 Target Role")
+            role = st.selectbox("Select your target role*", 
+                              ["Data Scientist", "Software Engineer", "Product Manager", 
+                               "UX Designer", "Marketing Specialist", "Financial Analyst"])
+            
+            st.markdown("### 🛠 Skills")
+            skills = st.text_area("Skills (comma-separated)*", 
+                                help="Include both technical and soft skills relevant to your target role")
+            
+            st.markdown("### 📌 Optional Sections")
+            projects = st.text_area("Key Projects", help="Describe 2-3 key projects with impact")
+            languages = st.text_input("Languages", help="List languages you speak")
+        
         st.markdown("### 🏢 Work Experience")
-        experience = st.text_area("Work Experience*")
-
-        st.markdown("### 🎓 Education & Certifications")
-        education = st.text_area("Education*")
-        certifications = st.text_area("Certifications")
-
-        st.markdown("### 📌 Optional Sections")
-        projects = st.text_area("Key Projects")
-        languages = st.text_input("Languages")
-
+        experience = st.text_area("Work Experience*", 
+                                help="Include company names, job titles, dates, and bullet points of achievements")
+        
         st.markdown("### 🔍 ATS Optimization")
         use_ats_keywords = st.checkbox("Include ATS-friendly keywords", value=True)
         modern_design = st.checkbox("Use modern resume design", value=True)
+        
+        submitted = st.form_submit_button("✨ Generate & Analyze Resume")
 
-        submit_resume = st.form_submit_button("✨ Generate ATS-Optimized Resume")
-
-    if submit_resume:
-        if not all([full_name, email, summary, skills, experience, education]):
+    if submitted:
+        if not all([full_name, email, role, skills, experience, education]):
             st.error("Please fill all required fields (*)")
         else:
-            ats_text = f"""{full_name.upper()}
-Email: {email} | Phone: {phone} | LinkedIn: {linkedin}
-
-PROFESSIONAL SUMMARY:
-{summary}
-
-SKILLS:
-{skills}
-
-WORK EXPERIENCE:
-{experience}
-
-EDUCATION:
-{education}"""
-
+            # Build resume text
+            resume_content = f"""
+            CANDIDATE: {full_name}
+            TARGET ROLE: {role}
+            CONTACT: {email} | {phone} | {linkedin}
+            
+            SUMMARY:
+            [AI will generate based on your inputs]
+            
+            SKILLS:
+            {skills}
+            
+            WORK EXPERIENCE:
+            {experience}
+            
+            EDUCATION:
+            {education}
+            """
+            
             if certifications:
-                ats_text += f"\n\nCERTIFICATIONS:\n{certifications}"
+                resume_content += f"\nCERTIFICATIONS:\n{certifications}"
             if projects:
-                ats_text += f"\n\nKEY PROJECTS:\n{projects}"
+                resume_content += f"\nPROJECTS:\n{projects}"
             if languages:
-                ats_text += f"\n\nLANGUAGES:\n{languages}"
-
+                resume_content += f"\nLANGUAGES:\n{languages}"
+            
+            # Generate AI analysis
+            with st.spinner("🤖 AI is analyzing your resume..."):
+                analysis_prompt = f"""
+                Analyze this resume for a {role} position and provide specific improvement suggestions:
+                1. ATS Optimization: Identify missing keywords from the job category
+                2. Structure: Suggest better organization of sections
+                3. Impact: Recommend stronger action verbs and quantifiable achievements
+                4. Skills Matching: Identify gaps between skills and target role
+                5. Summary: Generate a powerful professional summary
+                
+                Resume Content:
+                {resume_content}
+                
+                Provide output in this format:
+                
+                ### 🔍 AI Analysis Report
+                **ATS Score**: X/10
+                **Missing Keywords**: [list]
+                **Suggested Improvements**: [bulleted list]
+                **Generated Professional Summary**: [text]
+                """
+                
+                st.session_state.resume_analysis = get_result(analysis_prompt)
+            
             st.success("✅ ATS-Optimized Resume Generated!")
-
-            # --- PDF ---
+            
+            # Display AI Analysis
+            st.markdown("---")
+            st.markdown(st.session_state.resume_analysis)
+            
+            # Generate downloadable resume
+            st.markdown("---")
+            st.markdown("### 📤 Download Your Resume")
+            
+            # Generate professional summary if not already in analysis
+            summary_prompt = f"Generate a 3-sentence professional summary for a {role} with these skills: {skills}"
+            professional_summary = get_result(summary_prompt)
+            
+            # Create formatted resume text
+            formatted_resume = f"""
+            {full_name.upper()}
+            {email} | {phone} | {linkedin}
+            --------------------------------------------------
+            
+            PROFESSIONAL SUMMARY:
+            {professional_summary}
+            
+            TECHNICAL SKILLS:
+            {skills}
+            
+            PROFESSIONAL EXPERIENCE:
+            {experience}
+            
+            EDUCATION:
+            {education}
+            """
+            
+            if certifications:
+                formatted_resume += f"\nCERTIFICATIONS:\n{certifications}"
+            if projects:
+                formatted_resume += f"\nKEY PROJECTS:\n{projects}"
+            if languages:
+                formatted_resume += f"\nLANGUAGES:\n{languages}"
+            
+            # PDF Generation
             pdf = FPDF()
             pdf.add_page()
             pdf.set_font("Arial", size=12)
-            for line in ats_text.splitlines():
-                pdf.multi_cell(0, 10, line)
+            
+            # Add modern styling if selected
+            if modern_design:
+                pdf.set_fill_color(240, 240, 240)
+                pdf.cell(0, 10, full_name, ln=1, align='C')
+                pdf.set_font_size(10)
+                pdf.cell(0, 5, f"{email} | {phone} | {linkedin}", ln=1, align='C')
+                pdf.ln(5)
+            else:
+                pdf.cell(0, 10, full_name, ln=1)
+                pdf.cell(0, 5, f"{email} | {phone} | {linkedin}", ln=1)
+            
+            # Add sections
+            sections = [
+                ("PROFESSIONAL SUMMARY", professional_summary),
+                ("TECHNICAL SKILLS", skills),
+                ("PROFESSIONAL EXPERIENCE", experience),
+                ("EDUCATION", education)
+            ]
+            
+            for section, content in sections:
+                if modern_design:
+                    pdf.set_font('Arial', 'B', 12)
+                    pdf.cell(0, 10, section, ln=1, fill=True)
+                    pdf.set_font('Arial', '', 11)
+                else:
+                    pdf.set_font('Arial', 'B', 12)
+                    pdf.cell(0, 10, section, ln=1)
+                    pdf.set_font('Arial', '', 11)
+                
+                pdf.multi_cell(0, 5, content)
+                pdf.ln(3)
+            
+            # Add optional sections
+            if certifications:
+                if modern_design:
+                    pdf.set_font('Arial', 'B', 12)
+                    pdf.cell(0, 10, "CERTIFICATIONS", ln=1, fill=True)
+                    pdf.set_font('Arial', '', 11)
+                else:
+                    pdf.set_font('Arial', 'B', 12)
+                    pdf.cell(0, 10, "CERTIFICATIONS", ln=1)
+                    pdf.set_font('Arial', '', 11)
+                pdf.multi_cell(0, 5, certifications)
+                pdf.ln(3)
+            
+            if projects:
+                if modern_design:
+                    pdf.set_font('Arial', 'B', 12)
+                    pdf.cell(0, 10, "KEY PROJECTS", ln=1, fill=True)
+                    pdf.set_font('Arial', '', 11)
+                else:
+                    pdf.set_font('Arial', 'B', 12)
+                    pdf.cell(0, 10, "KEY PROJECTS", ln=1)
+                    pdf.set_font('Arial', '', 11)
+                pdf.multi_cell(0, 5, projects)
+                pdf.ln(3)
+            
+            if languages:
+                if modern_design:
+                    pdf.set_font('Arial', 'B', 12)
+                    pdf.cell(0, 10, "LANGUAGES", ln=1, fill=True)
+                    pdf.set_font('Arial', '', 11)
+                else:
+                    pdf.set_font('Arial', 'B', 12)
+                    pdf.cell(0, 10, "LANGUAGES", ln=1)
+                    pdf.set_font('Arial', '', 11)
+                pdf.multi_cell(0, 5, languages)
+            
+            # Save PDF to buffer
             pdf_buffer = BytesIO()
             pdf_bytes = pdf.output(dest='S').encode('latin1')
             pdf_buffer.write(pdf_bytes)
             pdf_buffer.seek(0)
-
-            # --- DOCX ---
-            try:
-                doc = Document()
+            
+            # Create DOCX version
+            doc = Document()
+            
+            # Add modern styling if selected
+            if modern_design:
+                heading = doc.add_paragraph()
+                heading_format = heading.paragraph_format
+                heading_format.alignment = 1  # Center alignment
+                runner = heading.add_run(full_name.upper())
+                runner.font.size = Pt(14)
+                runner.font.color.rgb = RGBColor(0, 0, 0)
+                runner.bold = True
+                
+                contact = doc.add_paragraph()
+                contact_format = contact.paragraph_format
+                contact_format.alignment = 1
+                contact_run = contact.add_run(f"{email} | {phone} | {linkedin}")
+                contact_run.font.size = Pt(10)
+            else:
                 doc.add_heading(full_name, 0)
-                doc.add_paragraph(f"Email: {email} | Phone: {phone} | LinkedIn: {linkedin}")
-                doc.add_heading("PROFESSIONAL SUMMARY", level=1)
-                doc.add_paragraph(summary)
-                doc.add_heading("SKILLS", level=1)
-                doc.add_paragraph(skills)
-                doc.add_heading("WORK EXPERIENCE", level=1)
-                doc.add_paragraph(experience)
-                doc.add_heading("EDUCATION", level=1)
-                doc.add_paragraph(education)
-                if certifications:
-                    doc.add_heading("CERTIFICATIONS", level=1)
-                    doc.add_paragraph(certifications)
-                if projects:
-                    doc.add_heading("KEY PROJECTS", level=1)
-                    doc.add_paragraph(projects)
-                if languages:
-                    doc.add_heading("LANGUAGES", level=1)
-                    doc.add_paragraph(languages)
-
-                docx_buffer = BytesIO()
-                doc.save(docx_buffer)
-                docx_buffer.seek(0)
-            except Exception as e:
-                st.error(f"Error generating DOCX: {str(e)}")
-                docx_buffer = None
-
-            # --- DOWNLOADS ---
-            st.markdown("### 📤 Download Your Resume")
+                doc.add_paragraph(f"{email} | {phone} | {linkedin}")
+            
+            # Add sections
+            def add_section(title, content):
+                if modern_design:
+                    p = doc.add_paragraph()
+                    p.paragraph_format.space_after = Pt(0)
+                    run = p.add_run(title)
+                    run.bold = True
+                    run.font.size = Pt(12)
+                    
+                    # Add gray underline
+                    p = doc.add_paragraph()
+                    p.paragraph_format.space_after = Pt(6)
+                    run = p.add_run("_"*50)
+                    run.font.color.rgb = RGBColor(200, 200, 200)
+                    
+                    doc.add_paragraph(content)
+                else:
+                    doc.add_heading(title, level=1)
+                    doc.add_paragraph(content)
+            
+            add_section("PROFESSIONAL SUMMARY", professional_summary)
+            add_section("TECHNICAL SKILLS", skills)
+            add_section("PROFESSIONAL EXPERIENCE", experience)
+            add_section("EDUCATION", education)
+            
+            if certifications:
+                add_section("CERTIFICATIONS", certifications)
+            if projects:
+                add_section("KEY PROJECTS", projects)
+            if languages:
+                add_section("LANGUAGES", languages)
+            
+            # Save DOCX to buffer
+            docx_buffer = BytesIO()
+            doc.save(docx_buffer)
+            docx_buffer.seek(0)
+            
+            # Download buttons
             col1, col2, col3 = st.columns(3)
             with col1:
-                st.download_button("📄 Download PDF", pdf_buffer, f"{full_name.replace(' ', '_')}_Resume.pdf", mime="application/pdf")
-            if docx_buffer:
-                with col2:
-                    st.download_button("📝 Download DOCX", docx_buffer, f"{full_name.replace(' ', '_')}_Resume.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+                st.download_button(
+                    label="📄 Download PDF",
+                    data=pdf_buffer,
+                    file_name=f"{full_name.replace(' ', '_')}_Resume.pdf",
+                    mime="application/pdf"
+                )
+            with col2:
+                st.download_button(
+                    label="📝 Download DOCX",
+                    data=docx_buffer,
+                    file_name=f"{full_name.replace(' ', '_')}_Resume.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                )
             with col3:
-                st.download_button("📋 Download TXT", ats_text, f"{full_name.replace(' ', '_')}_Resume.txt", mime="text/plain")
-
-                st.markdown("""
+                st.download_button(
+                    label="📋 Download TXT",
+                    data=formatted_resume,
+                    file_name=f"{full_name.replace(' ', '_')}_Resume.txt",
+                    mime="text/plain"
+                )
+            
+            # Additional AI suggestions
+            st.markdown("---")
+            st.markdown("### 🚀 Boost Your Resume Further")
+            
+            with st.expander("🔍 Get Tailored Job Description Analysis"):
+                job_desc = st.text_area("Paste a job description to get customized matching suggestions")
+                if st.button("Analyze Match") and job_desc:
+                    with st.spinner("Analyzing job match..."):
+                        match_prompt = f"""
+                        Analyze how well this resume matches the provided job description.
+                        Provide specific recommendations to improve alignment.
+                        
+                        Resume:
+                        {resume_content}
+                        
+                        Job Description:
+                        {job_desc}
+                        
+                        Format your response with:
+                        - Match Score (0-100)
+                        - Missing Keywords
+                        - Recommended Resume Changes
+                        - Suggested Skills to Highlight
+                        """
+                        
+                        match_analysis = get_result(match_prompt)
+                        st.markdown(match_analysis)
+            
+            with st.expander("💡 Generate Cover Letter"):
+                if st.button("Create Cover Letter"):
+                    with st.spinner("Generating cover letter..."):
+                        cover_prompt = f"""
+                        Write a professional cover letter for this candidate applying to a {role} position.
+                        Use formal business letter format.
+                        
+                        Candidate Info:
+                        Name: {full_name}
+                        Email: {email}
+                        Phone: {phone}
+                        
+                        Resume Highlights:
+                        {professional_summary}
+                        
+                        Skills:
+                        {skills}
+                        
+                        Experience Highlights:
+                        {experience}
+                        
+                        Education:
+                        {education}
+                        """
+                        
+                        cover_letter = get_result(cover_prompt)
+                        st.text_area("Generated Cover Letter", cover_letter, height=300)
+                        st.download_button(
+                            label="📥 Download Cover Letter",
+                            data=cover_letter,
+                            file_name=f"{full_name.replace(' ', '_')}_Cover_Letter.txt",
+                            mime="text/plain"
+                        )
+st.markdown("""
     <div style='background-color:#fffde7; border:2px solid #fdd835; border-radius:10px; padding:20px; margin-top:30px;'>
         <h3 style='color:#f57f17;'>\U0001F680 Ace Your 2025 Interviews with AI</h3>
         <p style='font-size:16px; color:#555;'>🔸 Rejections hurt, but <b>smart AI prep</b> can make you unstoppable.<br>🔸 Don’t just memorize answers – master interviews with tools tailored for 2025.</p>
