@@ -1104,68 +1104,79 @@ with ats_tab:
             
             formatted_resume = "\n".join(formatted_resume_parts)
             
-            # PDF Generation with improved ATS-friendly formatting
-            pdf = FPDF()
-            pdf.add_page()
-            pdf.set_font("Arial", size=12)
-            
-            # Header with clear contact information
-            pdf.set_font('Arial', 'B', 16)
-            pdf.cell(0, 10, full_name, ln=1, align='C')
-            pdf.set_font('Arial', '', 11)
-            pdf.cell(0, 5, f"{email} | {phone} | {linkedin}", ln=1, align='C')
-            pdf.ln(10)
-            
-            # Professional Summary section
-            pdf.set_font('Arial', 'B', 14)
-            pdf.cell(0, 8, "PROFESSIONAL SUMMARY", ln=1)
-            pdf.set_font('Arial', '', 11)
-            pdf.multi_cell(0, 5, professional_summary)
-            pdf.ln(8)
-            
-            # Skills section (important for ATS)
-            pdf.set_font('Arial', 'B', 14)
-            pdf.cell(0, 8, "SKILLS", ln=1)
-            pdf.set_font('Arial', '', 11)
-            skills_list = [s.strip() for s in skills.split(',')]
-            skills_text = " • ".join(skills_list)
-            pdf.multi_cell(0, 5, skills_text)
-            pdf.ln(8)
-            
-            # Work Experience (most important for ATS)
-            pdf.set_font('Arial', 'B', 14)
-            pdf.cell(0, 8, "PROFESSIONAL EXPERIENCE", ln=1)
-            pdf.set_font('Arial', '', 11)
-            pdf.multi_cell(0, 5, experience)
-            pdf.ln(8)
-            
-            # Education
-            pdf.set_font('Arial', 'B', 14)
-            pdf.cell(0, 8, "EDUCATION", ln=1)
-            pdf.set_font('Arial', '', 11)
-            pdf.multi_cell(0, 5, education)
-            pdf.ln(8)
-            
-            # Optional sections
-            optional_sections = [
-                ("CERTIFICATIONS", certifications),
-                ("KEY PROJECTS", projects),
-                ("LANGUAGES", languages)
-            ]
-            
-            for section, content in optional_sections:
-                if content:
-                    pdf.set_font('Arial', 'B', 14)
-                    pdf.cell(0, 8, section.upper(), ln=1)
-                    pdf.set_font('Arial', '', 11)
-                    pdf.multi_cell(0, 5, content)
-                    pdf.ln(8)
-            
-            # Save PDF to buffer
-            pdf_buffer = BytesIO()
-            pdf_bytes = pdf.output(dest='S').encode('latin1')
-            pdf_buffer.write(pdf_bytes)
-            pdf_buffer.seek(0)
+# PDF Generation with improved encoding handling
+pdf = FPDF()
+pdf.add_page()
+pdf.set_font("Arial", size=12)
+
+# First, create a function to safely encode text for PDF
+def safe_pdf_text(text):
+    if not text:
+        return ""
+    # Replace any problematic characters with Latin-1 compatible equivalents
+    return text.encode('latin1', errors='replace').decode('latin1')
+
+# Header with clear contact information
+pdf.set_font('Arial', 'B', 16)
+pdf.cell(0, 10, safe_pdf_text(full_name), ln=1, align='C')
+pdf.set_font('Arial', '', 11)
+pdf.cell(0, 5, safe_pdf_text(f"{email} | {phone} | {linkedin}"), ln=1, align='C')
+pdf.ln(10)
+
+# Professional Summary section
+pdf.set_font('Arial', 'B', 14)
+pdf.cell(0, 8, "PROFESSIONAL SUMMARY", ln=1)
+pdf.set_font('Arial', '', 11)
+pdf.multi_cell(0, 5, safe_pdf_text(professional_summary))
+pdf.ln(8)
+
+# Skills section
+pdf.set_font('Arial', 'B', 14)
+pdf.cell(0, 8, "SKILLS", ln=1)
+pdf.set_font('Arial', '', 11)
+skills_list = [s.strip() for s in skills.split(',')]
+skills_text = " • ".join(skills_list)
+pdf.multi_cell(0, 5, safe_pdf_text(skills_text))
+pdf.ln(8)
+
+# Work Experience
+pdf.set_font('Arial', 'B', 14)
+pdf.cell(0, 8, "PROFESSIONAL EXPERIENCE", ln=1)
+pdf.set_font('Arial', '', 11)
+pdf.multi_cell(0, 5, safe_pdf_text(experience))
+pdf.ln(8)
+
+# Education
+pdf.set_font('Arial', 'B', 14)
+pdf.cell(0, 8, "EDUCATION", ln=1)
+pdf.set_font('Arial', '', 11)
+pdf.multi_cell(0, 5, safe_pdf_text(education))
+pdf.ln(8)
+
+# Optional sections
+optional_sections = [
+    ("CERTIFICATIONS", certifications),
+    ("KEY PROJECTS", projects),
+    ("LANGUAGES", languages)
+]
+
+for section, content in optional_sections:
+    if content:
+        pdf.set_font('Arial', 'B', 14)
+        pdf.cell(0, 8, section.upper(), ln=1)
+        pdf.set_font('Arial', '', 11)
+        pdf.multi_cell(0, 5, safe_pdf_text(content))
+        pdf.ln(8)
+
+# Save PDF to buffer
+pdf_buffer = BytesIO()
+try:
+    pdf_bytes = pdf.output(dest='S').encode('latin1', errors='replace')
+except UnicodeEncodeError:
+    # Fallback to UTF-8 if Latin-1 fails completely
+    pdf_bytes = pdf.output(dest='S').encode('utf-8')
+pdf_buffer.write(pdf_bytes)
+pdf_buffer.seek(0)
             
             # Create DOCX version with ATS-friendly formatting
             doc = Document()
