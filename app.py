@@ -920,6 +920,7 @@ from io import BytesIO
 
 with ats_tab:
     st.subheader("🧩 AI-Powered ATS Resume Builder")
+
     st.markdown("""
     <div style="background-color:#e3f2fd; padding:15px; border-radius:10px; margin-bottom:20px;">
         <b>Pro Tip:</b> This builder creates resumes optimized for Applicant Tracking Systems (ATS) while maintaining 
@@ -929,83 +930,40 @@ with ats_tab:
 
     with st.form("resume_builder_form"):
         role = st.selectbox("Target Role*", ["Senior Software Developer", "Software Tester", "Data Scientist", "Product Manager"])
-        
+
         st.markdown("### 📝 Personal Information")
-        col1, col2 = st.columns(2)
-        with col1:
-            full_name = st.text_input("Full Name*", placeholder="John Doe")
-            email = st.text_input("Email*", placeholder="john.doe@example.com")
-        with col2:
-            phone = st.text_input("Phone", placeholder="+1 (123) 456-7890")
-            linkedin = st.text_input("LinkedIn URL", placeholder="linkedin.com/in/johndoe")
+        full_name = st.text_input("Full Name*")
+        email = st.text_input("Email*")
+        phone = st.text_input("Phone")
+        linkedin = st.text_input("LinkedIn URL")
 
         st.markdown("### 💼 Professional Details")
-        summary = st.text_area("Professional Summary*", placeholder="Results-driven professional with 5+ years of experience...")
+        summary = st.text_area("Professional Summary*")
 
         st.markdown("### 🛠 Skills")
-        with st.expander("💡 AI Skill Suggestions", expanded=False):
-            if st.button("Suggest Skills Based on Role"):
-                skill_prompt = f"Suggest 10-15 technical and soft skills for a {role} role, comma-separated"
-                st.session_state.suggested_skills = get_result(skill_prompt)
-            if 'suggested_skills' in st.session_state:
-                st.text_area("AI Suggested Skills", st.session_state.suggested_skills)
-                if st.button("Apply Suggested Skills"):
-                    skills = st.session_state.suggested_skills
-
-        skills = st.text_area("Skills (comma-separated)*", "Python, SQL, Cloud, Communication")
+        skills = st.text_area("Skills (comma-separated)*")
 
         st.markdown("### 🏢 Work Experience")
-        with st.expander("✨ Achievement Builder Tool", expanded=False):
-            responsibility = st.text_input("What was your responsibility?")
-            action = st.text_input("What actions did you take?")
-            result = st.text_input("What was the measurable result?")
-            if st.button("Create Achievement Statement"):
-                st.code(f"- {action}, {result.lower()}", language="text")
-
-        experience = st.text_area("Work Experience*", "Software Developer, XYZ Corp\n- Developed REST APIs using Django...")
+        experience = st.text_area("Work Experience*")
 
         st.markdown("### 🎓 Education & Certifications")
-        education = st.text_area("Education*", "B.Tech in Computer Science, ABC University (2018)")
-        certifications = st.text_area("Certifications", "AWS Certified Developer")
+        education = st.text_area("Education*")
+        certifications = st.text_area("Certifications")
 
         st.markdown("### 📌 Optional Sections")
-        projects = st.text_area("Key Projects", "E-commerce App – built using React and Django, scaled to 10k users.")
-        languages = st.text_input("Languages", "English (Fluent), Hindi (Native)")
+        projects = st.text_area("Key Projects")
+        languages = st.text_input("Languages")
 
         st.markdown("### 🔍 ATS Optimization")
         use_ats_keywords = st.checkbox("Include ATS-friendly keywords", value=True)
         modern_design = st.checkbox("Use modern resume design", value=True)
 
-        # ✅ SUBMIT BUTTON INSIDE FORM
         submit_resume = st.form_submit_button("✨ Generate ATS-Optimized Resume")
 
-    # OUTSIDE FORM: Resume Generation
     if submit_resume:
         if not all([full_name, email, summary, skills, experience, education]):
             st.error("Please fill all required fields (*)")
         else:
-            with st.spinner("🤖 AI is analyzing and optimizing your resume..."):
-                analysis_prompt = f"""
-                Analyze this resume content for ATS optimization for a {role} role. 
-                Give suggestions for keywords, formatting, and impact.
-
-                Summary: {summary}
-                Skills: {skills}
-                Experience: {experience}
-                Education: {education}
-                """
-                ai_analysis = get_result(analysis_prompt)
-
-                if use_ats_keywords:
-                    optimization_prompt = f"""
-                    Optimize this resume content with ATS keywords, action verbs, and quantifiable impact:
-                    Summary: {summary}
-                    Skills: {skills}
-                    Experience: {experience}
-                    """
-                    optimized_content = get_result(optimization_prompt)
-
-            # Compile resume text
             ats_text = f"""{full_name.upper()}
 Email: {email} | Phone: {phone} | LinkedIn: {linkedin}
 
@@ -1030,15 +988,7 @@ EDUCATION:
 
             st.success("✅ ATS-Optimized Resume Generated!")
 
-            # ---- TABS: Preview & Analysis ----
-            tab1, tab2 = st.tabs(["📝 Preview", "🤖 AI Feedback"])
-            with tab1:
-                st.text(ats_text)
-            with tab2:
-                st.markdown(ai_analysis)
-                st.download_button("📥 Download Feedback", ai_analysis, f"{full_name}_Feedback.txt")
-
-            # ---- PDF GENERATION ----
+            # --- PDF ---
             pdf = FPDF()
             pdf.add_page()
             pdf.set_font("Arial", size=12)
@@ -1049,7 +999,7 @@ EDUCATION:
             pdf_buffer.write(pdf_bytes)
             pdf_buffer.seek(0)
 
-            # ---- DOCX GENERATION ----
+            # --- DOCX ---
             doc = Document()
             doc.add_heading(full_name, 0)
             doc.add_paragraph(f"Email: {email} | Phone: {phone} | LinkedIn: {linkedin}")
@@ -1070,19 +1020,21 @@ EDUCATION:
             if languages:
                 doc.add_heading("LANGUAGES", level=1)
                 doc.add_paragraph(languages)
+
             docx_buffer = BytesIO()
             doc.save(docx_buffer)
             docx_buffer.seek(0)
 
-            # ---- DOWNLOAD BUTTONS ----
+            # --- DOWNLOADS ---
             st.markdown("### 📤 Download Your Resume")
             col1, col2, col3 = st.columns(3)
             with col1:
-                st.download_button("📄 Download PDF", pdf_buffer, f"{full_name}_Resume.pdf", mime="application/pdf")
+                st.download_button("📄 Download PDF", pdf_buffer, f"{full_name.replace(' ', '_')}_Resume.pdf", mime="application/pdf")
             with col2:
-                st.download_button("📝 Download DOCX", docx_buffer, f"{full_name}_Resume.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+                st.download_button("📝 Download DOCX", docx_buffer, f"{full_name.replace(' ', '_')}_Resume.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
             with col3:
-                st.download_button("📋 Download TXT", ats_text, f"{full_name}_Resume.txt", mime="text/plain")
+                st.download_button("📋 Download TXT", ats_text, f"{full_name.replace(' ', '_')}_Resume.txt", mime="text/plain")
+
                     st.markdown("""
     <div style='background-color:#fffde7; border:2px solid #fdd835; border-radius:10px; padding:20px; margin-top:30px;'>
         <h3 style='color:#f57f17;'>\U0001F680 Ace Your 2025 Interviews with AI</h3>
