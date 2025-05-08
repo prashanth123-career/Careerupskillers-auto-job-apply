@@ -922,7 +922,12 @@ with ats_tab:
     </div>
     """, unsafe_allow_html=True)
 
-    with st.form("manual_resume_form"):
+    with st.form("resume_builder_form"):
+        # Role Selection
+        role = st.selectbox("Target Role*", 
+                          ["Senior Software Developer", "Software Tester", "Data Scientist", "Product Manager"],
+                          index=0)
+        
         # Personal Information Section
         st.markdown("### 📝 Personal Information")
         col1, col2 = st.columns(2)
@@ -943,31 +948,39 @@ with ats_tab:
         st.markdown("### 🛠 Skills")
         with st.expander("💡 AI Skill Suggestions", expanded=False):
             if st.button("Suggest Skills Based on Role"):
-                skill_prompt = f"Suggest 10-15 technical and soft skills for a {role if 'role' in locals() else 'professional'} role, comma-separated"
-                suggested_skills = get_result(skill_prompt)
-                st.session_state.suggested_skills = suggested_skills
+                skill_prompt = f"Suggest 10-15 technical and soft skills for a {role} role, comma-separated"
+                st.session_state.suggested_skills = get_result(skill_prompt)
+            
             if 'suggested_skills' in st.session_state:
                 st.text_area("AI Suggested Skills", st.session_state.suggested_skills)
                 if st.button("Apply Suggested Skills"):
                     skills = st.session_state.suggested_skills
         
         skills = st.text_area("Skills (comma-separated)*", 
-                            "Python, SQL, Data Analysis, Machine Learning",
+                            "Python, SQL, Testing Frameworks, CI/CD" if role == "Software Tester" else "Java, Spring Boot, Microservices, Cloud Computing",
                             help="Separate skills with commas. Include both technical and soft skills.")
         
         # Work Experience with Achievement Builder
         st.markdown("### 🏢 Work Experience")
         with st.expander("✨ Achievement Builder Tool", expanded=False):
-            st.markdown("Convert responsibilities into measurable achievements:")
-            responsibility = st.text_input("What was your responsibility?", placeholder="Managed social media accounts")
-            action = st.text_input("What specific actions did you take?", placeholder="Implemented content calendar")
-            result = st.text_input("What was the measurable result?", placeholder="Increased engagement by 40%")
+            responsibility = st.text_input("What was your responsibility?", 
+                                         placeholder="Developed software features" if role == "Senior Software Developer" 
+                                         else "Executed test cases")
+            action = st.text_input("What specific actions did you take?", 
+                                 placeholder="Implemented REST APIs using Spring Boot" if role == "Senior Software Developer"
+                                 else "Automated 50+ test cases using Selenium")
+            result = st.text_input("What was the measurable result?", 
+                                 placeholder="Reduced API response time by 40%" if role == "Senior Software Developer"
+                                 else "Increased test coverage to 95%")
+            
             if st.button("Create Achievement Statement"):
                 achievement = f"- {action}, {result.lower()}"
                 st.code(achievement, language="text")
         
         experience = st.text_area("Work Experience*", 
-                                placeholder="Senior Data Analyst, XYZ Corp (2020-Present)\n- Analyzed large datasets...",
+                                placeholder=("Senior Software Developer, Tech Corp (2020-Present)\n- Designed and implemented microservices architecture..." 
+                                           if role == "Senior Software Developer" 
+                                           else "QA Engineer, Test Solutions (2019-Present)\n- Developed automated test frameworks for web applications..."),
                                 help="Use bullet points starting with action verbs. Include metrics where possible.")
         
         # Education & Certifications
@@ -975,17 +988,19 @@ with ats_tab:
         education = st.text_area("Education*", 
                                placeholder="BSc in Computer Science, University of ABC (2019)")
         certifications = st.text_area("Certifications (optional)", 
-                                    placeholder="Google Data Analytics Professional Certificate (2023)")
+                                    placeholder="AWS Certified Developer" if role == "Senior Software Developer"
+                                    else "ISTQB Certified Tester")
         
         # Optional Sections
         st.markdown("### 📌 Optional Sections")
         projects = st.text_area("Key Projects (optional)", 
-                              placeholder="Customer Segmentation Model - Developed ML model to...")
+                              placeholder=("E-commerce Platform - Led team of 5 developers to build scalable platform..." 
+                                         if role == "Senior Software Developer"
+                                         else "Test Automation Framework - Built framework reducing manual testing by 70%"))
         languages = st.text_input("Languages (optional)", placeholder="English (Fluent), Spanish (Intermediate)")
         
         # ATS Optimization Options
         st.markdown("### 🔍 ATS Optimization")
-        target_job = st.text_input("Target Job Title (for keyword optimization)", placeholder="Data Scientist")
         use_ats_keywords = st.checkbox("Include ATS-friendly keywords", value=True)
         modern_design = st.checkbox("Use modern resume design", value=True)
         
@@ -998,16 +1013,15 @@ with ats_tab:
             # AI Resume Analysis
             with st.spinner("🤖 AI is analyzing and optimizing your resume..."):
                 analysis_prompt = f"""
-                Analyze this resume content for ATS optimization and provide specific improvement suggestions:
+                Analyze this resume content for ATS optimization and provide specific improvement suggestions for a {role}:
                 Name: {full_name}
-                Target Role: {target_job if target_job else 'Not specified'}
                 Summary: {summary}
                 Skills: {skills}
                 Experience: {experience}
                 Education: {education}
                 
                 Provide feedback on:
-                1. Missing ATS keywords for the target role
+                1. Missing ATS keywords for {role} role
                 2. Suggested improvements for impact
                 3. Formatting recommendations
                 Return as bullet points.
@@ -1015,9 +1029,9 @@ with ats_tab:
                 ai_analysis = get_result(analysis_prompt)
                 
                 # Generate optimized content
-                if use_ats_keywords and target_job:
+                if use_ats_keywords:
                     optimization_prompt = f"""
-                    Optimize this resume content for ATS systems targeting {target_job} role:
+                    Optimize this resume content for ATS systems targeting {role} role:
                     Summary: {summary}
                     Skills: {skills}
                     Experience: {experience}
@@ -1028,8 +1042,6 @@ with ats_tab:
                     3. Quantifiable achievements where possible
                     """
                     optimized_content = get_result(optimization_prompt)
-                    # Parse optimized content back to sections
-                    # (This would need more sophisticated parsing in production)
             
             # Generate formatted text
             ats_text = f"""{full_name.upper()}
@@ -1076,7 +1088,7 @@ EDUCATION:
             with tab3:
                 # Generate ATS score
                 score_prompt = f"""
-                Rate this resume's ATS compatibility for {target_job if target_job else 'the specified role'} on a scale of 1-10.
+                Rate this resume's ATS compatibility for {role} role on a scale of 1-10.
                 Consider:
                 - Keyword optimization
                 - Section completeness
@@ -1092,9 +1104,9 @@ EDUCATION:
                 st.markdown(ats_score)
                 
                 # Visual score representation
-                if "8" in ats_score or "9" in ats_score or "10" in ats_score:
+                if any(x in ats_score for x in ["8", "9", "10"]):
                     st.success("Excellent ATS compatibility!")
-                elif "5" in ats_score or "6" in ats_score or "7" in ats_score:
+                elif any(x in ats_score for x in ["5", "6", "7"]):
                     st.warning("Good, but could be improved")
                 else:
                     st.error("Needs significant improvement")
@@ -1161,11 +1173,6 @@ EDUCATION:
             docx_buffer = None
             try:
                 doc = Document()
-                
-                # Modern header
-                header = doc.sections[0].header
-                header_para = header.paragraphs[0]
-                header_run = header_para.add_run()
                 
                 # Add title with professional formatting
                 title = doc.add_paragraph()
