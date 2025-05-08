@@ -913,6 +913,11 @@ with resume_tab:
                 st.markdown(suggested_questions)
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")
+from docx import Document
+from docx.shared import Pt, RGBColor
+from fpdf import FPDF
+from io import BytesIO
+
 with ats_tab:
     st.subheader("🧩 AI-Powered ATS Resume Builder")
     st.markdown("""
@@ -923,12 +928,8 @@ with ats_tab:
     """, unsafe_allow_html=True)
 
     with st.form("resume_builder_form"):
-        # Role Selection
-        role = st.selectbox("Target Role*", 
-                          ["Senior Software Developer", "Software Tester", "Data Scientist", "Product Manager"],
-                          index=0)
+        role = st.selectbox("Target Role*", ["Senior Software Developer", "Software Tester", "Data Scientist", "Product Manager"])
         
-        # Personal Information Section
         st.markdown("### 📝 Personal Information")
         col1, col2 = st.columns(2)
         with col1:
@@ -937,113 +938,74 @@ with ats_tab:
         with col2:
             phone = st.text_input("Phone", placeholder="+1 (123) 456-7890")
             linkedin = st.text_input("LinkedIn URL", placeholder="linkedin.com/in/johndoe")
-        
-        # Professional Section
+
         st.markdown("### 💼 Professional Details")
-        summary = st.text_area("Professional Summary*", 
-                             placeholder="Results-driven professional with 5+ years of experience...",
-                             help="Keep this concise (3-5 lines) with measurable achievements")
-        
-        # Skills with AI Suggestions
+        summary = st.text_area("Professional Summary*", placeholder="Results-driven professional with 5+ years of experience...")
+
         st.markdown("### 🛠 Skills")
         with st.expander("💡 AI Skill Suggestions", expanded=False):
             if st.button("Suggest Skills Based on Role"):
                 skill_prompt = f"Suggest 10-15 technical and soft skills for a {role} role, comma-separated"
                 st.session_state.suggested_skills = get_result(skill_prompt)
-            
             if 'suggested_skills' in st.session_state:
                 st.text_area("AI Suggested Skills", st.session_state.suggested_skills)
                 if st.button("Apply Suggested Skills"):
                     skills = st.session_state.suggested_skills
-        
-        skills = st.text_area("Skills (comma-separated)*", 
-                            "Python, SQL, Testing Frameworks, CI/CD" if role == "Software Tester" else "Java, Spring Boot, Microservices, Cloud Computing",
-                            help="Separate skills with commas. Include both technical and soft skills.")
-        
-        # Work Experience with Achievement Builder
+
+        skills = st.text_area("Skills (comma-separated)*", "Python, SQL, Cloud, Communication")
+
         st.markdown("### 🏢 Work Experience")
         with st.expander("✨ Achievement Builder Tool", expanded=False):
-            responsibility = st.text_input("What was your responsibility?", 
-                                         placeholder="Developed software features" if role == "Senior Software Developer" 
-                                         else "Executed test cases")
-            action = st.text_input("What specific actions did you take?", 
-                                 placeholder="Implemented REST APIs using Spring Boot" if role == "Senior Software Developer"
-                                 else "Automated 50+ test cases using Selenium")
-            result = st.text_input("What was the measurable result?", 
-                                 placeholder="Reduced API response time by 40%" if role == "Senior Software Developer"
-                                 else "Increased test coverage to 95%")
-            
+            responsibility = st.text_input("What was your responsibility?")
+            action = st.text_input("What actions did you take?")
+            result = st.text_input("What was the measurable result?")
             if st.button("Create Achievement Statement"):
-                achievement = f"- {action}, {result.lower()}"
-                st.code(achievement, language="text")
-        
-        experience = st.text_area("Work Experience*", 
-                                placeholder=("Senior Software Developer, Tech Corp (2020-Present)\n- Designed and implemented microservices architecture..." 
-                                           if role == "Senior Software Developer" 
-                                           else "QA Engineer, Test Solutions (2019-Present)\n- Developed automated test frameworks for web applications..."),
-                                help="Use bullet points starting with action verbs. Include metrics where possible.")
-        
-        # Education & Certifications
+                st.code(f"- {action}, {result.lower()}", language="text")
+
+        experience = st.text_area("Work Experience*", "Software Developer, XYZ Corp\n- Developed REST APIs using Django...")
+
         st.markdown("### 🎓 Education & Certifications")
-        education = st.text_area("Education*", 
-                               placeholder="BSc in Computer Science, University of ABC (2019)")
-        certifications = st.text_area("Certifications (optional)", 
-                                    placeholder="AWS Certified Developer" if role == "Senior Software Developer"
-                                    else "ISTQB Certified Tester")
-        
-        # Optional Sections
+        education = st.text_area("Education*", "B.Tech in Computer Science, ABC University (2018)")
+        certifications = st.text_area("Certifications", "AWS Certified Developer")
+
         st.markdown("### 📌 Optional Sections")
-        projects = st.text_area("Key Projects (optional)", 
-                              placeholder=("E-commerce Platform - Led team of 5 developers to build scalable platform..." 
-                                         if role == "Senior Software Developer"
-                                         else "Test Automation Framework - Built framework reducing manual testing by 70%"))
-        languages = st.text_input("Languages (optional)", placeholder="English (Fluent), Spanish (Intermediate)")
-        
-        # ATS Optimization Options
+        projects = st.text_area("Key Projects", "E-commerce App – built using React and Django, scaled to 10k users.")
+        languages = st.text_input("Languages", "English (Fluent), Hindi (Native)")
+
         st.markdown("### 🔍 ATS Optimization")
         use_ats_keywords = st.checkbox("Include ATS-friendly keywords", value=True)
         modern_design = st.checkbox("Use modern resume design", value=True)
-        
+
+        # ✅ SUBMIT BUTTON INSIDE FORM
         submit_resume = st.form_submit_button("✨ Generate ATS-Optimized Resume")
 
+    # OUTSIDE FORM: Resume Generation
     if submit_resume:
         if not all([full_name, email, summary, skills, experience, education]):
             st.error("Please fill all required fields (*)")
         else:
-            # AI Resume Analysis
             with st.spinner("🤖 AI is analyzing and optimizing your resume..."):
                 analysis_prompt = f"""
-                Analyze this resume content for ATS optimization and provide specific improvement suggestions for a {role}:
-                Name: {full_name}
+                Analyze this resume content for ATS optimization for a {role} role. 
+                Give suggestions for keywords, formatting, and impact.
+
                 Summary: {summary}
                 Skills: {skills}
                 Experience: {experience}
                 Education: {education}
-                
-                Provide feedback on:
-                1. Missing ATS keywords for {role} role
-                2. Suggested improvements for impact
-                3. Formatting recommendations
-                Return as bullet points.
                 """
                 ai_analysis = get_result(analysis_prompt)
-                
-                # Generate optimized content
+
                 if use_ats_keywords:
                     optimization_prompt = f"""
-                    Optimize this resume content for ATS systems targeting {role} role:
+                    Optimize this resume content with ATS keywords, action verbs, and quantifiable impact:
                     Summary: {summary}
                     Skills: {skills}
                     Experience: {experience}
-                    
-                    Return the optimized version in the same format but with:
-                    1. Added relevant keywords
-                    2. Stronger action verbs
-                    3. Quantifiable achievements where possible
                     """
                     optimized_content = get_result(optimization_prompt)
-            
-            # Generate formatted text
+
+            # Compile resume text
             ats_text = f"""{full_name.upper()}
 Email: {email} | Phone: {phone} | LinkedIn: {linkedin}
 
@@ -1051,200 +1013,76 @@ PROFESSIONAL SUMMARY:
 {summary}
 
 SKILLS:
-{', '.join([skill.strip() for skill in skills.split(',')])}
+{skills}
 
 WORK EXPERIENCE:
 {experience}
 
 EDUCATION:
 {education}"""
-            
+
             if certifications:
                 ats_text += f"\n\nCERTIFICATIONS:\n{certifications}"
             if projects:
-                ats_text += f"\n\nPROJECTS:\n{projects}"
+                ats_text += f"\n\nKEY PROJECTS:\n{projects}"
             if languages:
                 ats_text += f"\n\nLANGUAGES:\n{languages}"
 
             st.success("✅ ATS-Optimized Resume Generated!")
-            
-            # Display preview and AI analysis
-            tab1, tab2, tab3 = st.tabs(["Preview", "AI Analysis", "ATS Score"])
-            
+
+            # ---- TABS: Preview & Analysis ----
+            tab1, tab2 = st.tabs(["📝 Preview", "🤖 AI Feedback"])
             with tab1:
-                with st.expander("👀 Preview Your Resume", expanded=True):
-                    st.text(ats_text)
-            
+                st.text(ats_text)
             with tab2:
-                st.markdown("### 🤖 AI Optimization Feedback")
                 st.markdown(ai_analysis)
-                st.download_button(
-                    label="📥 Download Feedback Report",
-                    data=ai_analysis,
-                    file_name=f"{full_name.replace(' ', '_')}_Resume_Feedback.txt",
-                    mime="text/plain"
-                )
-            
-            with tab3:
-                # Generate ATS score
-                score_prompt = f"""
-                Rate this resume's ATS compatibility for {role} role on a scale of 1-10.
-                Consider:
-                - Keyword optimization
-                - Section completeness
-                - Readability
-                - Professional presentation
-                
-                Return the score with brief explanation.
-                Resume Content:
-                {ats_text}
-                """
-                ats_score = get_result(score_prompt)
-                st.markdown(f"### 🏆 ATS Compatibility Score")
-                st.markdown(ats_score)
-                
-                # Visual score representation
-                if any(x in ats_score for x in ["8", "9", "10"]):
-                    st.success("Excellent ATS compatibility!")
-                elif any(x in ats_score for x in ["5", "6", "7"]):
-                    st.warning("Good, but could be improved")
-                else:
-                    st.error("Needs significant improvement")
-            
-            # Generate PDF with modern design
-            pdf_buffer = None
-            try:
-                pdf = FPDF()
-                pdf.add_page()
-                
-                # Modern design elements
-                if modern_design:
-                    pdf.set_fill_color(70, 130, 180)  # Steel blue accent
-                    pdf.rect(0, 0, 0.5, 300, 'F')  # Left accent bar
-                    pdf.set_text_color(70, 130, 180)  # Header color
-                
-                # Header
-                pdf.set_font("Arial", 'B', 20)
-                pdf.cell(0, 10, full_name, ln=1)
-                
-                # Contact info
-                pdf.set_font("Arial", '', 10)
-                contact_info = f"{email} | {phone}" + (f" | {linkedin}" if linkedin else "")
-                pdf.cell(0, 8, contact_info, ln=1)
-                pdf.ln(5)
-                
-                # Sections with modern formatting
-                sections = [
-                    ("PROFESSIONAL SUMMARY", summary),
-                    ("SKILLS", ', '.join([skill.strip() for skill in skills.split(',')])),
-                    ("WORK EXPERIENCE", experience),
-                    ("EDUCATION", education)
-                ]
-                
-                if certifications:
-                    sections.append(("CERTIFICATIONS", certifications))
-                if projects:
-                    sections.append(("KEY PROJECTS", projects))
-                if languages:
-                    sections.append(("LANGUAGES", languages))
-                
-                for header, content in sections:
-                    if modern_design:
-                        pdf.set_fill_color(240, 240, 240)
-                        pdf.set_font("Arial", 'B', 12)
-                        pdf.cell(0, 8, header, ln=1, fill=True)
-                        pdf.set_fill_color(255, 255, 255)
-                    else:
-                        pdf.set_font("Arial", 'B', 12)
-                        pdf.cell(0, 8, header, ln=1)
-                    
-                    pdf.set_font("Arial", '', 11)
-                    pdf.multi_cell(0, 6, content)
-                    pdf.ln(3)
-                
-                pdf_buffer = BytesIO()
-                pdf_bytes = pdf.output(dest='S').encode('latin1')
-                pdf_buffer.write(pdf_bytes)
-                pdf_buffer.seek(0)
-            except Exception as e:
-                st.error(f"Error generating PDF: {str(e)}")
+                st.download_button("📥 Download Feedback", ai_analysis, f"{full_name}_Feedback.txt")
 
-            # Generate DOCX with professional styling
-            docx_buffer = None
-            try:
-                doc = Document()
-                
-                # Add title with professional formatting
-                title = doc.add_paragraph()
-                title_run = title.add_run(full_name)
-                title_run.font.size = Pt(18)
-                title_run.font.bold = True
-                title_run.font.color.rgb = RGBColor(70, 130, 180)  # Steel blue
-                
-                # Contact info
-                contact = doc.add_paragraph()
-                contact.add_run(f"{email} | {phone}" + (f" | {linkedin}" if linkedin else ""))
-                contact.paragraph_format.space_after = Pt(12)
-                
-                # Add sections with professional styling
-                def add_section(doc, title, content):
-                    heading = doc.add_paragraph()
-                    heading_run = heading.add_run(title)
-                    heading_run.bold = True
-                    heading_run.font.size = Pt(12)
-                    heading.paragraph_format.space_before = Pt(6)
-                    
-                    content_para = doc.add_paragraph(content)
-                    content_para.paragraph_format.space_after = Pt(12)
-                
-                add_section(doc, "PROFESSIONAL SUMMARY", summary)
-                add_section(doc, "SKILLS", ', '.join([skill.strip() for skill in skills.split(',')]))
-                add_section(doc, "WORK EXPERIENCE", experience)
-                add_section(doc, "EDUCATION", education)
-                
-                if certifications:
-                    add_section(doc, "CERTIFICATIONS", certifications)
-                if projects:
-                    add_section(doc, "KEY PROJECTS", projects)
-                if languages:
-                    add_section(doc, "LANGUAGES", languages)
-                
-                docx_buffer = BytesIO()
-                doc.save(docx_buffer)
-                docx_buffer.seek(0)
-            except Exception as e:
-                st.error(f"Error generating DOCX: {str(e)}")
+            # ---- PDF GENERATION ----
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("Arial", size=12)
+            for line in ats_text.splitlines():
+                pdf.multi_cell(0, 10, line)
+            pdf_buffer = BytesIO()
+            pdf_bytes = pdf.output(dest='S').encode('latin1')
+            pdf_buffer.write(pdf_bytes)
+            pdf_buffer.seek(0)
 
-            # Download buttons
-            st.markdown("### 📤 Download Options")
-            if pdf_buffer or docx_buffer:
-                col1, col2, col3 = st.columns(3)
-                if pdf_buffer:
-                    with col1:
-                        st.download_button(
-                            label="📄 Download PDF",
-                            data=pdf_buffer,
-                            file_name=f"{full_name.replace(' ', '_')}_Resume.pdf",
-                            mime="application/pdf",
-                            help="Best for ATS systems"
-                        )
-                if docx_buffer:
-                    with col2:
-                        st.download_button(
-                            label="📝 Download DOCX",
-                            data=docx_buffer,
-                            file_name=f"{full_name.replace(' ', '_')}_Resume.docx",
-                            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                            help="Editable Microsoft Word version"
-                        )
-                with col3:
-                    st.download_button(
-                        label="📋 Copy Text Version",
-                        data=ats_text,
-                        file_name=f"{full_name.replace(' ', '_')}_Resume.txt",
-                        mime="text/plain",
-                        help="For pasting into online forms"
-                    )
+            # ---- DOCX GENERATION ----
+            doc = Document()
+            doc.add_heading(full_name, 0)
+            doc.add_paragraph(f"Email: {email} | Phone: {phone} | LinkedIn: {linkedin}")
+            doc.add_heading("PROFESSIONAL SUMMARY", level=1)
+            doc.add_paragraph(summary)
+            doc.add_heading("SKILLS", level=1)
+            doc.add_paragraph(skills)
+            doc.add_heading("WORK EXPERIENCE", level=1)
+            doc.add_paragraph(experience)
+            doc.add_heading("EDUCATION", level=1)
+            doc.add_paragraph(education)
+            if certifications:
+                doc.add_heading("CERTIFICATIONS", level=1)
+                doc.add_paragraph(certifications)
+            if projects:
+                doc.add_heading("KEY PROJECTS", level=1)
+                doc.add_paragraph(projects)
+            if languages:
+                doc.add_heading("LANGUAGES", level=1)
+                doc.add_paragraph(languages)
+            docx_buffer = BytesIO()
+            doc.save(docx_buffer)
+            docx_buffer.seek(0)
+
+            # ---- DOWNLOAD BUTTONS ----
+            st.markdown("### 📤 Download Your Resume")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.download_button("📄 Download PDF", pdf_buffer, f"{full_name}_Resume.pdf", mime="application/pdf")
+            with col2:
+                st.download_button("📝 Download DOCX", docx_buffer, f"{full_name}_Resume.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            with col3:
+                st.download_button("📋 Download TXT", ats_text, f"{full_name}_Resume.txt", mime="text/plain")
                     st.markdown("""
     <div style='background-color:#fffde7; border:2px solid #fdd835; border-radius:10px; padding:20px; margin-top:30px;'>
         <h3 style='color:#f57f17;'>\U0001F680 Ace Your 2025 Interviews with AI</h3>
