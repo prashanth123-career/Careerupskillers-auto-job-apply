@@ -1179,7 +1179,7 @@ pdf_buffer.write(pdf_bytes)
 pdf_buffer.seek(0)
             
             # Create DOCX version with ATS-friendly formatting
-            doc = Document()
+              doc = Document()
             
             # Header
             doc.add_heading(full_name, level=0)
