@@ -958,6 +958,7 @@ EDUCATION:
                 st.text(ats_text)
 
             # Generate PDF
+            pdf_buffer = None
             try:
                 pdf = FPDF()
                 pdf.add_page()
@@ -991,10 +992,9 @@ EDUCATION:
                 pdf_buffer.seek(0)
             except Exception as e:
                 st.error(f"Error generating PDF: {str(e)}")
-                # Remove the return statement here since we're not in a function
-                continue
 
             # Generate DOCX
+            docx_buffer = None
             try:
                 doc = Document()
                 
@@ -1021,28 +1021,28 @@ EDUCATION:
                 docx_buffer.seek(0)
             except Exception as e:
                 st.error(f"Error generating DOCX: {str(e)}")
-                # Remove the return statement here since we're not in a function
-                continue
 
-            # Download buttons
-            col1, col2 = st.columns(2)
-            with col1:
-                st.download_button(
-                    label="📄 Download PDF",
-                    data=pdf_buffer,
-                    file_name=f"{full_name.replace(' ', '_')}_Resume.pdf",
-                    mime="application/pdf",
-                    help="Best for ATS systems"
-                )
-            with col2:
-                st.download_button(
-                    label="📝 Download DOCX",
-                    data=docx_buffer,
-                    file_name=f"{full_name.replace(' ', '_')}_Resume.docx",
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    help="Editable Microsoft Word version"
-                )
-    # Updated promotional content
+            # Download buttons - only show if the respective buffer was created
+            if pdf_buffer or docx_buffer:
+                col1, col2 = st.columns(2)
+                if pdf_buffer:
+                    with col1:
+                        st.download_button(
+                            label="📄 Download PDF",
+                            data=pdf_buffer,
+                            file_name=f"{full_name.replace(' ', '_')}_Resume.pdf",
+                            mime="application/pdf",
+                            help="Best for ATS systems"
+                        )
+                if docx_buffer:
+                    with col2:
+                        st.download_button(
+                            label="📝 Download DOCX",
+                            data=docx_buffer,
+                            file_name=f"{full_name.replace(' ', '_')}_Resume.docx",
+                            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                            help="Editable Microsoft Word version"
+                        )    # Updated promotional content
     st.markdown("""
     <div style='background-color:#fffde7; border:2px solid #fdd835; border-radius:10px; padding:20px; margin-top:30px;'>
         <h3 style='color:#f57f17;'>\U0001F680 Ace Your 2025 Interviews with AI</h3>
