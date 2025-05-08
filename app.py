@@ -917,7 +917,6 @@ from docx import Document
 from docx.shared import Pt, RGBColor
 from fpdf import FPDF
 from io import BytesIO
-
 with ats_tab:
     st.subheader("🧩 AI-Powered ATS Resume Builder")
     
@@ -927,10 +926,6 @@ with ats_tab:
         Get real-time suggestions to improve your resume's effectiveness.
     </div>
     """, unsafe_allow_html=True)
-
-    # Initialize session state for resume analysis
-    if 'resume_analysis' not in st.session_state:
-        st.session_state.resume_analysis = None
 
     with st.form("resume_builder_form"):
         col1, col2 = st.columns(2)
@@ -944,45 +939,51 @@ with ats_tab:
             
             st.markdown("### 🎓 Education & Certifications")
             education = st.text_area("Education*", 
-                                  placeholder="""Bachelor of Science in Computer Science
-University of California, Berkeley | 2018-2022
-GPA: 3.7/4.0""",
+                                  placeholder="""Bachelor of Science in Mechanical Engineering
+University of Michigan | 2018-2022
+GPA: 3.6/4.0""",
                                   help="Include degree, institution, and year")
             certifications = st.text_area("Certifications", 
-                                        placeholder="""AWS Certified Solutions Architect - Associate (2023)
-Google Data Analytics Professional Certificate (2022)""",
+                                        placeholder="""Certified Mechanical Engineer (CME)
+Six Sigma Green Belt Certification""",
                                         help="List relevant certifications")
             
         with col2:
             st.markdown("### 💼 Target Role")
-            role = st.selectbox("Select your target role*", 
-                              ["Data Scientist", "Software Engineer", "Product Manager", 
-                               "UX Designer", "Marketing Specialist", "Financial Analyst"])
+            # Modified role selection - combo of dropdown and free text
+            role_options = ["Select common role...", 
+                          "Data Scientist", "Software Engineer", "Product Manager", 
+                          "UX Designer", "Marketing Specialist", "Financial Analyst",
+                          "Mechanical Engineer", "Civil Engineer", "Electrical Engineer",
+                          "Healthcare Professional", "Teacher/Educator", "Research Scientist"]
+            
+            selected_option = st.selectbox("Or select from common roles", role_options)
+            custom_role = st.text_input("Enter your specific job title*", 
+                                      placeholder="E.g., Biomedical Engineer, Construction Project Manager")
+            
+            # Determine final role
+            role = custom_role if custom_role else (selected_option if selected_option != "Select common role..." else "")
             
             st.markdown("### 🛠 Skills")
             skills = st.text_area("Skills (comma-separated)*", 
-                                placeholder="""Python, SQL, Machine Learning, Data Analysis, 
-Tableau, Statistical Modeling, Communication, Team Leadership""",
+                                placeholder="""CAD Software (SolidWorks, AutoCAD), Finite Element Analysis, 
+Thermodynamics, Project Management, Technical Documentation""",
                                 help="Include both technical and soft skills relevant to your target role")
             
             st.markdown("### 📌 Optional Sections")
             projects = st.text_area("Key Projects", 
-                                  placeholder="""Customer Churn Prediction Model:
-- Developed ML model to predict customer churn with 92% accuracy
-- Implemented using Python and Scikit-learn, saving $2M annually""",
+                                  placeholder="""Solar-Powered Irrigation System:
+- Designed and implemented a sustainable irrigation solution for rural areas
+- Reduced water consumption by 40% compared to traditional systems""",
                                   help="Describe 2-3 key projects with impact")
             languages = st.text_input("Languages", placeholder="English (Fluent), Spanish (Intermediate)")
         
         st.markdown("### 🏢 Work Experience")
         experience = st.text_area("Work Experience*", 
-                                placeholder="""Data Analyst | ABC Corp | Jan 2022-Present
-- Analyzed customer data to identify trends, resulting in 15% increase in retention
-- Built automated reporting system saving 20 hours/month
-- Collaborated with cross-functional teams to implement data-driven solutions
-
-Data Science Intern | XYZ Tech | Jun-Aug 2021
-- Developed predictive models for sales forecasting
-- Cleaned and processed large datasets (1M+ records)""",
+                                placeholder="""Mechanical Engineering Intern | ABC Manufacturing | Summer 2021
+- Assisted in redesigning production line layout, improving efficiency by 15%
+- Conducted stress analysis on components using ANSYS
+- Collaborated with senior engineers on CAD models for new product line""",
                                 help="Include company names, job titles, dates, and bullet points of achievements")
         
         st.markdown("### 🔍 ATS Optimization")
@@ -995,18 +996,15 @@ Data Science Intern | XYZ Tech | Jun-Aug 2021
         if not all([full_name, email, role, skills, experience, education]):
             st.error("Please fill all required fields (*)")
         else:
-            # Generate professional summary first
+            # Generate professional summary tailored to the specific role
             summary_prompt = f"""
-            Generate a concise 3-4 sentence professional summary for a {role} with:
+            Generate a professional summary for a {role} with these qualifications:
             - Skills: {skills}
             - Experience: {experience.split('\n')[0] if experience else ''}
             - Education: {education.split('\n')[0] if education else ''}
             
-            Make it achievement-oriented and tailored for ATS systems.
-            Example format:
-            "Results-driven [Role] with [X] years of experience in [skills]. 
-            Proven track record in [achievements]. Strong background in [education/technical skills]. 
-            Passionate about [relevant industry focus]."
+            Make it 3-4 sentences maximum, focused on achievements and tailored for ATS systems.
+            Include relevant keywords for {role} positions.
             """
             
             with st.spinner("🤖 AI is generating your professional summary..."):
