@@ -911,7 +911,6 @@ with resume_tab:
                 st.markdown(suggested_questions)
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")
-                    # ----------------- ATS Resume Builder -----------------
 with ats_tab:
     st.subheader("🧩 AI-Powered ATS Resume Builder")
     st.markdown("""
@@ -1236,7 +1235,8 @@ EDUCATION:
                         file_name=f"{full_name.replace(' ', '_')}_Resume.txt",
                         mime="text/plain",
                         help="For pasting into online forms"
-                    )    st.markdown("""
+                    )
+                    st.markdown("""
     <div style='background-color:#fffde7; border:2px solid #fdd835; border-radius:10px; padding:20px; margin-top:30px;'>
         <h3 style='color:#f57f17;'>\U0001F680 Ace Your 2025 Interviews with AI</h3>
         <p style='font-size:16px; color:#555;'>🔸 Rejections hurt, but <b>smart AI prep</b> can make you unstoppable.<br>🔸 Don’t just memorize answers – master interviews with tools tailored for 2025.</p>
