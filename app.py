@@ -16,6 +16,8 @@ from datetime import datetime, date
 from docx import Document
 from fpdf import FPDF
 from io import BytesIO
+from docx.shared import Pt, RGBColor
+
 
 
 
