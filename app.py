@@ -967,8 +967,7 @@ with ats_tab:
         st.markdown("### 🔍 ATS Optimization")
         use_ats_keywords = st.checkbox("Include ATS-friendly keywords", value=True)
         resume_design = st.selectbox("Resume Design", 
-                                   ["Modern Professional", "Classic Elegant", "Creative Contemporary", 
-                                    "Minimalist Clean", "ATS-Optimized Simple"])
+                                   ["Modern Professional", "Classic Elegant", "ATS-Optimized Simple"])
         
         submitted = st.form_submit_button("✨ Generate & Analyze Resume")
 
@@ -1066,240 +1065,79 @@ with ats_tab:
             if languages:
                 formatted_resume += f"\nLANGUAGES:\n{languages}"
             
-            # PDF Generation with different designs
+            # PDF Generation - SIMPLIFIED VERSION THAT WORKS
             pdf = FPDF()
             pdf.add_page()
             pdf.set_font("Arial", size=12)
             
-            # Apply selected design
-            if resume_design == "Modern Professional":
-                pdf.set_fill_color(240, 240, 240)
-                pdf.set_text_color(0, 0, 0)
-                pdf.set_font("Arial", 'B', 14)
-                pdf.cell(0, 10, full_name, ln=1, align='C')
-                pdf.set_font_size(10)
-                pdf.cell(0, 5, f"{email} | {phone} | {linkedin}", ln=1, align='C')
-                pdf.ln(5)
-                section_fill = True
-            elif resume_design == "Classic Elegant":
-                pdf.set_text_color(0, 0, 0)
-                pdf.set_font("Times", 'B', 14)
-                pdf.cell(0, 10, full_name, ln=1)
-                pdf.set_font("Times", '', 10)
-                pdf.cell(0, 5, f"{email} | {phone} | {linkedin}", ln=1)
-                pdf.ln(5)
-                section_fill = False
-            elif resume_design == "Creative Contemporary":
-                pdf.set_fill_color(70, 130, 180)  # Steel blue
-                pdf.set_text_color(255, 255, 255)
-                pdf.cell(0, 15, full_name, ln=1, align='C', fill=True)
-                pdf.set_text_color(0, 0, 0)
-                pdf.set_font_size(10)
-                pdf.cell(0, 5, f"{email} | {phone} | {linkedin}", ln=1, align='C')
-                pdf.ln(5)
-                section_fill = True
-            elif resume_design == "Minimalist Clean":
-                pdf.set_text_color(0, 0, 0)
-                pdf.set_font("Helvetica", 'B', 12)
-                pdf.cell(0, 8, full_name, ln=1)
-                pdf.set_font("Helvetica", '', 10)
-                pdf.cell(0, 5, f"{email} | {phone} | {linkedin}", ln=1)
-                pdf.ln(8)
-                section_fill = False
-            else:  # ATS-Optimized Simple
-                pdf.set_text_color(0, 0, 0)
-                pdf.set_font("Arial", 'B', 12)
-                pdf.cell(0, 8, full_name, ln=1)
-                pdf.set_font("Arial", '', 10)
-                pdf.cell(0, 5, f"{email} | {phone} | {linkedin}", ln=1)
-                pdf.ln(5)
-                section_fill = False
+            # Simple header
+            pdf.cell(0, 10, full_name, ln=1)
+            pdf.cell(0, 5, f"{email} | {phone} | {linkedin}", ln=1)
+            pdf.ln(5)
             
-            # Add sections with design-specific formatting
-            sections = [
-                ("PROFESSIONAL SUMMARY", professional_summary),
-                ("TECHNICAL SKILLS", skills),
-                ("PROFESSIONAL EXPERIENCE", experience),
-                ("EDUCATION", education)
-            ]
+            # Function to safely add text
+            def safe_add_text(pdf, text):
+                try:
+                    pdf.multi_cell(0, 5, text)
+                except:
+                    # If there's any error, use cleaned text
+                    cleaned_text = text.encode('latin1', 'replace').decode('latin1')
+                    pdf.multi_cell(0, 5, cleaned_text)
             
-            for section, content in sections:
-                if resume_design in ["Modern Professional", "Creative Contemporary"] and section_fill:
-                    pdf.set_fill_color(220, 220, 220)
-                    pdf.set_font('Arial', 'B', 12)
-                    pdf.cell(0, 8, section, ln=1, fill=True)
-                    pdf.set_fill_color(255, 255, 255)
-                elif resume_design == "Classic Elegant":
-                    pdf.set_font('Times', 'B', 12)
-                    pdf.cell(0, 8, section, ln=1)
-                elif resume_design == "Minimalist Clean":
-                    pdf.set_font('Helvetica', 'B', 11)
-                    pdf.cell(0, 6, section, ln=1)
-                else:  # ATS-Optimized Simple
-                    pdf.set_font('Arial', 'B', 12)
-                    pdf.cell(0, 6, section, ln=1)
-                
-                # Set content font
-                if resume_design == "Classic Elegant":
-                    pdf.set_font('Times', '', 11)
-                elif resume_design == "Minimalist Clean":
-                    pdf.set_font('Helvetica', '', 10)
-                else:
-                    pdf.set_font('Arial', '', 11)
-                
-                pdf.multi_cell(0, 5, content)
-                pdf.ln(3)
+            # Add sections
+            pdf.set_font('Arial', 'B', 12)
+            pdf.cell(0, 10, "PROFESSIONAL SUMMARY", ln=1)
+            pdf.set_font('Arial', '', 11)
+            safe_add_text(pdf, professional_summary)
+            pdf.ln(3)
             
-            # Add optional sections
-            optional_sections = []
+            pdf.set_font('Arial', 'B', 12)
+            pdf.cell(0, 10, "TECHNICAL SKILLS", ln=1)
+            pdf.set_font('Arial', '', 11)
+            safe_add_text(pdf, skills)
+            pdf.ln(3)
+            
+            pdf.set_font('Arial', 'B', 12)
+            pdf.cell(0, 10, "PROFESSIONAL EXPERIENCE", ln=1)
+            pdf.set_font('Arial', '', 11)
+            safe_add_text(pdf, experience)
+            pdf.ln(3)
+            
+            pdf.set_font('Arial', 'B', 12)
+            pdf.cell(0, 10, "EDUCATION", ln=1)
+            pdf.set_font('Arial', '', 11)
+            safe_add_text(pdf, education)
+            pdf.ln(3)
+            
+            # Optional sections
             if certifications:
-                optional_sections.append(("CERTIFICATIONS", certifications))
-            if projects:
-                optional_sections.append(("KEY PROJECTS", projects))
-            if languages:
-                optional_sections.append(("LANGUAGES", languages))
-            
-            for section, content in optional_sections:
-                if resume_design in ["Modern Professional", "Creative Contemporary"] and section_fill:
-                    pdf.set_fill_color(220, 220, 220)
-                    pdf.set_font('Arial', 'B', 12)
-                    pdf.cell(0, 8, section, ln=1, fill=True)
-                    pdf.set_fill_color(255, 255, 255)
-                elif resume_design == "Classic Elegant":
-                    pdf.set_font('Times', 'B', 12)
-                    pdf.cell(0, 8, section, ln=1)
-                elif resume_design == "Minimalist Clean":
-                    pdf.set_font('Helvetica', 'B', 11)
-                    pdf.cell(0, 6, section, ln=1)
-                else:  # ATS-Optimized Simple
-                    pdf.set_font('Arial', 'B', 12)
-                    pdf.cell(0, 6, section, ln=1)
-                
-                # Set content font
-                if resume_design == "Classic Elegant":
-                    pdf.set_font('Times', '', 11)
-                elif resume_design == "Minimalist Clean":
-                    pdf.set_font('Helvetica', '', 10)
-                else:
-                    pdf.set_font('Arial', '', 11)
-                
-                pdf.multi_cell(0, 5, content)
+                pdf.set_font('Arial', 'B', 12)
+                pdf.cell(0, 10, "CERTIFICATIONS", ln=1)
+                pdf.set_font('Arial', '', 11)
+                safe_add_text(pdf, certifications)
                 pdf.ln(3)
             
-            # Save PDF to buffer
+            if projects:
+                pdf.set_font('Arial', 'B', 12)
+                pdf.cell(0, 10, "KEY PROJECTS", ln=1)
+                pdf.set_font('Arial', '', 11)
+                safe_add_text(pdf, projects)
+                pdf.ln(3)
+            
+            if languages:
+                pdf.set_font('Arial', 'B', 12)
+                pdf.cell(0, 10, "LANGUAGES", ln=1)
+                pdf.set_font('Arial', '', 11)
+                safe_add_text(pdf, languages)
+            
+            # Save PDF to buffer with error handling
             pdf_buffer = BytesIO()
-            pdf_bytes = pdf.output(dest='S').encode('latin1')
+            try:
+                pdf_bytes = pdf.output(dest='S').encode('latin1', 'replace')
+            except:
+                pdf_bytes = pdf.output(dest='S').encode('utf-8', 'replace')
             pdf_buffer.write(pdf_bytes)
             pdf_buffer.seek(0)
-            
-            # Create DOCX version with design options
-            doc = Document()
-            
-            # Apply selected design to DOCX
-            if resume_design == "Modern Professional":
-                # Add centered name with larger font
-                heading = doc.add_paragraph()
-                heading_format = heading.paragraph_format
-                heading_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                runner = heading.add_run(full_name.upper())
-                runner.font.size = Pt(14)
-                runner.font.color.rgb = RGBColor(0, 0, 0)
-                runner.bold = True
-                
-                # Add contact info
-                contact = doc.add_paragraph()
-                contact_format = contact.paragraph_format
-                contact_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                contact_run = contact.add_run(f"{email} | {phone} | {linkedin}")
-                contact_run.font.size = Pt(10)
-                
-                # Style for section headings
-                section_style = "Intense Quote"
-            elif resume_design == "Classic Elegant":
-                # Times New Roman classic style
-                doc.add_heading(full_name, 0)
-                doc.add_paragraph(f"{email} | {phone} | {linkedin}", style="Body Text")
-                section_style = "Heading 1"
-            elif resume_design == "Creative Contemporary":
-                # Modern style with color
-                heading = doc.add_paragraph()
-                heading_format = heading.paragraph_format
-                heading_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                runner = heading.add_run(full_name.upper())
-                runner.font.size = Pt(16)
-                runner.font.color.rgb = RGBColor(70, 130, 180)  # Steel blue
-                runner.bold = True
-                
-                contact = doc.add_paragraph()
-                contact_format = contact.paragraph_format
-                contact_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                contact_run = contact.add_run(f"{email} | {phone} | {linkedin}")
-                contact_run.font.size = Pt(10)
-                contact_run.font.color.rgb = RGBColor(100, 100, 100)
-                
-                section_style = "Heading 2"
-            elif resume_design == "Minimalist Clean":
-                # Simple clean style
-                heading = doc.add_paragraph()
-                runner = heading.add_run(full_name)
-                runner.font.size = Pt(12)
-                runner.bold = True
-                
-                contact = doc.add_paragraph(f"{email} | {phone} | {linkedin}")
-                contact.runs[0].font.size = Pt(9)
-                
-                section_style = "Heading 3"
-            else:  # ATS-Optimized Simple
-                doc.add_heading(full_name, level=1)
-                doc.add_paragraph(f"{email} | {phone} | {linkedin}")
-                section_style = "Heading 1"
-            
-            # Add sections with appropriate styling
-            def add_section(title, content):
-                if resume_design == "Modern Professional":
-                    # Modern style with underline
-                    p = doc.add_paragraph(style=section_style)
-                    p.add_run(title).bold = True
-                    
-                    # Add content
-                    doc.add_paragraph(content)
-                elif resume_design == "Classic Elegant":
-                    # Classic style
-                    doc.add_heading(title, level=1)
-                    doc.add_paragraph(content)
-                elif resume_design == "Creative Contemporary":
-                    # Contemporary style
-                    p = doc.add_paragraph(style=section_style)
-                    run = p.add_run(title)
-                    run.font.color.rgb = RGBColor(70, 130, 180)
-                    doc.add_paragraph(content)
-                elif resume_design == "Minimalist Clean":
-                    # Minimalist style
-                    p = doc.add_paragraph()
-                    run = p.add_run(title)
-                    run.bold = True
-                    run.font.size = Pt(11)
-                    doc.add_paragraph(content)
-                else:  # ATS-Optimized Simple
-                    doc.add_heading(title, level=1)
-                    doc.add_paragraph(content)
-            
-            add_section("PROFESSIONAL SUMMARY", professional_summary)
-            add_section("TECHNICAL SKILLS", skills)
-            add_section("PROFESSIONAL EXPERIENCE", experience)
-            add_section("EDUCATION", education)
-            
-            if certifications:
-                add_section("CERTIFICATIONS", certifications)
-            if projects:
-                add_section("KEY PROJECTS", projects)
-            if languages:
-                add_section("LANGUAGES", languages)
-            
-            # Save DOCX to buffer
-            docx_buffer = BytesIO()
-            doc.save(docx_buffer)
-            docx_buffer.seek(0)
             
             # Download buttons
             col1, col2, col3 = st.columns(3)
@@ -1311,13 +1149,6 @@ with ats_tab:
                     mime="application/pdf"
                 )
             with col2:
-                st.download_button(
-                    label="📝 Download DOCX",
-                    data=docx_buffer,
-                    file_name=f"{full_name.replace(' ', '_')}_Resume.docx",
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                )
-            with col3:
                 st.download_button(
                     label="📋 Download TXT",
                     data=formatted_resume,
