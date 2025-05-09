@@ -966,7 +966,9 @@ with ats_tab:
         
         st.markdown("### 🔍 ATS Optimization")
         use_ats_keywords = st.checkbox("Include ATS-friendly keywords", value=True)
-        modern_design = st.checkbox("Use modern resume design", value=True)
+        resume_design = st.selectbox("Resume Design", 
+                                   ["Modern Professional", "Classic Elegant", "Creative Contemporary", 
+                                    "Minimalist Clean", "ATS-Optimized Simple"])
         
         submitted = st.form_submit_button("✨ Generate & Analyze Resume")
 
@@ -1064,23 +1066,56 @@ with ats_tab:
             if languages:
                 formatted_resume += f"\nLANGUAGES:\n{languages}"
             
-            # PDF Generation
+            # PDF Generation with different designs
             pdf = FPDF()
             pdf.add_page()
             pdf.set_font("Arial", size=12)
             
-            # Add modern styling if selected
-            if modern_design:
+            # Apply selected design
+            if resume_design == "Modern Professional":
                 pdf.set_fill_color(240, 240, 240)
+                pdf.set_text_color(0, 0, 0)
+                pdf.set_font("Arial", 'B', 14)
                 pdf.cell(0, 10, full_name, ln=1, align='C')
                 pdf.set_font_size(10)
                 pdf.cell(0, 5, f"{email} | {phone} | {linkedin}", ln=1, align='C')
                 pdf.ln(5)
-            else:
+                section_fill = True
+            elif resume_design == "Classic Elegant":
+                pdf.set_text_color(0, 0, 0)
+                pdf.set_font("Times", 'B', 14)
                 pdf.cell(0, 10, full_name, ln=1)
+                pdf.set_font("Times", '', 10)
                 pdf.cell(0, 5, f"{email} | {phone} | {linkedin}", ln=1)
+                pdf.ln(5)
+                section_fill = False
+            elif resume_design == "Creative Contemporary":
+                pdf.set_fill_color(70, 130, 180)  # Steel blue
+                pdf.set_text_color(255, 255, 255)
+                pdf.cell(0, 15, full_name, ln=1, align='C', fill=True)
+                pdf.set_text_color(0, 0, 0)
+                pdf.set_font_size(10)
+                pdf.cell(0, 5, f"{email} | {phone} | {linkedin}", ln=1, align='C')
+                pdf.ln(5)
+                section_fill = True
+            elif resume_design == "Minimalist Clean":
+                pdf.set_text_color(0, 0, 0)
+                pdf.set_font("Helvetica", 'B', 12)
+                pdf.cell(0, 8, full_name, ln=1)
+                pdf.set_font("Helvetica", '', 10)
+                pdf.cell(0, 5, f"{email} | {phone} | {linkedin}", ln=1)
+                pdf.ln(8)
+                section_fill = False
+            else:  # ATS-Optimized Simple
+                pdf.set_text_color(0, 0, 0)
+                pdf.set_font("Arial", 'B', 12)
+                pdf.cell(0, 8, full_name, ln=1)
+                pdf.set_font("Arial", '', 10)
+                pdf.cell(0, 5, f"{email} | {phone} | {linkedin}", ln=1)
+                pdf.ln(5)
+                section_fill = False
             
-            # Add sections
+            # Add sections with design-specific formatting
             sections = [
                 ("PROFESSIONAL SUMMARY", professional_summary),
                 ("TECHNICAL SKILLS", skills),
@@ -1089,53 +1124,67 @@ with ats_tab:
             ]
             
             for section, content in sections:
-                if modern_design:
+                if resume_design in ["Modern Professional", "Creative Contemporary"] and section_fill:
+                    pdf.set_fill_color(220, 220, 220)
                     pdf.set_font('Arial', 'B', 12)
-                    pdf.cell(0, 10, section, ln=1, fill=True)
-                    pdf.set_font('Arial', '', 11)
+                    pdf.cell(0, 8, section, ln=1, fill=True)
+                    pdf.set_fill_color(255, 255, 255)
+                elif resume_design == "Classic Elegant":
+                    pdf.set_font('Times', 'B', 12)
+                    pdf.cell(0, 8, section, ln=1)
+                elif resume_design == "Minimalist Clean":
+                    pdf.set_font('Helvetica', 'B', 11)
+                    pdf.cell(0, 6, section, ln=1)
+                else:  # ATS-Optimized Simple
+                    pdf.set_font('Arial', 'B', 12)
+                    pdf.cell(0, 6, section, ln=1)
+                
+                # Set content font
+                if resume_design == "Classic Elegant":
+                    pdf.set_font('Times', '', 11)
+                elif resume_design == "Minimalist Clean":
+                    pdf.set_font('Helvetica', '', 10)
                 else:
-                    pdf.set_font('Arial', 'B', 12)
-                    pdf.cell(0, 10, section, ln=1)
                     pdf.set_font('Arial', '', 11)
                 
                 pdf.multi_cell(0, 5, content)
                 pdf.ln(3)
             
             # Add optional sections
+            optional_sections = []
             if certifications:
-                if modern_design:
-                    pdf.set_font('Arial', 'B', 12)
-                    pdf.cell(0, 10, "CERTIFICATIONS", ln=1, fill=True)
-                    pdf.set_font('Arial', '', 11)
-                else:
-                    pdf.set_font('Arial', 'B', 12)
-                    pdf.cell(0, 10, "CERTIFICATIONS", ln=1)
-                    pdf.set_font('Arial', '', 11)
-                pdf.multi_cell(0, 5, certifications)
-                pdf.ln(3)
-            
+                optional_sections.append(("CERTIFICATIONS", certifications))
             if projects:
-                if modern_design:
-                    pdf.set_font('Arial', 'B', 12)
-                    pdf.cell(0, 10, "KEY PROJECTS", ln=1, fill=True)
-                    pdf.set_font('Arial', '', 11)
-                else:
-                    pdf.set_font('Arial', 'B', 12)
-                    pdf.cell(0, 10, "KEY PROJECTS", ln=1)
-                    pdf.set_font('Arial', '', 11)
-                pdf.multi_cell(0, 5, projects)
-                pdf.ln(3)
-            
+                optional_sections.append(("KEY PROJECTS", projects))
             if languages:
-                if modern_design:
+                optional_sections.append(("LANGUAGES", languages))
+            
+            for section, content in optional_sections:
+                if resume_design in ["Modern Professional", "Creative Contemporary"] and section_fill:
+                    pdf.set_fill_color(220, 220, 220)
                     pdf.set_font('Arial', 'B', 12)
-                    pdf.cell(0, 10, "LANGUAGES", ln=1, fill=True)
-                    pdf.set_font('Arial', '', 11)
+                    pdf.cell(0, 8, section, ln=1, fill=True)
+                    pdf.set_fill_color(255, 255, 255)
+                elif resume_design == "Classic Elegant":
+                    pdf.set_font('Times', 'B', 12)
+                    pdf.cell(0, 8, section, ln=1)
+                elif resume_design == "Minimalist Clean":
+                    pdf.set_font('Helvetica', 'B', 11)
+                    pdf.cell(0, 6, section, ln=1)
+                else:  # ATS-Optimized Simple
+                    pdf.set_font('Arial', 'B', 12)
+                    pdf.cell(0, 6, section, ln=1)
+                
+                # Set content font
+                if resume_design == "Classic Elegant":
+                    pdf.set_font('Times', '', 11)
+                elif resume_design == "Minimalist Clean":
+                    pdf.set_font('Helvetica', '', 10)
                 else:
-                    pdf.set_font('Arial', 'B', 12)
-                    pdf.cell(0, 10, "LANGUAGES", ln=1)
                     pdf.set_font('Arial', '', 11)
-                pdf.multi_cell(0, 5, languages)
+                
+                pdf.multi_cell(0, 5, content)
+                pdf.ln(3)
             
             # Save PDF to buffer
             pdf_buffer = BytesIO()
@@ -1143,45 +1192,95 @@ with ats_tab:
             pdf_buffer.write(pdf_bytes)
             pdf_buffer.seek(0)
             
-            # Create DOCX version
+            # Create DOCX version with design options
             doc = Document()
             
-            # Add modern styling if selected
-            if modern_design:
+            # Apply selected design to DOCX
+            if resume_design == "Modern Professional":
+                # Add centered name with larger font
                 heading = doc.add_paragraph()
                 heading_format = heading.paragraph_format
-                heading_format.alignment = 1  # Center alignment
+                heading_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
                 runner = heading.add_run(full_name.upper())
                 runner.font.size = Pt(14)
                 runner.font.color.rgb = RGBColor(0, 0, 0)
                 runner.bold = True
                 
+                # Add contact info
                 contact = doc.add_paragraph()
                 contact_format = contact.paragraph_format
-                contact_format.alignment = 1
+                contact_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
                 contact_run = contact.add_run(f"{email} | {phone} | {linkedin}")
                 contact_run.font.size = Pt(10)
-            else:
+                
+                # Style for section headings
+                section_style = "Intense Quote"
+            elif resume_design == "Classic Elegant":
+                # Times New Roman classic style
                 doc.add_heading(full_name, 0)
+                doc.add_paragraph(f"{email} | {phone} | {linkedin}", style="Body Text")
+                section_style = "Heading 1"
+            elif resume_design == "Creative Contemporary":
+                # Modern style with color
+                heading = doc.add_paragraph()
+                heading_format = heading.paragraph_format
+                heading_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                runner = heading.add_run(full_name.upper())
+                runner.font.size = Pt(16)
+                runner.font.color.rgb = RGBColor(70, 130, 180)  # Steel blue
+                runner.bold = True
+                
+                contact = doc.add_paragraph()
+                contact_format = contact.paragraph_format
+                contact_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                contact_run = contact.add_run(f"{email} | {phone} | {linkedin}")
+                contact_run.font.size = Pt(10)
+                contact_run.font.color.rgb = RGBColor(100, 100, 100)
+                
+                section_style = "Heading 2"
+            elif resume_design == "Minimalist Clean":
+                # Simple clean style
+                heading = doc.add_paragraph()
+                runner = heading.add_run(full_name)
+                runner.font.size = Pt(12)
+                runner.bold = True
+                
+                contact = doc.add_paragraph(f"{email} | {phone} | {linkedin}")
+                contact.runs[0].font.size = Pt(9)
+                
+                section_style = "Heading 3"
+            else:  # ATS-Optimized Simple
+                doc.add_heading(full_name, level=1)
                 doc.add_paragraph(f"{email} | {phone} | {linkedin}")
+                section_style = "Heading 1"
             
-            # Add sections
+            # Add sections with appropriate styling
             def add_section(title, content):
-                if modern_design:
+                if resume_design == "Modern Professional":
+                    # Modern style with underline
+                    p = doc.add_paragraph(style=section_style)
+                    p.add_run(title).bold = True
+                    
+                    # Add content
+                    doc.add_paragraph(content)
+                elif resume_design == "Classic Elegant":
+                    # Classic style
+                    doc.add_heading(title, level=1)
+                    doc.add_paragraph(content)
+                elif resume_design == "Creative Contemporary":
+                    # Contemporary style
+                    p = doc.add_paragraph(style=section_style)
+                    run = p.add_run(title)
+                    run.font.color.rgb = RGBColor(70, 130, 180)
+                    doc.add_paragraph(content)
+                elif resume_design == "Minimalist Clean":
+                    # Minimalist style
                     p = doc.add_paragraph()
-                    p.paragraph_format.space_after = Pt(0)
                     run = p.add_run(title)
                     run.bold = True
-                    run.font.size = Pt(12)
-                    
-                    # Add gray underline
-                    p = doc.add_paragraph()
-                    p.paragraph_format.space_after = Pt(6)
-                    run = p.add_run("_"*50)
-                    run.font.color.rgb = RGBColor(200, 200, 200)
-                    
+                    run.font.size = Pt(11)
                     doc.add_paragraph(content)
-                else:
+                else:  # ATS-Optimized Simple
                     doc.add_heading(title, level=1)
                     doc.add_paragraph(content)
             
@@ -1228,66 +1327,151 @@ with ats_tab:
             
             # Additional AI suggestions
             st.markdown("---")
-            st.markdown("### 🚀 Boost Your Resume Further")
+            st.markdown("### 🚀 Boost Your Application")
+            
+            with st.expander("📝 AI Cover Letter Generator"):
+                st.markdown("Generate a tailored cover letter based on your resume and a job description")
+                job_desc = st.text_area("Paste the job description here*", height=150)
+                company_name = st.text_input("Company Name")
+                hiring_manager = st.text_input("Hiring Manager Name (if known)")
+                
+                if st.button("Generate Cover Letter"):
+                    if not job_desc:
+                        st.error("Please paste a job description")
+                    else:
+                        with st.spinner("Generating tailored cover letter..."):
+                            cover_prompt = f"""
+                            Write a professional cover letter for {full_name} applying for a {role} position at {company_name}.
+                            Tailor it specifically to this job description. Use formal business letter format.
+                            
+                            Job Requirements:
+                            {job_desc}
+                            
+                            Candidate Information:
+                            Name: {full_name}
+                            Email: {email}
+                            Phone: {phone}
+                            
+                            Resume Highlights:
+                            {professional_summary}
+                            
+                            Key Skills:
+                            {skills}
+                            
+                            Relevant Experience:
+                            {experience}
+                            
+                            Education:
+                            {education}
+                            
+                            Structure the letter with:
+                            1. Professional header with date and address
+                            2. Personalized salutation (use {hiring_manager} if provided)
+                            3. Strong opening paragraph highlighting relevant qualifications
+                            4. 2-3 body paragraphs matching skills to job requirements
+                            5. Closing paragraph with call to action
+                            6. Professional sign-off
+                            """
+                            
+                            cover_letter = get_result(cover_prompt)
+                            st.text_area("Generated Cover Letter", cover_letter, height=400)
+                            
+                            # Download buttons for cover letter
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                st.download_button(
+                                    label="📥 Download TXT Cover Letter",
+                                    data=cover_letter,
+                                    file_name=f"{full_name.replace(' ', '_')}_Cover_Letter.txt",
+                                    mime="text/plain"
+                                )
+                            with col2:
+                                # Create DOCX version of cover letter
+                                doc = Document()
+                                doc.add_paragraph(cover_letter)
+                                
+                                cover_buffer = BytesIO()
+                                doc.save(cover_buffer)
+                                cover_buffer.seek(0)
+                                
+                                st.download_button(
+                                    label="📄 Download DOCX Cover Letter",
+                                    data=cover_buffer,
+                                    file_name=f"{full_name.replace(' ', '_')}_Cover_Letter.docx",
+                                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                )
+            
+            with st.expander("🔗 LinkedIn Profile Optimizer"):
+                if linkedin:
+                    st.markdown(f"Analyzing LinkedIn profile: {linkedin}")
+                    with st.spinner("Generating LinkedIn optimization tips..."):
+                        linkedin_prompt = f"""
+                        Analyze this LinkedIn profile for optimization opportunities:
+                        Profile URL: {linkedin}
+                        
+                        Provide specific recommendations for:
+                        1. Profile Headline: Suggest an improved headline for a {role} that includes keywords
+                        2. About Section: Outline a compelling summary structure with examples
+                        3. Skills Section: List the top 5 skills to highlight for {role}
+                        4. Experience: Recommendations for optimizing experience descriptions
+                        5. Endorsements: Strategy to get relevant skill endorsements
+                        6. Networking: Tips for growing relevant connections
+                        
+                        Format as:
+                        ### LinkedIn Optimization Report for {full_name}
+                        **Current Headline**: [if available]
+                        **Improved Headline**: [suggestion]
+                        
+                        **About Section Recommendations**:
+                        - [bullet points]
+                        
+                        **Top Skills to Showcase**:
+                        1. [skill 1]
+                        2. [skill 2]
+                        ...
+                        
+                        **Experience Optimization**:
+                        - [suggestions]
+                        
+                        **Endorsement Strategy**:
+                        - [actionable tips]
+                        
+                        **Networking Tips**:
+                        - [suggestions]
+                        """
+                        
+                        linkedin_analysis = get_result(linkedin_prompt)
+                        st.markdown(linkedin_analysis)
+                else:
+                    st.info("Please add your LinkedIn URL above to get optimization tips")
             
             with st.expander("🔍 Get Tailored Job Description Analysis"):
-                job_desc = st.text_area("Paste a job description to get customized matching suggestions")
-                if st.button("Analyze Match") and job_desc:
+                job_desc = st.text_area("Paste a job description to get customized matching suggestions", height=150)
+                if st.button("Analyze Job Match") and job_desc:
                     with st.spinner("Analyzing job match..."):
                         match_prompt = f"""
                         Analyze how well this resume matches the provided job description.
                         Provide specific recommendations to improve alignment.
                         
-                        Resume:
+                        Candidate: {full_name}
+                        Target Role: {role}
+                        
+                        Resume Content:
                         {resume_content}
                         
                         Job Description:
                         {job_desc}
                         
                         Format your response with:
-                        - Match Score (0-100)
-                        - Missing Keywords
-                        - Recommended Resume Changes
-                        - Suggested Skills to Highlight
+                        - **Match Score**: X/100 with explanation
+                        - **Missing Keywords**: [list from job description]
+                        - **Recommended Resume Changes**: [bullet points]
+                        - **Suggested Skills to Highlight**: [based on job requirements]
+                        - **Cover Letter Talking Points**: [key points to emphasize]
                         """
                         
                         match_analysis = get_result(match_prompt)
-                        st.markdown(match_analysis)
-            
-            with st.expander("💡 Generate Cover Letter"):
-                if st.button("Create Cover Letter"):
-                    with st.spinner("Generating cover letter..."):
-                        cover_prompt = f"""
-                        Write a professional cover letter for this candidate applying to a {role} position.
-                        Use formal business letter format.
-                        
-                        Candidate Info:
-                        Name: {full_name}
-                        Email: {email}
-                        Phone: {phone}
-                        
-                        Resume Highlights:
-                        {professional_summary}
-                        
-                        Skills:
-                        {skills}
-                        
-                        Experience Highlights:
-                        {experience}
-                        
-                        Education:
-                        {education}
-                        """
-                        
-                        cover_letter = get_result(cover_prompt)
-                        st.text_area("Generated Cover Letter", cover_letter, height=300)
-                        st.download_button(
-                            label="📥 Download Cover Letter",
-                            data=cover_letter,
-                            file_name=f"{full_name.replace(' ', '_')}_Cover_Letter.txt",
-                            mime="text/plain"
-                        )
-st.markdown("""
+                        st.markdown(match_analysis)st.markdown("""
     <div style='background-color:#fffde7; border:2px solid #fdd835; border-radius:10px; padding:20px; margin-top:30px;'>
         <h3 style='color:#f57f17;'>\U0001F680 Ace Your 2025 Interviews with AI</h3>
         <p style='font-size:16px; color:#555;'>🔸 Rejections hurt, but <b>smart AI prep</b> can make you unstoppable.<br>🔸 Don’t just memorize answers – master interviews with tools tailored for 2025.</p>
