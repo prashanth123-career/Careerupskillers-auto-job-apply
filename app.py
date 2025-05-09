@@ -928,7 +928,6 @@ with ats_tab:
     </div>
     """, unsafe_allow_html=True)
 
-    # Initialize session state for resume analysis
     if 'resume_analysis' not in st.session_state:
         st.session_state.resume_analysis = None
 
@@ -966,8 +965,6 @@ with ats_tab:
         
         st.markdown("### 🔍 ATS Optimization")
         use_ats_keywords = st.checkbox("Include ATS-friendly keywords", value=True)
-        resume_design = st.selectbox("Resume Design", 
-                                   ["Modern Professional", "Classic Elegant", "ATS-Optimized Simple"])
         
         submitted = st.form_submit_button("✨ Generate & Analyze Resume")
 
@@ -1026,20 +1023,14 @@ with ats_tab:
                 st.session_state.resume_analysis = get_result(analysis_prompt)
             
             st.success("✅ ATS-Optimized Resume Generated!")
-            
-            # Display AI Analysis
             st.markdown("---")
             st.markdown(st.session_state.resume_analysis)
             
-            # Generate downloadable resume
-            st.markdown("---")
-            st.markdown("### 📤 Download Your Resume")
-            
-            # Generate professional summary if not already in analysis
+            # Generate professional summary
             summary_prompt = f"Generate a 3-sentence professional summary for a {role} with these skills: {skills}"
             professional_summary = get_result(summary_prompt)
             
-            # Create formatted resume text
+            # Create text version
             formatted_resume = f"""
             {full_name.upper()}
             {email} | {phone} | {linkedin}
@@ -1065,89 +1056,97 @@ with ats_tab:
             if languages:
                 formatted_resume += f"\nLANGUAGES:\n{languages}"
             
-            # PDF Generation - SIMPLIFIED VERSION THAT WORKS
-            pdf = FPDF()
-            pdf.add_page()
-            pdf.set_font("Arial", size=12)
-            
-            # Simple header
-            pdf.cell(0, 10, full_name, ln=1)
-            pdf.cell(0, 5, f"{email} | {phone} | {linkedin}", ln=1)
-            pdf.ln(5)
-            
-            # Function to safely add text
-            def safe_add_text(pdf, text):
-                try:
-                    pdf.multi_cell(0, 5, text)
-                except:
-                    # If there's any error, use cleaned text
-                    cleaned_text = text.encode('latin1', 'replace').decode('latin1')
-                    pdf.multi_cell(0, 5, cleaned_text)
-            
-            # Add sections
-            pdf.set_font('Arial', 'B', 12)
-            pdf.cell(0, 10, "PROFESSIONAL SUMMARY", ln=1)
-            pdf.set_font('Arial', '', 11)
-            safe_add_text(pdf, professional_summary)
-            pdf.ln(3)
-            
-            pdf.set_font('Arial', 'B', 12)
-            pdf.cell(0, 10, "TECHNICAL SKILLS", ln=1)
-            pdf.set_font('Arial', '', 11)
-            safe_add_text(pdf, skills)
-            pdf.ln(3)
-            
-            pdf.set_font('Arial', 'B', 12)
-            pdf.cell(0, 10, "PROFESSIONAL EXPERIENCE", ln=1)
-            pdf.set_font('Arial', '', 11)
-            safe_add_text(pdf, experience)
-            pdf.ln(3)
-            
-            pdf.set_font('Arial', 'B', 12)
-            pdf.cell(0, 10, "EDUCATION", ln=1)
-            pdf.set_font('Arial', '', 11)
-            safe_add_text(pdf, education)
-            pdf.ln(3)
-            
-            # Optional sections
-            if certifications:
-                pdf.set_font('Arial', 'B', 12)
-                pdf.cell(0, 10, "CERTIFICATIONS", ln=1)
-                pdf.set_font('Arial', '', 11)
-                safe_add_text(pdf, certifications)
-                pdf.ln(3)
-            
-            if projects:
-                pdf.set_font('Arial', 'B', 12)
-                pdf.cell(0, 10, "KEY PROJECTS", ln=1)
-                pdf.set_font('Arial', '', 11)
-                safe_add_text(pdf, projects)
-                pdf.ln(3)
-            
-            if languages:
-                pdf.set_font('Arial', 'B', 12)
-                pdf.cell(0, 10, "LANGUAGES", ln=1)
-                pdf.set_font('Arial', '', 11)
-                safe_add_text(pdf, languages)
-            
-            # Save PDF to buffer with error handling
-            pdf_buffer = BytesIO()
+            # NEW BULLETPROOF PDF GENERATION
             try:
+                from fpdf import FPDF
+                
+                def clean_text(text):
+                    """Ensure text is safe for PDF generation"""
+                    if not text:
+                        return ""
+                    # Replace problematic characters
+                    replacements = {
+                        '•': '-',
+                        '·': '-',
+                        '–': '-',
+                        '—': '-',
+                        '‘': "'",
+                        '’': "'",
+                        '“': '"',
+                        '”': '"',
+                        '…': '...'
+                    }
+                    for k, v in replacements.items():
+                        text = text.replace(k, v)
+                    # Remove any remaining non-ASCII characters
+                    return text.encode('ascii', 'ignore').decode('ascii')
+                
+                pdf = FPDF()
+                pdf.add_page()
+                pdf.set_font("Arial", size=12)
+                
+                # Header
+                pdf.cell(0, 10, clean_text(full_name), ln=1)
+                pdf.cell(0, 5, clean_text(f"{email} | {phone} | {linkedin}"), ln=1)
+                pdf.ln(5)
+                
+                # Add all sections with cleaned text
+                sections = [
+                    ("PROFESSIONAL SUMMARY", professional_summary),
+                    ("TECHNICAL SKILLS", skills),
+                    ("PROFESSIONAL EXPERIENCE", experience),
+                    ("EDUCATION", education)
+                ]
+                
+                for section, content in sections:
+                    pdf.set_font('Arial', 'B', 12)
+                    pdf.cell(0, 10, clean_text(section), ln=1)
+                    pdf.set_font('Arial', '', 11)
+                    pdf.multi_cell(0, 5, clean_text(content))
+                    pdf.ln(3)
+                
+                # Optional sections
+                if certifications:
+                    pdf.set_font('Arial', 'B', 12)
+                    pdf.cell(0, 10, clean_text("CERTIFICATIONS"), ln=1)
+                    pdf.set_font('Arial', '', 11)
+                    pdf.multi_cell(0, 5, clean_text(certifications))
+                    pdf.ln(3)
+                
+                if projects:
+                    pdf.set_font('Arial', 'B', 12)
+                    pdf.cell(0, 10, clean_text("KEY PROJECTS"), ln=1)
+                    pdf.set_font('Arial', '', 11)
+                    pdf.multi_cell(0, 5, clean_text(projects))
+                    pdf.ln(3)
+                
+                if languages:
+                    pdf.set_font('Arial', 'B', 12)
+                    pdf.cell(0, 10, clean_text("LANGUAGES"), ln=1)
+                    pdf.set_font('Arial', '', 11)
+                    pdf.multi_cell(0, 5, clean_text(languages))
+                
+                # Generate PDF bytes safely
                 pdf_bytes = pdf.output(dest='S').encode('latin1', 'replace')
-            except:
-                pdf_bytes = pdf.output(dest='S').encode('utf-8', 'replace')
-            pdf_buffer.write(pdf_bytes)
-            pdf_buffer.seek(0)
+                pdf_buffer = BytesIO(pdf_bytes)
+                
+            except Exception as e:
+                st.error(f"Failed to generate PDF: {str(e)}")
+                pdf_buffer = None
             
             # Download buttons
-            col1, col2, col3 = st.columns(3)
+            col1, col2 = st.columns(2)
             with col1:
-                st.download_button(
-                    label="📄 Download PDF",
-                    data=pdf_buffer,
-                    file_name=f"{full_name.replace(' ', '_')}_Resume.pdf",
-                    mime="application/pdf"
-                )
+                if pdf_buffer:
+                    st.download_button(
+                        label="📄 Download PDF",
+                        data=pdf_buffer,
+                        file_name=f"{full_name.replace(' ', '_')}_Resume.pdf",
+                        mime="application/pdf"
+                    )
+                else:
+                    st.warning("PDF not available")
+            
             with col2:
                 st.download_button(
                     label="📋 Download TXT",
@@ -1155,154 +1154,6 @@ with ats_tab:
                     file_name=f"{full_name.replace(' ', '_')}_Resume.txt",
                     mime="text/plain"
                 )
-            
-            # Additional AI suggestions
-            st.markdown("---")
-            st.markdown("### 🚀 Boost Your Application")
-            
-            with st.expander("📝 AI Cover Letter Generator"):
-                st.markdown("Generate a tailored cover letter based on your resume and a job description")
-                job_desc = st.text_area("Paste the job description here*", height=150)
-                company_name = st.text_input("Company Name")
-                hiring_manager = st.text_input("Hiring Manager Name (if known)")
-                
-                if st.button("Generate Cover Letter"):
-                    if not job_desc:
-                        st.error("Please paste a job description")
-                    else:
-                        with st.spinner("Generating tailored cover letter..."):
-                            cover_prompt = f"""
-                            Write a professional cover letter for {full_name} applying for a {role} position at {company_name}.
-                            Tailor it specifically to this job description. Use formal business letter format.
-                            
-                            Job Requirements:
-                            {job_desc}
-                            
-                            Candidate Information:
-                            Name: {full_name}
-                            Email: {email}
-                            Phone: {phone}
-                            
-                            Resume Highlights:
-                            {professional_summary}
-                            
-                            Key Skills:
-                            {skills}
-                            
-                            Relevant Experience:
-                            {experience}
-                            
-                            Education:
-                            {education}
-                            
-                            Structure the letter with:
-                            1. Professional header with date and address
-                            2. Personalized salutation (use {hiring_manager} if provided)
-                            3. Strong opening paragraph highlighting relevant qualifications
-                            4. 2-3 body paragraphs matching skills to job requirements
-                            5. Closing paragraph with call to action
-                            6. Professional sign-off
-                            """
-                            
-                            cover_letter = get_result(cover_prompt)
-                            st.text_area("Generated Cover Letter", cover_letter, height=400)
-                            
-                            # Download buttons for cover letter
-                            col1, col2 = st.columns(2)
-                            with col1:
-                                st.download_button(
-                                    label="📥 Download TXT Cover Letter",
-                                    data=cover_letter,
-                                    file_name=f"{full_name.replace(' ', '_')}_Cover_Letter.txt",
-                                    mime="text/plain"
-                                )
-                            with col2:
-                                # Create DOCX version of cover letter
-                                doc = Document()
-                                doc.add_paragraph(cover_letter)
-                                
-                                cover_buffer = BytesIO()
-                                doc.save(cover_buffer)
-                                cover_buffer.seek(0)
-                                
-                                st.download_button(
-                                    label="📄 Download DOCX Cover Letter",
-                                    data=cover_buffer,
-                                    file_name=f"{full_name.replace(' ', '_')}_Cover_Letter.docx",
-                                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                                )
-            
-            with st.expander("🔗 LinkedIn Profile Optimizer"):
-                if linkedin:
-                    st.markdown(f"Analyzing LinkedIn profile: {linkedin}")
-                    with st.spinner("Generating LinkedIn optimization tips..."):
-                        linkedin_prompt = f"""
-                        Analyze this LinkedIn profile for optimization opportunities:
-                        Profile URL: {linkedin}
-                        
-                        Provide specific recommendations for:
-                        1. Profile Headline: Suggest an improved headline for a {role} that includes keywords
-                        2. About Section: Outline a compelling summary structure with examples
-                        3. Skills Section: List the top 5 skills to highlight for {role}
-                        4. Experience: Recommendations for optimizing experience descriptions
-                        5. Endorsements: Strategy to get relevant skill endorsements
-                        6. Networking: Tips for growing relevant connections
-                        
-                        Format as:
-                        ### LinkedIn Optimization Report for {full_name}
-                        **Current Headline**: [if available]
-                        **Improved Headline**: [suggestion]
-                        
-                        **About Section Recommendations**:
-                        - [bullet points]
-                        
-                        **Top Skills to Showcase**:
-                        1. [skill 1]
-                        2. [skill 2]
-                        ...
-                        
-                        **Experience Optimization**:
-                        - [suggestions]
-                        
-                        **Endorsement Strategy**:
-                        - [actionable tips]
-                        
-                        **Networking Tips**:
-                        - [suggestions]
-                        """
-                        
-                        linkedin_analysis = get_result(linkedin_prompt)
-                        st.markdown(linkedin_analysis)
-                else:
-                    st.info("Please add your LinkedIn URL above to get optimization tips")
-            
-            with st.expander("🔍 Get Tailored Job Description Analysis"):
-                job_desc = st.text_area("Paste a job description to get customized matching suggestions", height=150)
-                if st.button("Analyze Job Match") and job_desc:
-                    with st.spinner("Analyzing job match..."):
-                        match_prompt = f"""
-                        Analyze how well this resume matches the provided job description.
-                        Provide specific recommendations to improve alignment.
-                        
-                        Candidate: {full_name}
-                        Target Role: {role}
-                        
-                        Resume Content:
-                        {resume_content}
-                        
-                        Job Description:
-                        {job_desc}
-                        
-                        Format your response with:
-                        - **Match Score**: X/100 with explanation
-                        - **Missing Keywords**: [list from job description]
-                        - **Recommended Resume Changes**: [bullet points]
-                        - **Suggested Skills to Highlight**: [based on job requirements]
-                        - **Cover Letter Talking Points**: [key points to emphasize]
-                        """
-                        
-                        match_analysis = get_result(match_prompt)
-                        st.markdown(match_analysis)
         st.markdown("""
         <div style='background-color:#fffde7; border:2px solid #fdd835; border-radius:10px; padding:20px; margin-top:30px;'>
         <h3 style='color:#f57f17;'>\U0001F680 Ace Your 2025 Interviews with AI</h3>
