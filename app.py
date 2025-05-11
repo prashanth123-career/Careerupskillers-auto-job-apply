@@ -947,8 +947,8 @@ with ats_tab:
             
         with col2:
             st.markdown("### 💼 Target Role")
-            role = st.selectbox("Select your target role*", 
-                              ["Data Scientist", "Software Engineer", "Product Manager", 
+            role =  st.text_area("Target Role*", 
+                              [help="Data Scientist", "Software Engineer", "Product Manager", 
                                "UX Designer", "Marketing Specialist", "Financial Analyst"])
             
             st.markdown("### 🛠 Skills")
