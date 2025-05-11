@@ -947,7 +947,9 @@ with ats_tab:
             
         with col2:
             st.markdown("### 💼 Target Role")
-            Target_Job_role = st.text_Input("Target Role*") 
+            Target_Job_role = st.text_area("Target Role*")*",
+            help="Include target Job role")
+            
                               
             st.markdown("### 🛠 Skills")
             skills = st.text_area("Skills (comma-separated)*", 
