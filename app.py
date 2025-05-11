@@ -938,7 +938,7 @@ with ats_tab:
             st.markdown("### 📝 Personal Information")
             full_name = st.text_input("Full Name*")
             email = st.text_input("Email*")
-            phone = st.text_input("Phone")
+            phone = st.text_input("Phone*")
             linkedin = st.text_input("LinkedIn URL")
             
             st.markdown("### 🎓 Education & Certifications")
@@ -947,7 +947,7 @@ with ats_tab:
             
         with col2:
             st.markdown("### 💼 Target Role")
-            Target_Job_role = st.text_Input("Target Role*"), 
+            Target_Job_role = st.text_Input("Target Role*") 
                               
             st.markdown("### 🛠 Skills")
             skills = st.text_area("Skills (comma-separated)*", 
