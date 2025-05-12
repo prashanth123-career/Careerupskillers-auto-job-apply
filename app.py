@@ -1281,7 +1281,7 @@ Based on this user's resume info, suggest improvements for their LinkedIn profil
 
 Name: {full_name}
 Target Role: {role}
-Summary: {professional_summary}  # ✅ This is now safely inside the string
+Summary: {professional_summary}
 Skills: {skills}
 Work Experience: {experience}
 Education: {education}
