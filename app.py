@@ -1825,7 +1825,7 @@ with tab5:
             for job in jobs_to_show:
                 with st.container():
                     st.markdown(f"""
-                    <div style="padding:15px; border-radius:10px; background-color:#f5f5f5; margin-bottom:10px;">
+                    <div style="padding:15px; border-radius:10px; background-color:#66BB6A; margin-bottom:10px;">
                         <h4>{job['title']}</h4>
                         <p>🏢 <b>{job['company']}</b> | 📍 {job['location']} | 💰 {job['salary']}</p>
                         <p>{job['visa']}</p>
@@ -1887,7 +1887,7 @@ with tab5:
         with cols[idx]:
             st.markdown(f"""
             <div style='text-align:center; padding:10px; 
-            background-color:{"#e3f2fd" if idx < len(st.session_state.visa_milestones) else "#f5f5f5"};
+            background-color:{"#66BB6A" if idx < len(st.session_state.visa_milestones) else "#66BB6A"};
             border-radius:10px;'>
                 <div style='font-size:24px;'>{icon}</div>
                 <div>{text}</div>
