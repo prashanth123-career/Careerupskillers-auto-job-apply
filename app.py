@@ -1292,64 +1292,31 @@ Languages: {languages}
 Provide recommendations in this format:
 
 ### LinkedIn Optimization Report for {full_name}
-**Suggested Headline**: ...
+**Suggested Headline**: [strong, keyword-rich headline]
 
 **About Section**:
-...
+[2-3 sentence summary optimized for recruiters]
 
 **Experience Section Tips**:
-- ...
+- Bullet point 1
+- Bullet point 2
 
 **Top Skills to List**:
-- ...
+- Skill 1
+- Skill 2
+- Skill 3
 
 **Project Highlights**:
-- ...
+- Include 1-2 impressive projects that support your job role
 
 **Networking & Visibility Tips**:
-- ...
+- Suggested action for growing relevant LinkedIn network
+- How to gain endorsements in target skill areas
 """
             linkedin_analysis = get_result(linkedin_prompt)
             st.markdown(linkedin_analysis)
     else:
         st.info("Please enter your LinkedIn URL above to generate optimization tips (used for personalization only)")
-
-                        
-                        Provide specific recommendations for:
-                        1. Profile Headline: Suggest an improved headline for a {role} that includes keywords
-                        2. About Section: Outline a compelling summary structure with examples
-                        3. Skills Section: List the top 5 skills to highlight for {role}
-                        4. Experience: Recommendations for optimizing experience descriptions
-                        5. Endorsements: Strategy to get relevant skill endorsements
-                        6. Networking: Tips for growing relevant connections
-                        
-                        Format as:
-                        ### LinkedIn Optimization Report for {full_name}
-                        **Current Headline**: [if available]
-                        **Improved Headline**: [suggestion]
-                        
-                        **About Section Recommendations**:
-                        - [bullet points]
-                        
-                        **Top Skills to Showcase**:
-                        1. [skill 1]
-                        2. [skill 2]
-                        ...
-                        
-                        **Experience Optimization**:
-                        - [suggestions]
-                        
-                        **Endorsement Strategy**:
-                        - [actionable tips]
-                        
-                        **Networking Tips**:
-                        - [suggestions]
-                        """
-                        
-                        linkedin_analysis = get_result(linkedin_prompt)
-                        st.markdown(linkedin_analysis)
-                else:
-                    st.info("Please add your LinkedIn URL above to get optimization tips")
         st.markdown("""
         <div style='background-color:#fffde7; border:2px solid #fdd835; border-radius:10px; padding:20px; margin-top:30px;'>
         <h3 style='color:#f57f17;'>\U0001F680 Ace Your 2025 Interviews with AI</h3>
