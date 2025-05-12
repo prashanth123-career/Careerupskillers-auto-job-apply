@@ -1267,15 +1267,52 @@ with ats_tab:
                                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                                 )
             
-            # LINKEDIN OPTIMIZATION TIPS
-            st.markdown("---")
-            with st.expander("🔗 LinkedIn Profile Optimizer"):
-                if linkedin:
-                    st.markdown(f"Analyzing LinkedIn profile: {linkedin}")
-                    with st.spinner("Generating LinkedIn optimization tips..."):
-                        linkedin_prompt = f"""
-                        Analyze this LinkedIn profile for optimization opportunities:
-                        Profile URL: {linkedin}
+# LINKEDIN OPTIMIZATION TIPS
+st.markdown("---")
+with st.expander("🔗 LinkedIn Profile Optimizer"):
+    if linkedin:
+        role = Target_Job_role  # assign properly from input
+        st.markdown(f"Simulating LinkedIn Profile Optimization for: {full_name}")
+        with st.spinner("Generating LinkedIn optimization tips..."):
+            linkedin_prompt = f"""
+            You are a LinkedIn optimization expert.
+
+            Based on this user's resume info, suggest improvements for their LinkedIn profile.
+
+            Name: {full_name}
+            Target Role: {role}
+            Summary: {professional_summary}
+            Skills: {skills}
+            Work Experience: {experience}
+            Education: {education}
+            Certifications: {certifications}
+            Projects: {projects}
+            Languages: {languages}
+
+            Provide recommendations in this format:
+
+            ### LinkedIn Optimization Report for {full_name}
+            **Suggested Headline**: ...
+            
+            **About Section**:
+            ...
+            
+            **Experience Section Tips**:
+            - ...
+            
+            **Top Skills to List**:
+            - ...
+            
+            **Project Highlights**:
+            - ...
+            
+            **Networking & Visibility Tips**:
+            - ...
+            """
+            linkedin_analysis = get_result(linkedin_prompt)
+            st.markdown(linkedin_analysis)
+    else:
+        st.info("Please enter your LinkedIn URL above to generate optimization tips (used for personalization only)")
                         
                         Provide specific recommendations for:
                         1. Profile Headline: Suggest an improved headline for a {role} that includes keywords
