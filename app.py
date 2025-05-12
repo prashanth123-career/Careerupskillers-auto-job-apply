@@ -922,7 +922,7 @@ with ats_tab:
     st.subheader("🧩 AI-Powered ATS Resume Builder")
     
     st.markdown("""
-    <div style="background-color:#e3f2fd; padding:15px; border-radius:10px; margin-bottom:20px;">
+    <div style="background-color:#66BB6A; padding:15px; border-radius:10px; margin-bottom:20px;">
         <b>Pro Tip:</b> Our AI analyzes your resume for ATS optimization, keyword matching, and recruiter appeal.
         Get real-time suggestions to improve your resume's effectiveness.
     </div>
