@@ -1271,9 +1271,10 @@ with ats_tab:
 st.markdown("---")
 with st.expander("🔗 LinkedIn Profile Optimizer"):
     if linkedin:
-        role = Target_Job_role  # Ensure role is captured correctly
-        st.markdown(f"Simulating LinkedIn Profile Optimization for: {full_name}")
-        with st.spinner("Generating LinkedIn optimization tips..."):
+        role = Target_Job_role  # Assign user-selected role
+        st.markdown(f"Simulating LinkedIn Optimization for: {full_name}")
+        with st.spinner("Generating LinkedIn optimization report..."):
+
             linkedin_prompt = f"""
 You are a LinkedIn optimization expert.
 
@@ -1295,11 +1296,11 @@ Provide recommendations in this format:
 **Suggested Headline**: [strong, keyword-rich headline]
 
 **About Section**:
-[2-3 sentence summary optimized for recruiters]
+[2–4 sentence summary optimized for recruiters]
 
 **Experience Section Tips**:
-- Bullet point 1
-- Bullet point 2
+- Bullet 1
+- Bullet 2
 
 **Top Skills to List**:
 - Skill 1
@@ -1307,16 +1308,23 @@ Provide recommendations in this format:
 - Skill 3
 
 **Project Highlights**:
-- Include 1-2 impressive projects that support your job role
+- Key project worth showcasing
 
 **Networking & Visibility Tips**:
-- Suggested action for growing relevant LinkedIn network
-- How to gain endorsements in target skill areas
+- Tips to expand connections and endorsements
 """
             linkedin_analysis = get_result(linkedin_prompt)
             st.markdown(linkedin_analysis)
+
+            # Download LinkedIn report as TXT
+            st.download_button(
+                label="📥 Download LinkedIn Report (TXT)",
+                data=linkedin_analysis,
+                file_name=f"{full_name.replace(' ', '_')}_LinkedIn_Report.txt",
+                mime="text/plain"
+            )
     else:
-        st.info("Please enter your LinkedIn URL above to generate optimization tips (used for personalization only)")
+        st.info("Please enter your LinkedIn URL above to personalize optimization tips.")
 
         st.markdown("""
         <div style='background-color:#fffde7; border:2px solid #fdd835; border-radius:10px; padding:20px; margin-top:30px;'>
