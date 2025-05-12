@@ -1271,7 +1271,7 @@ with ats_tab:
 st.markdown("---")
 with st.expander("🔗 LinkedIn Profile Optimizer"):
     if linkedin:
-        role = Target_Job_role  # Assign the role from input if not already done
+        role = Target_Job_role  # Ensure role is captured correctly
         st.markdown(f"Simulating LinkedIn Profile Optimization for: {full_name}")
         with st.spinner("Generating LinkedIn optimization tips..."):
             linkedin_prompt = f"""
@@ -1317,6 +1317,7 @@ Provide recommendations in this format:
             st.markdown(linkedin_analysis)
     else:
         st.info("Please enter your LinkedIn URL above to generate optimization tips (used for personalization only)")
+
         st.markdown("""
         <div style='background-color:#fffde7; border:2px solid #fdd835; border-radius:10px; padding:20px; margin-top:30px;'>
         <h3 style='color:#f57f17;'>\U0001F680 Ace Your 2025 Interviews with AI</h3>
