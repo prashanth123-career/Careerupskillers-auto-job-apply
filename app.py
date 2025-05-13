@@ -1195,7 +1195,7 @@ with ats_tab:
             # AI COVER LETTER GENERATOR
             st.markdown("---")
             with st.expander("📝 AI Cover Letter Generator"):
-                st.markdown("Generate a tailored cover letter based on your resume and a job description")
+                st.markdown("Generate a tailored cover letter based on this user's resume info")
                 job_desc = st.text_area("Paste the job description here*", height=150)
                 company_name = st.text_input("Company Name")
                 hiring_manager = st.text_input("Hiring Manager Name (if known)")
