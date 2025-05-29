@@ -10,6 +10,9 @@ from docx import Document
 from fpdf import FPDF
 from io import BytesIO
 from docx.shared import Pt, RGBColor
+import pandas as pd
+import re
+import base64
 
 # Password lock function
 def password_protect():
@@ -18,8 +21,10 @@ def password_protect():
         st.session_state.authenticated = False
     if 'attempts' not in st.session_state:
         st.session_state.attempts = 3
+    if 'data_submitted' not in st.session_state:
+        st.session_state.data_submitted = False
 
-    # If not authenticated, show password prompt
+    # Step 1: Password prompt
     if not st.session_state.authenticated:
         st.markdown("<h2 style='text-align: center;'>🔒 App Access</h2>", unsafe_allow_html=True)
         st.write("Please enter the password to access the CareerUpskillers AI Job Hub.")
@@ -27,26 +32,98 @@ def password_protect():
         # Password input
         user_input = st.text_input("Enter password", type="password", key="password_input")
         
-        # Submit button
+        # Submit password button
         if st.button("Submit Password"):
             try:
-                # Retrieve password from Streamlit secrets
                 correct_password = st.secrets["APP_PASSWORD"]
                 if user_input == correct_password:
                     st.session_state.authenticated = True
-                    st.success("Access granted! Loading app...")
-                    st.rerun()  # Refresh to load the app
+                    st.success("Password correct! Please provide your details.")
+                    st.rerun()  # Refresh to show next step
                 else:
                     st.session_state.attempts -= 1
                     if st.session_state.attempts > 0:
                         st.error(f"Wrong password! {st.session_state.attempts} attempts left.")
                     else:
                         st.error("Access denied. Too many failed attempts.")
-                        st.stop()  # Halt execution
+                        st.stop()
             except KeyError:
                 st.error("Password not configured in Streamlit secrets. Please set 'APP_PASSWORD' in secrets.toml or Streamlit Cloud settings.")
                 st.stop()
         return False
+
+    # Step 2: Collect email and phone number
+    if not st.session_state.data_submitted:
+        st.markdown("<h2 style='text-align: center;'>📋 User Information</h2>", unsafe_allow_html=True)
+        st.write("Please provide your email and phone number to proceed.")
+        
+        # Email input
+        email = st.text_input("Email ID", key="email_input")
+        
+        # Phone number input
+        phone = st.text_input("Phone Number (with country code, e.g., +12025550123)", key="phone_input")
+        
+        # Submit details button
+        if st.button("Submit Details"):
+            # Basic email validation
+            email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            # Phone validation: starts with +, followed by 10-15 digits
+            phone_regex = r'^\+\d{10,15}$'
+            
+            if not re.match(email_regex, email):
+                st.error("Please enter a valid email address (e.g., user@example.com).")
+            elif not re.match(phone_regex, phone):
+                st.error("Please enter a valid phone number with country code (e.g., +12025550123).")
+            else:
+                try:
+                    # Load existing Excel data from secrets
+                    excel_data = st.secrets.get("USER_DATA_EXCEL", None)
+                    if excel_data:
+                        # Decode base64 Excel file
+                        excel_bytes = base64.b64decode(excel_data)
+                        df = pd.read_excel(io.BytesIO(excel_bytes))
+                    else:
+                        # Initialize empty DataFrame if no Excel file exists
+                        df = pd.DataFrame(columns=["Email", "Phone Number", "Timestamp"])
+
+                    # Append new data
+                    new_data = pd.DataFrame({
+                        "Email": [email],
+                        "Phone Number": [phone],
+                        "Timestamp": [datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
+                    })
+                    df = pd.concat([df, new_data], ignore_index=True)
+
+                    # Save updated DataFrame to Excel in memory
+                    output = io.BytesIO()
+                    df.to_excel(output, index=False)
+                    output.seek(0)
+                    
+                    # Encode updated Excel file to base64
+                    excel_base64 = base64.b64encode(output.read()).decode('utf-8')
+                    
+                    # Note: Streamlit secrets are read-only in code; manual update required
+                    st.warning("User data saved. Please update 'USER_DATA_EXCEL' in Streamlit secrets with the new base64 string (available in app logs or download below).")
+                    
+                    # Provide download button for updated Excel
+                    st.download_button(
+                        label="Download Updated Excel",
+                        data=output.getvalue(),
+                        file_name="user_data.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
+                    
+                    # Log base64 string for manual update (in local testing)
+                    st.code(excel_base64, language="text")
+                    
+                    st.session_state.data_submitted = True
+                    st.success("Details submitted! Loading app...")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Error processing Excel data: {str(e)}")
+                    st.stop()
+        return False
+
     return True
 
 # 3. Set page config as the FIRST Streamlit command (only one call allowed)
@@ -55,9 +132,10 @@ st.set_page_config(
     page_icon="🌟",
     layout="centered"
 )
-# Check password before running the app
+
+# Check password and collect user data before running the app
 if not password_protect():
-    st.stop()  # Stop execution if not authenticated
+    st.stop()  # Stop execution if not authenticated or data not submitted
 
 # 4. Configure Gemini API using Streamlit secrets
 try:
