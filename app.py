@@ -13,8 +13,7 @@ from docx.shared import Pt, RGBColor
 import pandas as pd
 import re
 import base64
-import json
-from google.oauth2.service_account import Credentials
+import io  # Added to fix the error
 
 # Password lock function
 def password_protect():
@@ -138,6 +137,7 @@ st.set_page_config(
 # Check password and collect user data before running the app
 if not password_protect():
     st.stop()  # Stop execution if not authenticated or data not submitted
+
 
 # 4. Configure Gemini API using Streamlit secrets
 try:
