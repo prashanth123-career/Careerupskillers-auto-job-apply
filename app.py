@@ -13,7 +13,8 @@ from docx.shared import Pt, RGBColor
 import pandas as pd
 import re
 import base64
-import io  # Added to fix the error
+import io
+import numpy as np
 
 # Password lock function
 def password_protect():
@@ -40,7 +41,7 @@ def password_protect():
                 if user_input == correct_password:
                     st.session_state.authenticated = True
                     st.success("Password correct! Please provide your details.")
-                    st.rerun()  # Refresh to show next step
+                    st.rerun()
                 else:
                     st.session_state.attempts -= 1
                     if st.session_state.attempts > 0:
@@ -49,7 +50,7 @@ def password_protect():
                         st.error("Access denied. Too many failed attempts.")
                         st.stop()
             except KeyError:
-                st.error("Password not configured in Streamlit secrets. Please set 'APP_PASSWORD' in secrets.toml or Streamlit Cloud settings.")
+                st.error("Password not configured in secrets. Set 'APP_PASSWORD' in secrets.toml or Streamlit Cloud.")
                 st.stop()
         return False
 
@@ -58,17 +59,11 @@ def password_protect():
         st.markdown("<h2 style='text-align: center;'>📋 User Information</h2>", unsafe_allow_html=True)
         st.write("Please provide your email and phone number to proceed.")
         
-        # Email input
         email = st.text_input("Email ID", key="email_input")
-        
-        # Phone number input
         phone = st.text_input("Phone Number (with country code, e.g., +12025550123)", key="phone_input")
         
-        # Submit details button
         if st.button("Submit Details"):
-            # Basic email validation
             email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-            # Phone validation: starts with +, followed by 10-15 digits
             phone_regex = r'^\+\d{10,15}$'
             
             if not re.match(email_regex, email):
@@ -78,13 +73,15 @@ def password_protect():
             else:
                 try:
                     # Load existing Excel data from secrets
-                    excel_data = st.secrets.get("USER_DATA_EXCEL", None)
-                    if excel_data:
-                        # Decode base64 Excel file
-                        excel_bytes = base64.b64decode(excel_data)
-                        df = pd.read_excel(io.BytesIO(excel_bytes))
+                    excel_data = st.secrets.get("USER_DATA_EXCEL", "")
+                    if excel_data.strip():
+                        try:
+                            excel_bytes = base64.b64decode(excel_data)
+                            df = pd.read_excel(io.BytesIO(excel_bytes), engine='openpyxl')
+                        except Exception as decode_error:
+                            st.warning(f"Invalid Excel data: {str(decode_error)}. Starting new file.")
+                            df = pd.DataFrame(columns=["Email", "Phone Number", "Timestamp"])
                     else:
-                        # Initialize empty DataFrame if no Excel file exists
                         df = pd.DataFrame(columns=["Email", "Phone Number", "Timestamp"])
 
                     # Append new data
@@ -95,30 +92,25 @@ def password_protect():
                     })
                     df = pd.concat([df, new_data], ignore_index=True)
 
-                    # Save updated DataFrame to Excel in memory
+                    # Save updated DataFrame to Excel
                     output = io.BytesIO()
-                    df.to_excel(output, index=False)
+                    df.to_excel(output, index=False, engine='openpyxl')
                     output.seek(0)
                     
-                    # Encode updated Excel file to base64
+                    # Encode to base64
                     excel_base64 = base64.b64encode(output.read()).decode('utf-8')
                     
-                    # Note: Streamlit secrets are read-only in code; manual update required
-                    st.warning("User data saved. Please update 'USER_DATA_EXCEL' in Streamlit secrets with the new base64 string (available in app logs or download below).")
-                    
-                    # Provide download button for updated Excel
+                    st.warning("User data saved. Update 'USER_DATA_EXCEL' in Streamlit secrets with the base64 string below.")
                     st.download_button(
                         label="Download Updated Excel",
                         data=output.getvalue(),
                         file_name="user_data.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     )
-                    
-                    # Log base64 string for manual update (in local testing)
                     st.code(excel_base64, language="text")
                     
                     st.session_state.data_submitted = True
-                    st.success("Details submitted! Loading app...")
+                    st.success("Details submitted!")
                     st.rerun()
                 except Exception as e:
                     st.error(f"Error processing Excel data: {str(e)}")
@@ -127,16 +119,16 @@ def password_protect():
 
     return True
 
-# 3. Set page config as the FIRST Streamlit command (only one call allowed)
+# 3. Set page config as the FIRST Streamlit command
 st.set_page_config(
     page_title="CareerUpskillers | AI Job Hub",
     page_icon="🌟",
     layout="centered"
 )
 
-# Check password and collect user data before running the app
+# Check password and collect user data
 if not password_protect():
-    st.stop()  # Stop execution if not authenticated or data not submitted
+    st.stop()
 
 
 # 4. Configure Gemini API using Streamlit secrets
