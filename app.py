@@ -7,6 +7,19 @@ st.set_page_config(
     page_icon="🌟",
     layout="centered"
 )
+password = "secure123"  # Set your password here
+attempts = 3
+
+while attempts > 0:
+    user_input = input("Enter password: ")
+    if user_input == password:
+        print("Access granted!")
+        break
+    else:
+        attempts -= 1
+        print(f"Wrong password! {attempts} attempts left.")
+if attempts == 0:
+    print("Access denied. Too many failed attempts.")
 
 # 3. Other imports
 import urllib.parse
