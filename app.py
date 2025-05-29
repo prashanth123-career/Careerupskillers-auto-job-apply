@@ -14,7 +14,6 @@ import pandas as pd
 import re
 import base64
 import json
-import gspread
 from google.oauth2.service_account import Credentials
 
 # Password lock function
