@@ -1,14 +1,7 @@
 # 1. Import Streamlit first (required to avoid StreamlitAPIException)
 import streamlit as st
 
-# 2. Set page config as the FIRST Streamlit command (only one call allowed)
-st.set_page_config(
-    page_title="CareerUpskillers | AI Job Hub",
-    page_icon="🌟",
-    layout="centered"
-)
-
-# 3. Other imports
+# 2. Other imports
 import urllib.parse
 import google.generativeai as genai
 from PyPDF2 import PdfReader
@@ -18,6 +11,7 @@ from fpdf import FPDF
 from io import BytesIO
 from docx.shared import Pt, RGBColor
 
+# Password lock function
 def password_protect():
     # Initialize session state variables
     if 'authenticated' not in st.session_state:
@@ -51,6 +45,16 @@ def password_protect():
         return False
     return True
 
+# 3. Set page config as the FIRST Streamlit command (only one call allowed)
+st.set_page_config(
+    page_title="CareerUpskillers | AI Job Hub",
+    page_icon="🌟",
+    layout="centered"
+)
+
+# Check password before running the app
+if not password_protect():
+    st.stop()  # Stop execution if not authenticated
 
 # 4. Configure Gemini API using Streamlit secrets
 try:
