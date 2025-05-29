@@ -18,7 +18,38 @@ from fpdf import FPDF
 from io import BytesIO
 from docx.shared import Pt, RGBColor
 
+def password_protect():
+    # Initialize session state variables
+    if 'authenticated' not in st.session_state:
+        st.session_state.authenticated = False
+    if 'attempts' not in st.session_state:
+        st.session_state.attempts = 3
+    if 'password' not in st.session_state:
+        st.session_state.password = "secure123"  # Set your password here
 
+    # If not authenticated, show password prompt
+    if not st.session_state.authenticated:
+        st.markdown("<h2 style='text-align: center;'>🔒 App Access</h2>", unsafe_allow_html=True)
+        st.write("Please enter the password to access the CareerUpskillers AI Job Hub.")
+        
+        # Password input
+        user_input = st.text_input("Enter password", type="password", key="password_input")
+        
+        # Submit button
+        if st.button("Submit Password"):
+            if user_input == st.session_state.password:
+                st.session_state.authenticated = True
+                st.success("Access granted! Loading app...")
+                st.rerun()  # Refresh to load the app
+            else:
+                st.session_state.attempts -= 1
+                if st.session_state.attempts > 0:
+                    st.error(f"Wrong password! {st.session_state.attempts} attempts left.")
+                else:
+                    st.error("Access denied. Too many failed attempts.")
+                    st.stop()  # Halt execution
+        return False
+    return True
 
 
 # 4. Configure Gemini API using Streamlit secrets
